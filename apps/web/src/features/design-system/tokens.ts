@@ -28,25 +28,25 @@ export type LayoutTokens = {
 
 export const DESIGN_TOKENS = {
   colors: {
-    bgPrimary: "#F8FAFC",
+    bgPrimary: "#F5F7FB",
     bgSecondary: "#FFFFFF",
-    textPrimary: "#0F172A",
-    textSecondary: "#475569",
-    brandPrimary: "#3B82F6",
-    brandSecondary: "#22C55E",
-    accentHighlight: "#A855F7",
-    success: "#16A34A",
+    textPrimary: "#111827",
+    textSecondary: "#4B5563",
+    brandPrimary: "#0EA5E9",
+    brandSecondary: "#14B8A6",
+    accentHighlight: "#F43F5E",
+    success: "#15803D",
     warning: "#F59E0B",
-    error: "#DC2626"
+    error: "#B91C1C"
   } satisfies ColorTokens,
   spacing: [8, 16, 24, 32, 48] as const,
   typography: {
-    headingFamily: "Playfair Display, Georgia, serif",
-    bodyFamily: "Inter, Segoe UI, sans-serif",
-    h1: "700 32px/1.2 Playfair Display, Georgia, serif",
-    h2: "600 24px/1.3 Playfair Display, Georgia, serif",
-    h3: "500 18px/1.4 Playfair Display, Georgia, serif",
-    body: "400 16px/1.6 Inter, Segoe UI, sans-serif"
+    headingFamily: "Fraunces, Georgia, serif",
+    bodyFamily: "Plus Jakarta Sans, Segoe UI, sans-serif",
+    h1: "700 40px/1.12 Fraunces, Georgia, serif",
+    h2: "600 28px/1.24 Fraunces, Georgia, serif",
+    h3: "500 20px/1.32 Fraunces, Georgia, serif",
+    body: "400 16px/1.65 Plus Jakarta Sans, Segoe UI, sans-serif"
   } satisfies TypographyTokens,
   layout: {
     maxContentWidth: 1200,

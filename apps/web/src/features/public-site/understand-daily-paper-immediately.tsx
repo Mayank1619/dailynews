@@ -38,11 +38,11 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
       style={{
         maxWidth: DESIGN_TOKENS.layout.maxContentWidth,
         margin: "0 auto",
-        padding: DESIGN_TOKENS.spacing[2],
+        padding: `${DESIGN_TOKENS.spacing[2]}px ${DESIGN_TOKENS.spacing[1]}px ${DESIGN_TOKENS.spacing[2]}px`,
         font: DESIGN_TOKENS.typography.body,
         color: DESIGN_TOKENS.colors.textPrimary,
         background:
-          "radial-gradient(circle at 10% 0%, rgba(59,130,246,0.08), transparent 40%), radial-gradient(circle at 100% 0%, rgba(34,197,94,0.08), transparent 35%), #F8FAFC"
+          "radial-gradient(circle at 5% 0%, rgba(14,165,233,0.16), transparent 42%), radial-gradient(circle at 95% 0%, rgba(20,184,166,0.14), transparent 36%), linear-gradient(180deg, #F5F7FB 0%, #FFFFFF 100%)"
       }}
       data-seo-title={seo.title}
       data-seo-description={seo.description}
@@ -54,48 +54,76 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          gap: DESIGN_TOKENS.spacing[1],
+          gap: DESIGN_TOKENS.spacing[0],
           flexWrap: "wrap",
-          marginBottom: DESIGN_TOKENS.spacing[2]
+          marginBottom: DESIGN_TOKENS.spacing[1]
         }}
       >
-        <strong style={{ font: DESIGN_TOKENS.typography.h3 }}>{hero.brand}</strong>
+        <strong
+          style={{
+            font: DESIGN_TOKENS.typography.h3,
+            letterSpacing: "0.02em"
+          }}
+        >
+          {hero.brand}
+        </strong>
         <div
           style={{
             color: DESIGN_TOKENS.colors.textPrimary,
             textDecoration: "none",
-            padding: "8px 12px",
+            padding: "10px 14px",
             borderRadius: 999,
-            border: `1px solid ${DESIGN_TOKENS.colors.brandPrimary}`
+            border: "1px solid rgba(17,24,39,0.12)",
+            background: "rgba(255,255,255,0.78)",
+            backdropFilter: "blur(6px)"
           }}
         >
           <ReachSignupAndLoginQuicklyActions />
         </div>
       </header>
 
-      <section style={{ display: "grid", gap: DESIGN_TOKENS.spacing[1], marginBottom: DESIGN_TOKENS.spacing[2] }}>
-        <h1 style={{ font: DESIGN_TOKENS.typography.h1, margin: 0 }}>{hero.brand}</h1>
-        <p style={{ font: DESIGN_TOKENS.typography.h2, margin: 0 }}>{hero.headline}</p>
-        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 720, margin: 0 }}>{hero.valueProposition}</p>
+      <section
+        style={{
+          display: "grid",
+          gap: DESIGN_TOKENS.spacing[1],
+          marginBottom: DESIGN_TOKENS.spacing[2],
+          background: "rgba(255,255,255,0.74)",
+          border: "1px solid rgba(17,24,39,0.08)",
+          borderRadius: 24,
+          padding: `${DESIGN_TOKENS.spacing[2]}px ${DESIGN_TOKENS.spacing[2]}px`
+        }}
+      >
+        <h1 style={{ font: DESIGN_TOKENS.typography.h1, margin: 0, maxWidth: 900 }}>{hero.headline}</h1>
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 760, margin: 0 }}>{hero.valueProposition}</p>
         <a
           href={hero.primaryCta.route}
           style={{
             width: "fit-content",
             marginTop: DESIGN_TOKENS.spacing[1],
-            padding: "10px 18px",
+            padding: "12px 20px",
             borderRadius: 999,
-            background: DESIGN_TOKENS.colors.brandPrimary,
+            background: `linear-gradient(120deg, ${DESIGN_TOKENS.colors.brandPrimary}, ${DESIGN_TOKENS.colors.brandSecondary})`,
             color: DESIGN_TOKENS.colors.bgSecondary,
             textDecoration: "none",
             fontWeight: 700,
-            boxShadow: "0 6px 20px rgba(59,130,246,0.25)"
+            letterSpacing: "0.01em",
+            boxShadow: "0 14px 26px rgba(14,165,233,0.28)"
           }}
         >
           {hero.primaryCta.label}
         </a>
       </section>
 
-      <section aria-label="how-it-works" style={{ marginBottom: DESIGN_TOKENS.spacing[2] }}>
+      <section
+        aria-label="how-it-works"
+        style={{
+          marginBottom: DESIGN_TOKENS.spacing[2],
+          background: DESIGN_TOKENS.colors.bgSecondary,
+          border: "1px solid rgba(17,24,39,0.08)",
+          borderRadius: 20,
+          padding: `${DESIGN_TOKENS.spacing[1]}px ${DESIGN_TOKENS.spacing[2]}px`
+        }}
+      >
         <h2 style={{ font: DESIGN_TOKENS.typography.h2 }}>How it works</h2>
         <ol style={{ paddingLeft: 20, margin: 0, color: DESIGN_TOKENS.colors.textSecondary }}>
           {HOW_IT_WORKS_STEPS.map((step) => (
@@ -111,19 +139,39 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
         style={{
           marginBottom: DESIGN_TOKENS.spacing[2],
           background: DESIGN_TOKENS.colors.bgSecondary,
-          border: `1px solid rgba(15,23,42,0.08)`,
-          borderRadius: 16,
-          padding: DESIGN_TOKENS.spacing[1]
+          border: "1px solid rgba(17,24,39,0.08)",
+          borderRadius: 20,
+          padding: `${DESIGN_TOKENS.spacing[1]}px ${DESIGN_TOKENS.spacing[2]}px`
         }}
       >
-        <p style={{ margin: 0, color: DESIGN_TOKENS.colors.brandSecondary, fontWeight: 700 }}>{SAMPLE_DIGEST_PREVIEW.label}</p>
+        <p
+          style={{
+            margin: 0,
+            color: DESIGN_TOKENS.colors.bgSecondary,
+            background: DESIGN_TOKENS.colors.accentHighlight,
+            borderRadius: 999,
+            padding: "6px 12px",
+            width: "fit-content",
+            fontWeight: 700
+          }}
+        >
+          {SAMPLE_DIGEST_PREVIEW.label}
+        </p>
         <h3 style={{ font: DESIGN_TOKENS.typography.h3, margin: "8px 0" }}>{SAMPLE_DIGEST_PREVIEW.title}</h3>
         <p style={{ margin: 0, color: DESIGN_TOKENS.colors.textSecondary }}>{SAMPLE_DIGEST_PREVIEW.snippet}</p>
       </section>
 
-      <footer style={{ display: "flex", gap: DESIGN_TOKENS.spacing[1], flexWrap: "wrap" }}>
+      <footer
+        style={{
+          display: "flex",
+          gap: DESIGN_TOKENS.spacing[1],
+          flexWrap: "wrap",
+          paddingTop: DESIGN_TOKENS.spacing[1],
+          borderTop: "1px solid rgba(17,24,39,0.1)"
+        }}
+      >
         {FOOTER_TRUST_LINKS.map((link) => (
-          <a key={link.id} href={link.route} style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
+          <a key={link.id} href={link.route} style={{ color: DESIGN_TOKENS.colors.textSecondary, textDecoration: "none" }}>
             {link.label}
           </a>
         ))}

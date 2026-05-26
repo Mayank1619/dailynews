@@ -14,7 +14,17 @@ export function ReachSignupAndLoginQuicklyActions({ includePrimary = false }: Re
   return (
     <nav aria-label="public quick actions" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
       {actions.map((action) => (
-        <a key={action.route} href={action.route}>
+        <a
+          key={action.route}
+          href={action.route}
+          style={{
+            color: "#111827",
+            textDecoration: "none",
+            fontWeight: 600,
+            fontSize: 14,
+            letterSpacing: "0.01em"
+          }}
+        >
           {action.label}
         </a>
       ))}
