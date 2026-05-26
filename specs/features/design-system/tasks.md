@@ -8,15 +8,15 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm feature scope and dependencies in specs/features/design-system/spec.md
-- [ ] T002 Capture implementation assumptions in specs/features/design-system/plan.md
-- [ ] T003 [P] Prepare feature test folders in tests/unit/design-system/, tests/integration/design-system/, and tests/e2e/design-system/
+- [x] T001 Confirm feature scope and dependencies in specs/features/design-system/spec.md
+- [x] T002 Capture implementation assumptions in specs/features/design-system/plan.md
+- [x] T003 [P] Prepare feature test folders in tests/unit/design-system/, tests/integration/design-system/, and tests/e2e/design-system/
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 Create base design tokens in apps/web/src/features/design-system/tokens.ts
-- [ ] T005 Set up component story scaffolding in apps/web/src/features/design-system/stories/index.stories.tsx
-- [ ] T006 Configure accessibility regression checks in apps/web/tests/a11y/design-system.a11y.test.ts
+- [x] T004 Create base design tokens in apps/web/src/features/design-system/tokens.ts
+- [x] T005 Set up component story scaffolding in apps/web/src/features/design-system/stories/index.stories.tsx
+- [x] T006 Configure accessibility regression checks in apps/web/tests/a11y/design-system.a11y.test.ts
 
 ## Phase 3: User Story 1 - Establish Shared Visual Rules (Priority: P1)
 
@@ -25,16 +25,16 @@
 
 ### Tests for US1 (write first and confirm failing baseline)
 
-- [ ] T007 [P] [US1] Add contract/integration boundary test in tests/integration/design-system/test-establish-shared-visual-rules-contracts.spec.ts
-- [ ] T008 [P] [US1] Add unit test coverage in tests/unit/design-system/test-establish-shared-visual-rules.spec.ts
-- [ ] T009 [P] [US1] Add end-to-end scenario in tests/e2e/design-system/test-establish-shared-visual-rules.e2e.ts
+- [x] T007 [P] [US1] Add contract/integration boundary test in tests/integration/design-system/test-establish-shared-visual-rules-contracts.spec.ts
+- [x] T008 [P] [US1] Add unit test coverage in tests/unit/design-system/test-establish-shared-visual-rules.spec.ts
+- [x] T009 [P] [US1] Add end-to-end scenario in tests/e2e/design-system/test-establish-shared-visual-rules.e2e.ts
 
 ### Implementation for US1
 
-- [ ] T010 [P] [US1] Create feature model/types in apps/api/src/features/design-system/establish-shared-visual-rules.types.ts
-- [ ] T011 [US1] Implement service logic in apps/api/src/features/design-system/establish-shared-visual-rules.service.ts
-- [ ] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/design-system/establish-shared-visual-rules.tsx
-- [ ] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/design-system/establish-shared-visual-rules.telemetry.ts
+- [x] T010 [P] [US1] Create feature model/types in apps/api/src/features/design-system/establish-shared-visual-rules.types.ts
+- [x] T011 [US1] Implement service logic in apps/api/src/features/design-system/establish-shared-visual-rules.service.ts
+- [x] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/design-system/establish-shared-visual-rules.tsx
+- [x] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/design-system/establish-shared-visual-rules.telemetry.ts
 
 ## Phase 4: User Story 2 - Reuse Core Components Across Features (Priority: P2)
 
