@@ -83,3 +83,9 @@ apps/
 ## Complexity Tracking
 
 No constitution violations accepted for this feature plan.
+
+## Implementation Assumptions Snapshot (2026-05-26)
+
+- The repository may not contain pre-existing app scaffolding; minimal web/api/test scaffolding is allowed for design-system execution.
+- User Story 1 is the delivery target for MVP implementation in this iteration.
+- Verification is executed with Vitest unit/integration tests and a Playwright e2e placeholder aligned to feature task coverage.
