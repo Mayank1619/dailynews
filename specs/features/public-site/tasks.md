@@ -8,15 +8,15 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm feature scope and dependencies in specs/features/public-site/spec.md
-- [ ] T002 Capture implementation assumptions in specs/features/public-site/plan.md
-- [ ] T003 [P] Prepare feature test folders in tests/unit/public-site/, tests/integration/public-site/, and tests/e2e/public-site/
+- [X] T001 Confirm feature scope and dependencies in specs/features/public-site/spec.md
+- [X] T002 Capture implementation assumptions in specs/features/public-site/plan.md
+- [X] T003 [P] Prepare feature test folders in tests/unit/public-site/, tests/integration/public-site/, and tests/e2e/public-site/
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 [P] Create landing page content contracts in apps/web/src/features/public-site/contracts.ts
-- [ ] T005 [P] Set up public route monitoring and CTA health checks in apps/web/src/features/public-site/telemetry.ts
-- [ ] T006 Configure SEO metadata helpers for landing and blog entry in apps/web/src/features/public-site/seo.ts
+- [X] T004 [P] Create landing page content contracts in apps/web/src/features/public-site/contracts.ts
+- [X] T005 [P] Set up public route monitoring and CTA health checks in apps/web/src/features/public-site/telemetry.ts
+- [X] T006 Configure SEO metadata helpers for landing and blog entry in apps/web/src/features/public-site/seo.ts
 
 ## Phase 3: User Story 1 - Understand Daily Paper Immediately (Priority: P1)
 
@@ -25,16 +25,16 @@
 
 ### Tests for US1 (write first and confirm failing baseline)
 
-- [ ] T007 [P] [US1] Add contract/integration boundary test in tests/integration/public-site/test-understand-daily-paper-immediately-contracts.spec.ts
-- [ ] T008 [P] [US1] Add unit test coverage in tests/unit/public-site/test-understand-daily-paper-immediately.spec.ts
-- [ ] T009 [P] [US1] Add end-to-end scenario in tests/e2e/public-site/test-understand-daily-paper-immediately.e2e.ts
+- [X] T007 [P] [US1] Add contract/integration boundary test in tests/integration/public-site/test-understand-daily-paper-immediately-contracts.spec.ts
+- [X] T008 [P] [US1] Add unit test coverage in tests/unit/public-site/test-understand-daily-paper-immediately.spec.ts
+- [X] T009 [P] [US1] Add end-to-end scenario in tests/e2e/public-site/test-understand-daily-paper-immediately.e2e.ts
 
 ### Implementation for US1
 
-- [ ] T010 [P] [US1] Create feature model/types in apps/api/src/features/public-site/understand-daily-paper-immediately.types.ts
-- [ ] T011 [US1] Implement service logic in apps/api/src/features/public-site/understand-daily-paper-immediately.service.ts
-- [ ] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/public-site/understand-daily-paper-immediately.tsx
-- [ ] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/public-site/understand-daily-paper-immediately.telemetry.ts
+- [X] T010 [P] [US1] Create feature model/types in apps/api/src/features/public-site/understand-daily-paper-immediately.types.ts
+- [X] T011 [US1] Implement service logic in apps/api/src/features/public-site/understand-daily-paper-immediately.service.ts
+- [X] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/public-site/understand-daily-paper-immediately.tsx
+- [X] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/public-site/understand-daily-paper-immediately.telemetry.ts
 
 ## Phase 4: User Story 2 - Reach Signup and Login Quickly (Priority: P2)
 
@@ -43,15 +43,15 @@
 
 ### Tests for US2 (write first and confirm failing baseline)
 
-- [ ] T014 [P] [US2] Add contract/integration boundary test in tests/integration/public-site/test-reach-signup-and-login-quickly-contracts.spec.ts
-- [ ] T015 [P] [US2] Add unit test coverage in tests/unit/public-site/test-reach-signup-and-login-quickly.spec.ts
+- [X] T014 [P] [US2] Add contract/integration boundary test in tests/integration/public-site/test-reach-signup-and-login-quickly-contracts.spec.ts
+- [X] T015 [P] [US2] Add unit test coverage in tests/unit/public-site/test-reach-signup-and-login-quickly.spec.ts
 - [ ] T016 [P] [US2] Add end-to-end scenario in tests/e2e/public-site/test-reach-signup-and-login-quickly.e2e.ts
 
 ### Implementation for US2
 
-- [ ] T017 [P] [US2] Create feature model/types in apps/api/src/features/public-site/reach-signup-and-login-quickly.types.ts
-- [ ] T018 [US2] Implement service logic in apps/api/src/features/public-site/reach-signup-and-login-quickly.service.ts
-- [ ] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/public-site/reach-signup-and-login-quickly.tsx
+- [X] T017 [P] [US2] Create feature model/types in apps/api/src/features/public-site/reach-signup-and-login-quickly.types.ts
+- [X] T018 [US2] Implement service logic in apps/api/src/features/public-site/reach-signup-and-login-quickly.service.ts
+- [X] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/public-site/reach-signup-and-login-quickly.tsx
 - [ ] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/public-site/reach-signup-and-login-quickly.telemetry.ts
 
 ## Phase 5: User Story 3 - Build Trust Before Signup (Priority: P3)

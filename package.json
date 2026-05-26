@@ -7,7 +7,7 @@
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "vitest run tests/unit --passWithNoTests",
     "test:integration": "vitest run tests/integration apps/web/tests/a11y --passWithNoTests",
-    "test:e2e": "playwright test tests/e2e/design-system/test-establish-shared-visual-rules.e2e.ts"
+    "test:e2e": "playwright test tests/e2e"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.0",
