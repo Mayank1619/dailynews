@@ -166,3 +166,8 @@ As an admin, I want blocked users to be prevented from signing in or receiving n
 - Newsletter delivery itself is outside this spec except for the verification and blocked-user gating rules.
 - Terms and consent text versions are supplied by product or governance owners and will be recorded alongside each consent event.
 - The authentication experience must remain consistent with the Daily Paper constitution and the existing design-system rules for layout, contrast, motion, and accessibility.
+
+## Implementation Pass Confirmation (2026-05-26)
+
+- Scope confirmed for this pass: Phase 1 setup, Phase 2 foundational work, and User Story 1 (P1) only.
+- Dependency baseline confirmed: Firebase Auth client bootstrap for web signup, Firebase Admin ID-token verification for API identity binding, and privacy-safe consent telemetry/audit hooks.

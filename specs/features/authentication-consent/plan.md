@@ -12,6 +12,13 @@ Identity, session, and authorization checks use Firebase Auth as the mandatory b
 
 Scope statement: Phase 1 implementation included according to the feature scope and dependencies in spec.md.
 
+## Implementation Assumptions (This Pass)
+
+- Firebase credentials and client config variables are provided through deployment environment variables and are not hardcoded.
+- Signup identity creation uses Firebase Auth email-password baseline, while consent persistence is handled by feature service abstractions in this slice.
+- Consent telemetry and audit events must remain privacy-safe and exclude raw IP addresses, user agents, passwords, and secrets.
+- This pass intentionally excludes US2 and US3 runtime flows beyond shared foundational auth middleware and audit infrastructure.
+
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x on Node.js 22

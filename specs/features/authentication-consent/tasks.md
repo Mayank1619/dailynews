@@ -8,15 +8,15 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm feature scope and dependencies in specs/features/authentication-consent/spec.md
-- [ ] T002 Capture implementation assumptions in specs/features/authentication-consent/plan.md
-- [ ] T003 [P] Prepare feature test folders in tests/unit/authentication-consent/, tests/integration/authentication-consent/, and tests/e2e/authentication-consent/
+- [X] T001 Confirm feature scope and dependencies in specs/features/authentication-consent/spec.md
+- [X] T002 Capture implementation assumptions in specs/features/authentication-consent/plan.md
+- [X] T003 [P] Prepare feature test folders in tests/unit/authentication-consent/, tests/integration/authentication-consent/, and tests/e2e/authentication-consent/
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 Configure Firebase Auth client SDK bootstrap in apps/web/src/lib/firebaseAuthClient.ts
-- [ ] T005 Implement Firebase Admin ID-token verification in apps/api/src/middleware/firebaseAuth.ts
-- [ ] T006 Create consent and identity audit logging service in apps/api/src/services/consentAuditService.ts
+- [X] T004 Configure Firebase Auth client SDK bootstrap in apps/web/src/lib/firebaseAuthClient.ts
+- [X] T005 Implement Firebase Admin ID-token verification in apps/api/src/middleware/firebaseAuth.ts
+- [X] T006 Create consent and identity audit logging service in apps/api/src/services/consentAuditService.ts
 
 ## Phase 3: User Story 1 - Secure Signup with Explicit Consent (Priority: P1)
 
@@ -25,16 +25,16 @@
 
 ### Tests for US1 (write first and confirm failing baseline)
 
-- [ ] T007 [P] [US1] Add contract/integration boundary test in tests/integration/authentication-consent/test-secure-signup-with-explicit-consent-contracts.spec.ts
-- [ ] T008 [P] [US1] Add unit test coverage in tests/unit/authentication-consent/test-secure-signup-with-explicit-consent.spec.ts
-- [ ] T009 [P] [US1] Add end-to-end scenario in tests/e2e/authentication-consent/test-secure-signup-with-explicit-consent.e2e.ts
+- [X] T007 [P] [US1] Add contract/integration boundary test in tests/integration/authentication-consent/test-secure-signup-with-explicit-consent-contracts.spec.ts
+- [X] T008 [P] [US1] Add unit test coverage in tests/unit/authentication-consent/test-secure-signup-with-explicit-consent.spec.ts
+- [X] T009 [P] [US1] Add end-to-end scenario in tests/e2e/authentication-consent/test-secure-signup-with-explicit-consent.e2e.ts
 
 ### Implementation for US1
 
-- [ ] T010 [P] [US1] Create feature model/types in apps/api/src/features/authentication-consent/secure-signup-with-explicit-consent.types.ts
-- [ ] T011 [US1] Implement service logic in apps/api/src/features/authentication-consent/secure-signup-with-explicit-consent.service.ts
-- [ ] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/authentication-consent/secure-signup-with-explicit-consent.tsx
-- [ ] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/authentication-consent/secure-signup-with-explicit-consent.telemetry.ts
+- [X] T010 [P] [US1] Create feature model/types in apps/api/src/features/authentication-consent/secure-signup-with-explicit-consent.types.ts
+- [X] T011 [US1] Implement service logic in apps/api/src/features/authentication-consent/secure-signup-with-explicit-consent.service.ts
+- [X] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/authentication-consent/secure-signup-with-explicit-consent.tsx
+- [X] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/authentication-consent/secure-signup-with-explicit-consent.telemetry.ts
 
 ## Phase 4: User Story 2 - Login, Logout, and Password Recovery (Priority: P2)
 
