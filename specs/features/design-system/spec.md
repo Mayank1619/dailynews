@@ -141,3 +141,9 @@ As a design reviewer or design-ops contributor, I want Figma-ready component map
 - Similar fallback fonts may be used when exact named fonts are unavailable, provided the same hierarchy and readability goals are preserved.
 - Figma library creation and maintenance are downstream activities, while this spec provides the authoritative naming and behavioral rules they must follow.
 - Downstream feature specs, including public-site, are expected to reference this spec for shared design behavior rather than redefining foundational UI rules.
+
+## Implementation Scope Confirmation (2026-05-26)
+
+- Confirmed this implementation slice covers design-system foundations and User Story 1 only.
+- Confirmed dependencies for this slice are limited to token baselines, accessibility checks, and sample integration artifacts.
+- Confirmed downstream stories remain out of scope until User Story 1 verification is complete.
