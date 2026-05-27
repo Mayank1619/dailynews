@@ -8,15 +8,15 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm feature scope and dependencies in specs/features/content-ingestion/spec.md
-- [ ] T002 Capture implementation assumptions in specs/features/content-ingestion/plan.md
-- [ ] T003 [P] Prepare feature test folders in tests/unit/content-ingestion/, tests/integration/content-ingestion/, and tests/e2e/content-ingestion/
+- [X] T001 Confirm feature scope and dependencies in specs/features/content-ingestion/spec.md
+- [X] T002 Capture implementation assumptions in specs/features/content-ingestion/plan.md
+- [X] T003 [P] Prepare feature test folders in tests/unit/content-ingestion/, tests/integration/content-ingestion/, and tests/e2e/content-ingestion/
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 [P] Create ingestion connector interface and base types in apps/worker/src/features/content-ingestion/connectors.ts
-- [ ] T005 Set up scheduler trigger and job orchestration in apps/worker/src/features/content-ingestion/scheduler.ts
-- [ ] T006 [P] Implement ingestion observability and dead-letter routing in apps/worker/src/features/content-ingestion/telemetry.ts
+- [X] T004 [P] Create ingestion connector interface and base types in apps/worker/src/features/content-ingestion/connectors.ts
+- [X] T005 Set up scheduler trigger and job orchestration in apps/worker/src/features/content-ingestion/scheduler.ts
+- [X] T006 [P] Implement ingestion observability and dead-letter routing in apps/worker/src/features/content-ingestion/telemetry.ts
 
 ## Phase 3: User Story 1 - Manage Approved Sources (Priority: P1)
 
@@ -25,16 +25,16 @@
 
 ### Tests for US1 (write first and confirm failing baseline)
 
-- [ ] T007 [P] [US1] Add contract/integration boundary test in tests/integration/content-ingestion/test-manage-approved-sources-contracts.spec.ts
-- [ ] T008 [P] [US1] Add unit test coverage in tests/unit/content-ingestion/test-manage-approved-sources.spec.ts
-- [ ] T009 [P] [US1] Add end-to-end scenario in tests/e2e/content-ingestion/test-manage-approved-sources.e2e.ts
+- [X] T007 [P] [US1] Add contract/integration boundary test in tests/integration/content-ingestion/test-manage-approved-sources-contracts.spec.ts
+- [X] T008 [P] [US1] Add unit test coverage in tests/unit/content-ingestion/test-manage-approved-sources.spec.ts
+- [X] T009 [P] [US1] Add end-to-end scenario in tests/e2e/content-ingestion/test-manage-approved-sources.e2e.ts
 
 ### Implementation for US1
 
-- [ ] T010 [P] [US1] Create feature model/types in apps/api/src/features/content-ingestion/manage-approved-sources.types.ts
-- [ ] T011 [US1] Implement service logic in apps/api/src/features/content-ingestion/manage-approved-sources.service.ts
-- [ ] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/content-ingestion/manage-approved-sources.tsx
-- [ ] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/content-ingestion/manage-approved-sources.telemetry.ts
+- [X] T010 [P] [US1] Create feature model/types in apps/api/src/features/content-ingestion/manage-approved-sources.types.ts
+- [X] T011 [US1] Implement service logic in apps/api/src/features/content-ingestion/manage-approved-sources.service.ts
+- [X] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/content-ingestion/manage-approved-sources.tsx
+- [X] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/content-ingestion/manage-approved-sources.telemetry.ts
 
 ## Phase 4: User Story 2 - Ingest Articles on Schedule (Priority: P1)
 
@@ -43,16 +43,16 @@
 
 ### Tests for US2 (write first and confirm failing baseline)
 
-- [ ] T014 [P] [US2] Add contract/integration boundary test in tests/integration/content-ingestion/test-ingest-articles-on-schedule-contracts.spec.ts
-- [ ] T015 [P] [US2] Add unit test coverage in tests/unit/content-ingestion/test-ingest-articles-on-schedule.spec.ts
-- [ ] T016 [P] [US2] Add end-to-end scenario in tests/e2e/content-ingestion/test-ingest-articles-on-schedule.e2e.ts
+- [X] T014 [P] [US2] Add contract/integration boundary test in tests/integration/content-ingestion/test-ingest-articles-on-schedule-contracts.spec.ts
+- [X] T015 [P] [US2] Add unit test coverage in tests/unit/content-ingestion/test-ingest-articles-on-schedule.spec.ts
+- [X] T016 [P] [US2] Add end-to-end scenario in tests/e2e/content-ingestion/test-ingest-articles-on-schedule.e2e.ts
 
 ### Implementation for US2
 
-- [ ] T017 [P] [US2] Create feature model/types in apps/api/src/features/content-ingestion/ingest-articles-on-schedule.types.ts
-- [ ] T018 [US2] Implement service logic in apps/api/src/features/content-ingestion/ingest-articles-on-schedule.service.ts
-- [ ] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/content-ingestion/ingest-articles-on-schedule.tsx
-- [ ] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/content-ingestion/ingest-articles-on-schedule.telemetry.ts
+- [X] T017 [P] [US2] Create feature model/types in apps/api/src/features/content-ingestion/ingest-articles-on-schedule.types.ts
+- [X] T018 [US2] Implement service logic in apps/api/src/features/content-ingestion/ingest-articles-on-schedule.service.ts
+- [X] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/content-ingestion/ingest-articles-on-schedule.tsx
+- [X] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/content-ingestion/ingest-articles-on-schedule.telemetry.ts
 
 ## Phase 5: User Story 3 - Preserve Attribution and Avoid Duplicates (Priority: P2)
 
@@ -61,16 +61,16 @@
 
 ### Tests for US3 (write first and confirm failing baseline)
 
-- [ ] T021 [P] [US3] Add contract/integration boundary test in tests/integration/content-ingestion/test-preserve-attribution-and-avoid-duplicates-contracts.spec.ts
-- [ ] T022 [P] [US3] Add unit test coverage in tests/unit/content-ingestion/test-preserve-attribution-and-avoid-duplicates.spec.ts
-- [ ] T023 [P] [US3] Add end-to-end scenario in tests/e2e/content-ingestion/test-preserve-attribution-and-avoid-duplicates.e2e.ts
+- [X] T021 [P] [US3] Add contract/integration boundary test in tests/integration/content-ingestion/test-preserve-attribution-and-avoid-duplicates-contracts.spec.ts
+- [X] T022 [P] [US3] Add unit test coverage in tests/unit/content-ingestion/test-preserve-attribution-and-avoid-duplicates.spec.ts
+- [X] T023 [P] [US3] Add end-to-end scenario in tests/e2e/content-ingestion/test-preserve-attribution-and-avoid-duplicates.e2e.ts
 
 ### Implementation for US3
 
-- [ ] T024 [P] [US3] Create feature model/types in apps/api/src/features/content-ingestion/preserve-attribution-and-avoid-duplicates.types.ts
-- [ ] T025 [US3] Implement service logic in apps/api/src/features/content-ingestion/preserve-attribution-and-avoid-duplicates.service.ts
-- [ ] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/content-ingestion/preserve-attribution-and-avoid-duplicates.tsx
-- [ ] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/content-ingestion/preserve-attribution-and-avoid-duplicates.telemetry.ts
+- [X] T024 [P] [US3] Create feature model/types in apps/api/src/features/content-ingestion/preserve-attribution-and-avoid-duplicates.types.ts
+- [X] T025 [US3] Implement service logic in apps/api/src/features/content-ingestion/preserve-attribution-and-avoid-duplicates.service.ts
+- [X] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/content-ingestion/preserve-attribution-and-avoid-duplicates.tsx
+- [X] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/content-ingestion/preserve-attribution-and-avoid-duplicates.telemetry.ts
 
 ## Phase 6: User Story 4 - Continue Through Partial Failures (Priority: P2)
 
@@ -79,9 +79,9 @@
 
 ### Tests for US4 (write first and confirm failing baseline)
 
-- [ ] T028 [P] [US4] Add contract/integration boundary test in tests/integration/content-ingestion/test-continue-through-partial-failures-contracts.spec.ts
-- [ ] T029 [P] [US4] Add unit test coverage in tests/unit/content-ingestion/test-continue-through-partial-failures.spec.ts
-- [ ] T030 [P] [US4] Add end-to-end scenario in tests/e2e/content-ingestion/test-continue-through-partial-failures.e2e.ts
+- [X] T028 [P] [US4] Add contract/integration boundary test in tests/integration/content-ingestion/test-continue-through-partial-failures-contracts.spec.ts
+- [X] T029 [P] [US4] Add unit test coverage in tests/unit/content-ingestion/test-continue-through-partial-failures.spec.ts
+- [X] T030 [P] [US4] Add end-to-end scenario in tests/e2e/content-ingestion/test-continue-through-partial-failures.e2e.ts
 
 ### Implementation for US4
 
