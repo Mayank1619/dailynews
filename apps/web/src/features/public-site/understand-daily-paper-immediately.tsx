@@ -78,7 +78,7 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
             backdropFilter: "blur(6px)"
           }}
         >
-          <ReachSignupAndLoginQuicklyActions />
+          <ReachSignupAndLoginQuicklyActions includePrimary />
         </div>
       </header>
 
@@ -95,23 +95,40 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
       >
         <h1 style={{ font: DESIGN_TOKENS.typography.h1, margin: 0, maxWidth: 900 }}>{hero.headline}</h1>
         <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 760, margin: 0 }}>{hero.valueProposition}</p>
-        <a
-          href={hero.primaryCta.route}
-          style={{
-            width: "fit-content",
-            marginTop: DESIGN_TOKENS.spacing[1],
-            padding: "12px 20px",
-            borderRadius: 999,
-            background: `linear-gradient(120deg, ${DESIGN_TOKENS.colors.brandPrimary}, ${DESIGN_TOKENS.colors.brandSecondary})`,
-            color: DESIGN_TOKENS.colors.bgSecondary,
-            textDecoration: "none",
-            fontWeight: 700,
-            letterSpacing: "0.01em",
-            boxShadow: "0 14px 26px rgba(14,165,233,0.28)"
-          }}
-        >
-          {hero.primaryCta.label}
-        </a>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: DESIGN_TOKENS.spacing[1] }}>
+          <a
+            href="/signup"
+            style={{
+              width: "fit-content",
+              padding: "12px 20px",
+              borderRadius: 999,
+              background: `linear-gradient(120deg, ${DESIGN_TOKENS.colors.brandPrimary}, ${DESIGN_TOKENS.colors.brandSecondary})`,
+              color: DESIGN_TOKENS.colors.bgSecondary,
+              textDecoration: "none",
+              fontWeight: 700,
+              letterSpacing: "0.01em",
+              boxShadow: "0 14px 26px rgba(14,165,233,0.28)"
+            }}
+          >
+            Register
+          </a>
+          <a
+            href="/login"
+            style={{
+              width: "fit-content",
+              padding: "12px 20px",
+              borderRadius: 999,
+              background: DESIGN_TOKENS.colors.bgSecondary,
+              color: DESIGN_TOKENS.colors.textPrimary,
+              border: "1px solid rgba(17,24,39,0.14)",
+              textDecoration: "none",
+              fontWeight: 700,
+              letterSpacing: "0.01em"
+            }}
+          >
+            Login
+          </a>
+        </div>
       </section>
 
       <section
