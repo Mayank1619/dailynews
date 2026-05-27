@@ -12,6 +12,13 @@ No direct end-user identity enforcement is required in this feature; upstream au
 
 Scope statement: Phase 1 implementation included according to the feature scope and dependencies in spec.md.
 
+Implementation assumptions for the Phase 1 slice:
+- Canonical URL normalization removes tracking query parameters and trailing slash variants before grouping.
+- Title similarity deduplication is deterministic and uses a fixed threshold tuned for this corpus slice.
+- `rawHash` is the fallback grouping key when a raw article has no URL.
+- Source attribution always preserves the original source URL value from ingestion records.
+- `scoreSignals` remains optional and is omitted when absent.
+
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x on Node.js 22
