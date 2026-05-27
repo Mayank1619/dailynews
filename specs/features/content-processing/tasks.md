@@ -8,15 +8,15 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm feature scope and dependencies in specs/features/content-processing/spec.md
-- [ ] T002 Capture implementation assumptions in specs/features/content-processing/plan.md
-- [ ] T003 [P] Prepare feature test folders in tests/unit/content-processing/, tests/integration/content-processing/, and tests/e2e/content-processing/
+- [x] T001 Confirm feature scope and dependencies in specs/features/content-processing/spec.md
+- [x] T002 Capture implementation assumptions in specs/features/content-processing/plan.md
+- [x] T003 [P] Prepare feature test folders in tests/unit/content-processing/, tests/integration/content-processing/, and tests/e2e/content-processing/
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 [P] Create processing pipeline contracts in apps/worker/src/features/content-processing/contracts.ts
-- [ ] T005 Implement canonical hash/version utility in apps/worker/src/features/content-processing/versioning.ts
-- [ ] T006 [P] Set up processing telemetry and quality counters in apps/worker/src/features/content-processing/telemetry.ts
+- [x] T004 [P] Create processing pipeline contracts in apps/worker/src/features/content-processing/contracts.ts
+- [x] T005 Implement canonical hash/version utility in apps/worker/src/features/content-processing/versioning.ts
+- [x] T006 [P] Set up processing telemetry and quality counters in apps/worker/src/features/content-processing/telemetry.ts
 
 ## Phase 3: User Story 1 - Deduplicate Stories Across Sources (Priority: P1)
 
@@ -25,16 +25,16 @@
 
 ### Tests for US1 (write first and confirm failing baseline)
 
-- [ ] T007 [P] [US1] Add contract/integration boundary test in tests/integration/content-processing/test-deduplicate-stories-across-sources-contracts.spec.ts
-- [ ] T008 [P] [US1] Add unit test coverage in tests/unit/content-processing/test-deduplicate-stories-across-sources.spec.ts
-- [ ] T009 [P] [US1] Add end-to-end scenario in tests/e2e/content-processing/test-deduplicate-stories-across-sources.e2e.ts
+- [x] T007 [P] [US1] Add contract/integration boundary test in tests/integration/content-processing/test-deduplicate-stories-across-sources-contracts.spec.ts
+- [x] T008 [P] [US1] Add unit test coverage in tests/unit/content-processing/test-deduplicate-stories-across-sources.spec.ts
+- [x] T009 [P] [US1] Add end-to-end scenario in tests/e2e/content-processing/test-deduplicate-stories-across-sources.e2e.ts
 
 ### Implementation for US1
 
-- [ ] T010 [P] [US1] Create feature model/types in apps/api/src/features/content-processing/deduplicate-stories-across-sources.types.ts
-- [ ] T011 [US1] Implement service logic in apps/api/src/features/content-processing/deduplicate-stories-across-sources.service.ts
-- [ ] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/content-processing/deduplicate-stories-across-sources.tsx
-- [ ] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/content-processing/deduplicate-stories-across-sources.telemetry.ts
+- [x] T010 [P] [US1] Create feature model/types in apps/api/src/features/content-processing/deduplicate-stories-across-sources.types.ts
+- [x] T011 [US1] Implement service logic in apps/api/src/features/content-processing/deduplicate-stories-across-sources.service.ts
+- [x] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/content-processing/deduplicate-stories-across-sources.tsx
+- [x] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/content-processing/deduplicate-stories-across-sources.telemetry.ts
 
 ## Phase 4: User Story 2 - Assign Taxonomy Categories to Stories (Priority: P1)
 
@@ -43,16 +43,16 @@
 
 ### Tests for US2 (write first and confirm failing baseline)
 
-- [ ] T014 [P] [US2] Add contract/integration boundary test in tests/integration/content-processing/test-assign-taxonomy-categories-to-stories-contracts.spec.ts
-- [ ] T015 [P] [US2] Add unit test coverage in tests/unit/content-processing/test-assign-taxonomy-categories-to-stories.spec.ts
-- [ ] T016 [P] [US2] Add end-to-end scenario in tests/e2e/content-processing/test-assign-taxonomy-categories-to-stories.e2e.ts
+- [x] T014 [P] [US2] Add contract/integration boundary test in tests/integration/content-processing/test-assign-taxonomy-categories-to-stories-contracts.spec.ts
+- [x] T015 [P] [US2] Add unit test coverage in tests/unit/content-processing/test-assign-taxonomy-categories-to-stories.spec.ts
+- [x] T016 [P] [US2] Add end-to-end scenario in tests/e2e/content-processing/test-assign-taxonomy-categories-to-stories.e2e.ts
 
 ### Implementation for US2
 
-- [ ] T017 [P] [US2] Create feature model/types in apps/api/src/features/content-processing/assign-taxonomy-categories-to-stories.types.ts
-- [ ] T018 [US2] Implement service logic in apps/api/src/features/content-processing/assign-taxonomy-categories-to-stories.service.ts
-- [ ] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/content-processing/assign-taxonomy-categories-to-stories.tsx
-- [ ] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/content-processing/assign-taxonomy-categories-to-stories.telemetry.ts
+- [x] T017 [P] [US2] Create feature model/types in apps/api/src/features/content-processing/assign-taxonomy-categories-to-stories.types.ts
+- [x] T018 [US2] Implement service logic in apps/api/src/features/content-processing/assign-taxonomy-categories-to-stories.service.ts
+- [x] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/content-processing/assign-taxonomy-categories-to-stories.tsx
+- [x] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/content-processing/assign-taxonomy-categories-to-stories.telemetry.ts
 
 ## Phase 5: User Story 3 - Normalize Article Fields (Priority: P1)
 
@@ -61,16 +61,16 @@
 
 ### Tests for US3 (write first and confirm failing baseline)
 
-- [ ] T021 [P] [US3] Add contract/integration boundary test in tests/integration/content-processing/test-normalize-article-fields-contracts.spec.ts
-- [ ] T022 [P] [US3] Add unit test coverage in tests/unit/content-processing/test-normalize-article-fields.spec.ts
-- [ ] T023 [P] [US3] Add end-to-end scenario in tests/e2e/content-processing/test-normalize-article-fields.e2e.ts
+- [x] T021 [P] [US3] Add contract/integration boundary test in tests/integration/content-processing/test-normalize-article-fields-contracts.spec.ts
+- [x] T022 [P] [US3] Add unit test coverage in tests/unit/content-processing/test-normalize-article-fields.spec.ts
+- [x] T023 [P] [US3] Add end-to-end scenario in tests/e2e/content-processing/test-normalize-article-fields.e2e.ts
 
 ### Implementation for US3
 
-- [ ] T024 [P] [US3] Create feature model/types in apps/api/src/features/content-processing/normalize-article-fields.types.ts
-- [ ] T025 [US3] Implement service logic in apps/api/src/features/content-processing/normalize-article-fields.service.ts
-- [ ] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/content-processing/normalize-article-fields.tsx
-- [ ] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/content-processing/normalize-article-fields.telemetry.ts
+- [x] T024 [P] [US3] Create feature model/types in apps/api/src/features/content-processing/normalize-article-fields.types.ts
+- [x] T025 [US3] Implement service logic in apps/api/src/features/content-processing/normalize-article-fields.service.ts
+- [x] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/content-processing/normalize-article-fields.tsx
+- [x] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/content-processing/normalize-article-fields.telemetry.ts
 
 ## Phase 6: User Story 4 - Preserve Full Source Attribution (Priority: P1)
 
@@ -79,9 +79,9 @@
 
 ### Tests for US4 (write first and confirm failing baseline)
 
-- [ ] T028 [P] [US4] Add contract/integration boundary test in tests/integration/content-processing/test-preserve-full-source-attribution-contracts.spec.ts
-- [ ] T029 [P] [US4] Add unit test coverage in tests/unit/content-processing/test-preserve-full-source-attribution.spec.ts
-- [ ] T030 [P] [US4] Add end-to-end scenario in tests/e2e/content-processing/test-preserve-full-source-attribution.e2e.ts
+- [x] T028 [P] [US4] Add contract/integration boundary test in tests/integration/content-processing/test-preserve-full-source-attribution-contracts.spec.ts
+- [x] T029 [P] [US4] Add unit test coverage in tests/unit/content-processing/test-preserve-full-source-attribution.spec.ts
+- [x] T030 [P] [US4] Add end-to-end scenario in tests/e2e/content-processing/test-preserve-full-source-attribution.e2e.ts
 
 ### Implementation for US4
 
