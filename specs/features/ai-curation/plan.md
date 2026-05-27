@@ -12,6 +12,12 @@ No direct end-user identity enforcement is required in this feature; upstream au
 
 Scope statement: Phase 1 implementation included according to the feature scope and dependencies in spec.md.
 
+Implementation assumptions captured (T002):
+- Ranking remains deterministic using topic-match priority followed by recency.
+- Summary generation in this slice uses an injectable summarizer contract with fallback-first safety behavior.
+- Privacy-safe telemetry captures aggregate counters and identifiers only; it excludes prompt/article body payloads.
+- Category quotas are enforced via configurable `perCategoryLimit` validation (`> 0`).
+
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x on Node.js 22
