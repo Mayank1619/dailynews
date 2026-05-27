@@ -8,15 +8,15 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm feature scope and dependencies in specs/features/ai-curation/spec.md
-- [ ] T002 Capture implementation assumptions in specs/features/ai-curation/plan.md
-- [ ] T003 [P] Prepare feature test folders in tests/unit/ai-curation/, tests/integration/ai-curation/, and tests/e2e/ai-curation/
+- [X] T001 Confirm feature scope and dependencies in specs/features/ai-curation/spec.md
+- [X] T002 Capture implementation assumptions in specs/features/ai-curation/plan.md
+- [X] T003 [P] Prepare feature test folders in tests/unit/ai-curation/, tests/integration/ai-curation/, and tests/e2e/ai-curation/
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 [P] Create curation pipeline interfaces in apps/worker/src/features/ai-curation/interfaces.ts
-- [ ] T005 Configure model gateway and retry policy in apps/worker/src/features/ai-curation/modelGateway.ts
-- [ ] T006 [P] Set up privacy-safe curation telemetry events in apps/worker/src/features/ai-curation/telemetry.ts
+- [X] T004 [P] Create curation pipeline interfaces in apps/worker/src/features/ai-curation/interfaces.ts
+- [X] T005 Configure model gateway and retry policy in apps/worker/src/features/ai-curation/modelGateway.ts
+- [X] T006 [P] Set up privacy-safe curation telemetry events in apps/worker/src/features/ai-curation/telemetry.ts
 
 ## Phase 3: User Story 1 - Receive a Ranked, Summarized Digest of Relevant Stories (Priority: P1)
 
@@ -25,16 +25,16 @@
 
 ### Tests for US1 (write first and confirm failing baseline)
 
-- [ ] T007 [P] [US1] Add contract/integration boundary test in tests/integration/ai-curation/test-receive-a-ranked-summarized-digest-of-relevant-stories-contracts.spec.ts
-- [ ] T008 [P] [US1] Add unit test coverage in tests/unit/ai-curation/test-receive-a-ranked-summarized-digest-of-relevant-stories.spec.ts
-- [ ] T009 [P] [US1] Add end-to-end scenario in tests/e2e/ai-curation/test-receive-a-ranked-summarized-digest-of-relevant-stories.e2e.ts
+- [X] T007 [P] [US1] Add contract/integration boundary test in tests/integration/ai-curation/test-receive-a-ranked-summarized-digest-of-relevant-stories-contracts.spec.ts
+- [X] T008 [P] [US1] Add unit test coverage in tests/unit/ai-curation/test-receive-a-ranked-summarized-digest-of-relevant-stories.spec.ts
+- [X] T009 [P] [US1] Add end-to-end scenario in tests/e2e/ai-curation/test-receive-a-ranked-summarized-digest-of-relevant-stories.e2e.ts
 
 ### Implementation for US1
 
-- [ ] T010 [P] [US1] Create feature model/types in apps/api/src/features/ai-curation/receive-a-ranked-summarized-digest-of-relevant-stories.types.ts
-- [ ] T011 [US1] Implement service logic in apps/api/src/features/ai-curation/receive-a-ranked-summarized-digest-of-relevant-stories.service.ts
-- [ ] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/ai-curation/receive-a-ranked-summarized-digest-of-relevant-stories.tsx
-- [ ] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/ai-curation/receive-a-ranked-summarized-digest-of-relevant-stories.telemetry.ts
+- [X] T010 [P] [US1] Create feature model/types in apps/api/src/features/ai-curation/receive-a-ranked-summarized-digest-of-relevant-stories.types.ts
+- [X] T011 [US1] Implement service logic in apps/api/src/features/ai-curation/receive-a-ranked-summarized-digest-of-relevant-stories.service.ts
+- [X] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/ai-curation/receive-a-ranked-summarized-digest-of-relevant-stories.tsx
+- [X] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/ai-curation/receive-a-ranked-summarized-digest-of-relevant-stories.telemetry.ts
 
 ## Phase 4: User Story 2 - Read Summaries That Are Honest About Their AI Origin (Priority: P1)
 
@@ -43,16 +43,16 @@
 
 ### Tests for US2 (write first and confirm failing baseline)
 
-- [ ] T014 [P] [US2] Add contract/integration boundary test in tests/integration/ai-curation/test-read-summaries-that-are-honest-about-their-ai-origin-contracts.spec.ts
-- [ ] T015 [P] [US2] Add unit test coverage in tests/unit/ai-curation/test-read-summaries-that-are-honest-about-their-ai-origin.spec.ts
-- [ ] T016 [P] [US2] Add end-to-end scenario in tests/e2e/ai-curation/test-read-summaries-that-are-honest-about-their-ai-origin.e2e.ts
+- [X] T014 [P] [US2] Add contract/integration boundary test in tests/integration/ai-curation/test-read-summaries-that-are-honest-about-their-ai-origin-contracts.spec.ts
+- [X] T015 [P] [US2] Add unit test coverage in tests/unit/ai-curation/test-read-summaries-that-are-honest-about-their-ai-origin.spec.ts
+- [X] T016 [P] [US2] Add end-to-end scenario in tests/e2e/ai-curation/test-read-summaries-that-are-honest-about-their-ai-origin.e2e.ts
 
 ### Implementation for US2
 
-- [ ] T017 [P] [US2] Create feature model/types in apps/api/src/features/ai-curation/read-summaries-that-are-honest-about-their-ai-origin.types.ts
-- [ ] T018 [US2] Implement service logic in apps/api/src/features/ai-curation/read-summaries-that-are-honest-about-their-ai-origin.service.ts
-- [ ] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/ai-curation/read-summaries-that-are-honest-about-their-ai-origin.tsx
-- [ ] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/ai-curation/read-summaries-that-are-honest-about-their-ai-origin.telemetry.ts
+- [X] T017 [P] [US2] Create feature model/types in apps/api/src/features/ai-curation/read-summaries-that-are-honest-about-their-ai-origin.types.ts
+- [X] T018 [US2] Implement service logic in apps/api/src/features/ai-curation/read-summaries-that-are-honest-about-their-ai-origin.service.ts
+- [X] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/ai-curation/read-summaries-that-are-honest-about-their-ai-origin.tsx
+- [X] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/ai-curation/read-summaries-that-are-honest-about-their-ai-origin.telemetry.ts
 
 ## Phase 5: User Story 3 - Receive a Readable Digest Even When AI Summarization Fails (Priority: P1)
 
@@ -61,16 +61,16 @@
 
 ### Tests for US3 (write first and confirm failing baseline)
 
-- [ ] T021 [P] [US3] Add contract/integration boundary test in tests/integration/ai-curation/test-receive-a-readable-digest-even-when-ai-summarization-fails-contracts.spec.ts
-- [ ] T022 [P] [US3] Add unit test coverage in tests/unit/ai-curation/test-receive-a-readable-digest-even-when-ai-summarization-fails.spec.ts
-- [ ] T023 [P] [US3] Add end-to-end scenario in tests/e2e/ai-curation/test-receive-a-readable-digest-even-when-ai-summarization-fails.e2e.ts
+- [X] T021 [P] [US3] Add contract/integration boundary test in tests/integration/ai-curation/test-receive-a-readable-digest-even-when-ai-summarization-fails-contracts.spec.ts
+- [X] T022 [P] [US3] Add unit test coverage in tests/unit/ai-curation/test-receive-a-readable-digest-even-when-ai-summarization-fails.spec.ts
+- [X] T023 [P] [US3] Add end-to-end scenario in tests/e2e/ai-curation/test-receive-a-readable-digest-even-when-ai-summarization-fails.e2e.ts
 
 ### Implementation for US3
 
-- [ ] T024 [P] [US3] Create feature model/types in apps/api/src/features/ai-curation/receive-a-readable-digest-even-when-ai-summarization-fails.types.ts
-- [ ] T025 [US3] Implement service logic in apps/api/src/features/ai-curation/receive-a-readable-digest-even-when-ai-summarization-fails.service.ts
-- [ ] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/ai-curation/receive-a-readable-digest-even-when-ai-summarization-fails.tsx
-- [ ] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/ai-curation/receive-a-readable-digest-even-when-ai-summarization-fails.telemetry.ts
+- [X] T024 [P] [US3] Create feature model/types in apps/api/src/features/ai-curation/receive-a-readable-digest-even-when-ai-summarization-fails.types.ts
+- [X] T025 [US3] Implement service logic in apps/api/src/features/ai-curation/receive-a-readable-digest-even-when-ai-summarization-fails.service.ts
+- [X] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/ai-curation/receive-a-readable-digest-even-when-ai-summarization-fails.tsx
+- [X] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/ai-curation/receive-a-readable-digest-even-when-ai-summarization-fails.telemetry.ts
 
 ## Phase 6: User Story 4 - Digest Includes a Controlled Number of Stories Per Category (Priority: P2)
 
@@ -79,9 +79,9 @@
 
 ### Tests for US4 (write first and confirm failing baseline)
 
-- [ ] T028 [P] [US4] Add contract/integration boundary test in tests/integration/ai-curation/test-digest-includes-a-controlled-number-of-stories-per-category-contracts.spec.ts
-- [ ] T029 [P] [US4] Add unit test coverage in tests/unit/ai-curation/test-digest-includes-a-controlled-number-of-stories-per-category.spec.ts
-- [ ] T030 [P] [US4] Add end-to-end scenario in tests/e2e/ai-curation/test-digest-includes-a-controlled-number-of-stories-per-category.e2e.ts
+- [X] T028 [P] [US4] Add contract/integration boundary test in tests/integration/ai-curation/test-digest-includes-a-controlled-number-of-stories-per-category-contracts.spec.ts
+- [X] T029 [P] [US4] Add unit test coverage in tests/unit/ai-curation/test-digest-includes-a-controlled-number-of-stories-per-category.spec.ts
+- [X] T030 [P] [US4] Add end-to-end scenario in tests/e2e/ai-curation/test-digest-includes-a-controlled-number-of-stories-per-category.e2e.ts
 
 ### Implementation for US4
 

@@ -12,6 +12,12 @@
 - Content Processing (`specs/features/content-processing/spec.md`)
 - Onboarding + Preferences (`specs/features/onboarding-preferences/spec.md`)
 
+## Implementation Confirmation (T001)
+
+- Scope confirmed for tasks T001-T030: foundational worker interfaces/gateway/telemetry, US1-US3 implementation and tests, US4 tests.
+- Dependency boundary confirmed: this feature consumes only `articles_processed` and `preferences.topics[]`, and outputs `article_summaries` candidates.
+- Downstream dependency confirmed: digest assembly remains the consumer and is not modified by this implementation slice.
+
 ---
 
 ## Overview
