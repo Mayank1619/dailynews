@@ -29,6 +29,13 @@ Design) is the governing constraint: **the dashboard MUST only ever display data
 signed-in user, and every user-control action MUST be reversible except the explicitly scoped
 account-deletion path.**
 
+## Implementation Scope Confirmation (T001)
+
+- This implementation slice covers setup and foundational work, plus user stories through T030.
+- Included stories: dashboard home view, edit preferences entry point, pause/resume delivery, and
+  tests for past-newsletter history behavior.
+- Deferred in this slice: account settings/delete-account story implementation tasks (T031+).
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*

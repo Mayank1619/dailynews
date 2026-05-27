@@ -8,15 +8,15 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm feature scope and dependencies in specs/features/user-dashboard/spec.md
-- [ ] T002 Capture implementation assumptions in specs/features/user-dashboard/plan.md
-- [ ] T003 [P] Prepare feature test folders in tests/unit/user-dashboard/, tests/integration/user-dashboard/, and tests/e2e/user-dashboard/
+- [X] T001 Confirm feature scope and dependencies in specs/features/user-dashboard/spec.md
+- [X] T002 Capture implementation assumptions in specs/features/user-dashboard/plan.md
+- [X] T003 [P] Prepare feature test folders in tests/unit/user-dashboard/, tests/integration/user-dashboard/, and tests/e2e/user-dashboard/
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 Implement Firebase Auth session guard and UID ownership enforcement in apps/api/src/middleware/firebaseAuth.ts
-- [ ] T005 Create dashboard query service scoped by authenticated UID in apps/api/src/features/user-dashboard/dashboardService.ts
-- [ ] T006 [P] Set up dashboard audit and privacy-safe telemetry in apps/api/src/features/user-dashboard/telemetry.ts
+- [X] T004 Implement Firebase Auth session guard and UID ownership enforcement in apps/api/src/middleware/firebaseAuth.ts
+- [X] T005 Create dashboard query service scoped by authenticated UID in apps/api/src/features/user-dashboard/dashboardService.ts
+- [X] T006 [P] Set up dashboard audit and privacy-safe telemetry in apps/api/src/features/user-dashboard/telemetry.ts
 
 ## Phase 3: User Story 1 - View My Dashboard Home (Priority: P1)
 
@@ -25,16 +25,16 @@
 
 ### Tests for US1 (write first and confirm failing baseline)
 
-- [ ] T007 [P] [US1] Add contract/integration boundary test in tests/integration/user-dashboard/test-view-my-dashboard-home-contracts.spec.ts
-- [ ] T008 [P] [US1] Add unit test coverage in tests/unit/user-dashboard/test-view-my-dashboard-home.spec.ts
-- [ ] T009 [P] [US1] Add end-to-end scenario in tests/e2e/user-dashboard/test-view-my-dashboard-home.e2e.ts
+- [X] T007 [P] [US1] Add contract/integration boundary test in tests/integration/user-dashboard/test-view-my-dashboard-home-contracts.spec.ts
+- [X] T008 [P] [US1] Add unit test coverage in tests/unit/user-dashboard/test-view-my-dashboard-home.spec.ts
+- [X] T009 [P] [US1] Add end-to-end scenario in tests/e2e/user-dashboard/test-view-my-dashboard-home.e2e.ts
 
 ### Implementation for US1
 
-- [ ] T010 [P] [US1] Create feature model/types in apps/api/src/features/user-dashboard/view-my-dashboard-home.types.ts
-- [ ] T011 [US1] Implement service logic in apps/api/src/features/user-dashboard/view-my-dashboard-home.service.ts
-- [ ] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/user-dashboard/view-my-dashboard-home.tsx
-- [ ] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/user-dashboard/view-my-dashboard-home.telemetry.ts
+- [X] T010 [P] [US1] Create feature model/types in apps/api/src/features/user-dashboard/view-my-dashboard-home.types.ts
+- [X] T011 [US1] Implement service logic in apps/api/src/features/user-dashboard/view-my-dashboard-home.service.ts
+- [X] T012 [US1] Implement UI or endpoint integration in apps/web/src/features/user-dashboard/view-my-dashboard-home.tsx
+- [X] T013 [US1] Add telemetry/audit hooks in apps/api/src/features/user-dashboard/view-my-dashboard-home.telemetry.ts
 
 ## Phase 4: User Story 2 - Edit My Preferences from the Dashboard (Priority: P2)
 
@@ -43,16 +43,16 @@
 
 ### Tests for US2 (write first and confirm failing baseline)
 
-- [ ] T014 [P] [US2] Add contract/integration boundary test in tests/integration/user-dashboard/test-edit-my-preferences-from-the-dashboard-contracts.spec.ts
-- [ ] T015 [P] [US2] Add unit test coverage in tests/unit/user-dashboard/test-edit-my-preferences-from-the-dashboard.spec.ts
-- [ ] T016 [P] [US2] Add end-to-end scenario in tests/e2e/user-dashboard/test-edit-my-preferences-from-the-dashboard.e2e.ts
+- [X] T014 [P] [US2] Add contract/integration boundary test in tests/integration/user-dashboard/test-edit-my-preferences-from-the-dashboard-contracts.spec.ts
+- [X] T015 [P] [US2] Add unit test coverage in tests/unit/user-dashboard/test-edit-my-preferences-from-the-dashboard.spec.ts
+- [X] T016 [P] [US2] Add end-to-end scenario in tests/e2e/user-dashboard/test-edit-my-preferences-from-the-dashboard.e2e.ts
 
 ### Implementation for US2
 
-- [ ] T017 [P] [US2] Create feature model/types in apps/api/src/features/user-dashboard/edit-my-preferences-from-the-dashboard.types.ts
-- [ ] T018 [US2] Implement service logic in apps/api/src/features/user-dashboard/edit-my-preferences-from-the-dashboard.service.ts
-- [ ] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/user-dashboard/edit-my-preferences-from-the-dashboard.tsx
-- [ ] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/user-dashboard/edit-my-preferences-from-the-dashboard.telemetry.ts
+- [X] T017 [P] [US2] Create feature model/types in apps/api/src/features/user-dashboard/edit-my-preferences-from-the-dashboard.types.ts
+- [X] T018 [US2] Implement service logic in apps/api/src/features/user-dashboard/edit-my-preferences-from-the-dashboard.service.ts
+- [X] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/user-dashboard/edit-my-preferences-from-the-dashboard.tsx
+- [X] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/user-dashboard/edit-my-preferences-from-the-dashboard.telemetry.ts
 
 ## Phase 5: User Story 3 - Pause or Resume Newsletter Delivery (Priority: P2)
 
@@ -61,16 +61,16 @@
 
 ### Tests for US3 (write first and confirm failing baseline)
 
-- [ ] T021 [P] [US3] Add contract/integration boundary test in tests/integration/user-dashboard/test-pause-or-resume-newsletter-delivery-contracts.spec.ts
-- [ ] T022 [P] [US3] Add unit test coverage in tests/unit/user-dashboard/test-pause-or-resume-newsletter-delivery.spec.ts
-- [ ] T023 [P] [US3] Add end-to-end scenario in tests/e2e/user-dashboard/test-pause-or-resume-newsletter-delivery.e2e.ts
+- [X] T021 [P] [US3] Add contract/integration boundary test in tests/integration/user-dashboard/test-pause-or-resume-newsletter-delivery-contracts.spec.ts
+- [X] T022 [P] [US3] Add unit test coverage in tests/unit/user-dashboard/test-pause-or-resume-newsletter-delivery.spec.ts
+- [X] T023 [P] [US3] Add end-to-end scenario in tests/e2e/user-dashboard/test-pause-or-resume-newsletter-delivery.e2e.ts
 
 ### Implementation for US3
 
-- [ ] T024 [P] [US3] Create feature model/types in apps/api/src/features/user-dashboard/pause-or-resume-newsletter-delivery.types.ts
-- [ ] T025 [US3] Implement service logic in apps/api/src/features/user-dashboard/pause-or-resume-newsletter-delivery.service.ts
-- [ ] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/user-dashboard/pause-or-resume-newsletter-delivery.tsx
-- [ ] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/user-dashboard/pause-or-resume-newsletter-delivery.telemetry.ts
+- [X] T024 [P] [US3] Create feature model/types in apps/api/src/features/user-dashboard/pause-or-resume-newsletter-delivery.types.ts
+- [X] T025 [US3] Implement service logic in apps/api/src/features/user-dashboard/pause-or-resume-newsletter-delivery.service.ts
+- [X] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/user-dashboard/pause-or-resume-newsletter-delivery.tsx
+- [X] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/user-dashboard/pause-or-resume-newsletter-delivery.telemetry.ts
 
 ## Phase 6: User Story 4 - View and Access Past Newsletters (Priority: P2)
 
@@ -79,9 +79,9 @@
 
 ### Tests for US4 (write first and confirm failing baseline)
 
-- [ ] T028 [P] [US4] Add contract/integration boundary test in tests/integration/user-dashboard/test-view-and-access-past-newsletters-contracts.spec.ts
-- [ ] T029 [P] [US4] Add unit test coverage in tests/unit/user-dashboard/test-view-and-access-past-newsletters.spec.ts
-- [ ] T030 [P] [US4] Add end-to-end scenario in tests/e2e/user-dashboard/test-view-and-access-past-newsletters.e2e.ts
+- [X] T028 [P] [US4] Add contract/integration boundary test in tests/integration/user-dashboard/test-view-and-access-past-newsletters-contracts.spec.ts
+- [X] T029 [P] [US4] Add unit test coverage in tests/unit/user-dashboard/test-view-and-access-past-newsletters.spec.ts
+- [X] T030 [P] [US4] Add end-to-end scenario in tests/e2e/user-dashboard/test-view-and-access-past-newsletters.e2e.ts
 
 ### Implementation for US4
 

@@ -72,3 +72,20 @@ export async function verifyFirebaseIdToken(
     }
   };
 }
+
+export function requireAuthenticatedContext(context: FirebaseRequestContext): FirebaseAuthContext {
+  if (!context.auth) {
+    throw new Error("Authentication required");
+  }
+
+  return context.auth;
+}
+
+export function assertUidOwnership(context: FirebaseRequestContext, ownerUid: string): FirebaseAuthContext {
+  const auth = requireAuthenticatedContext(context);
+  if (auth.uid !== ownerUid) {
+    throw new Error("Forbidden: UID ownership mismatch");
+  }
+
+  return auth;
+}

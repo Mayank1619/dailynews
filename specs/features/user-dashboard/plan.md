@@ -83,3 +83,11 @@ apps/
 ## Complexity Tracking
 
 No constitution violations accepted for this feature plan.
+
+## Implementation Assumptions (T002)
+
+- Dashboard APIs and services rely on Firebase Auth UID from verified ID tokens.
+- Preferences and newsletter history repositories are injected dependencies and are exercised via tests with fakes.
+- History default behavior assumes a 30-day limit at call sites while service accepts explicit limit/cursor options.
+- Telemetry payloads use opaque user references only and intentionally omit emails and newsletter content.
+- UI integration in this slice is component-level with typed helpers; route wiring is handled by application composition.
