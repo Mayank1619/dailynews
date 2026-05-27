@@ -83,3 +83,22 @@ apps/
 ## Complexity Tracking
 
 No constitution violations accepted for this feature plan.
+
+## Phase 2 Activation Criteria
+
+All of the following criteria MUST be satisfied before any Phase 2 monetization work begins:
+
+1. **legalComplianceApproved**: Legal and compliance review of billing, tax, and consumer-protection requirements completed and approved.
+2. **paymentProviderSelected**: External payment processor (e.g. Stripe) evaluated and selected per regional and business requirements.
+3. **consentDesignApproved**: Explicit opt-in consent flow and reversible subscription controls designed and approved against constitution guardrails.
+4. **migrationPlanDocumented**: A backward-compatible migration path from free-tier to optional paid plans documented and validated.
+5. **constitutionGatesPassed**: All constitution gates (trust, privacy/consent, design, verification) re-evaluated against the Phase 2 feature spec.
+
+## Implementation Assumptions (Phase 1)
+
+- All users remain on the `free-plan` tier. No user-facing upgrade, checkout, or cancellation flows exist.
+- Placeholder types (`SubscriptionPlanPlaceholder`, `UserSubscriptionPlaceholder`, `BillingEventPlaceholder`) are TypeScript-only definitions with no Firestore persistence in Phase 1.
+- Telemetry is limited to governance signals: `phase1.scope_check_passed`, `phase1.scope_check_failed`, `phase1.free_tier_confirmed`, `phase1.reserved_endpoint_blocked`.
+- Reserved Phase 2 API endpoints (`/api/subscriptions/checkout`, `/api/subscriptions/webhook`, `/api/subscriptions/status`) return scope-blocked responses via `ScopeProtectionService`.
+- Premium feature flags (`ad-free`, `more-sources`, `longer-digest`) are type-reserved only and MUST NOT be toggled for any user in Phase 1.
+- Frontend `PlanStatusDisplay` component presents free-tier status only; no purchase or upgrade path is rendered.
