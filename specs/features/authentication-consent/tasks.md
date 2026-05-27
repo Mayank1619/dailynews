@@ -43,16 +43,16 @@
 
 ### Tests for US2 (write first and confirm failing baseline)
 
-- [ ] T014 [P] [US2] Add contract/integration boundary test in tests/integration/authentication-consent/test-login-logout-and-password-recovery-contracts.spec.ts
-- [ ] T015 [P] [US2] Add unit test coverage in tests/unit/authentication-consent/test-login-logout-and-password-recovery.spec.ts
-- [ ] T016 [P] [US2] Add end-to-end scenario in tests/e2e/authentication-consent/test-login-logout-and-password-recovery.e2e.ts
+- [X] T014 [P] [US2] Add contract/integration boundary test in tests/integration/authentication-consent/test-login-logout-and-password-recovery-contracts.spec.ts
+- [X] T015 [P] [US2] Add unit test coverage in tests/unit/authentication-consent/test-login-logout-and-password-recovery.spec.ts
+- [X] T016 [P] [US2] Add end-to-end scenario in tests/e2e/authentication-consent/test-login-logout-and-password-recovery.e2e.ts
 
 ### Implementation for US2
 
-- [ ] T017 [P] [US2] Create feature model/types in apps/api/src/features/authentication-consent/login-logout-and-password-recovery.types.ts
-- [ ] T018 [US2] Implement service logic in apps/api/src/features/authentication-consent/login-logout-and-password-recovery.service.ts
-- [ ] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/authentication-consent/login-logout-and-password-recovery.tsx
-- [ ] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/authentication-consent/login-logout-and-password-recovery.telemetry.ts
+- [X] T017 [P] [US2] Create feature model/types in apps/api/src/features/authentication-consent/login-logout-and-password-recovery.types.ts
+- [X] T018 [US2] Implement service logic in apps/api/src/features/authentication-consent/login-logout-and-password-recovery.service.ts
+- [X] T019 [US2] Implement UI or endpoint integration in apps/web/src/features/authentication-consent/login-logout-and-password-recovery.tsx
+- [X] T020 [US2] Add telemetry/audit hooks in apps/api/src/features/authentication-consent/login-logout-and-password-recovery.telemetry.ts
 
 ## Phase 5: User Story 3 - Blocked Account Enforcement (Priority: P3)
 
@@ -61,22 +61,22 @@
 
 ### Tests for US3 (write first and confirm failing baseline)
 
-- [ ] T021 [P] [US3] Add contract/integration boundary test in tests/integration/authentication-consent/test-blocked-account-enforcement-contracts.spec.ts
-- [ ] T022 [P] [US3] Add unit test coverage in tests/unit/authentication-consent/test-blocked-account-enforcement.spec.ts
-- [ ] T023 [P] [US3] Add end-to-end scenario in tests/e2e/authentication-consent/test-blocked-account-enforcement.e2e.ts
+- [X] T021 [P] [US3] Add contract/integration boundary test in tests/integration/authentication-consent/test-blocked-account-enforcement-contracts.spec.ts
+- [X] T022 [P] [US3] Add unit test coverage in tests/unit/authentication-consent/test-blocked-account-enforcement.spec.ts
+- [X] T023 [P] [US3] Add end-to-end scenario in tests/e2e/authentication-consent/test-blocked-account-enforcement.e2e.ts
 
 ### Implementation for US3
 
-- [ ] T024 [P] [US3] Create feature model/types in apps/api/src/features/authentication-consent/blocked-account-enforcement.types.ts
-- [ ] T025 [US3] Implement service logic in apps/api/src/features/authentication-consent/blocked-account-enforcement.service.ts
-- [ ] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/authentication-consent/blocked-account-enforcement.tsx
-- [ ] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/authentication-consent/blocked-account-enforcement.telemetry.ts
+- [X] T024 [P] [US3] Create feature model/types in apps/api/src/features/authentication-consent/blocked-account-enforcement.types.ts
+- [X] T025 [US3] Implement service logic in apps/api/src/features/authentication-consent/blocked-account-enforcement.service.ts
+- [X] T026 [US3] Implement UI or endpoint integration in apps/web/src/features/authentication-consent/blocked-account-enforcement.tsx
+- [X] T027 [US3] Add telemetry/audit hooks in apps/api/src/features/authentication-consent/blocked-account-enforcement.telemetry.ts
 
 ## Final Phase: Polish & Cross-Cutting Concerns
 
-- [ ] T028 [P] Update feature documentation and runbook notes in specs/features/authentication-consent/quickstart.md
-- [ ] T029 Run full test suite for this feature and capture results in specs/features/authentication-consent/quickstart.md
-- [ ] T030 Verify privacy-safe telemetry and consent/RBAC compliance for this feature in specs/features/authentication-consent/spec.md
+- [X] T028 [P] Update feature documentation and runbook notes in specs/features/authentication-consent/quickstart.md
+- [X] T029 Run full test suite for this feature and capture results in specs/features/authentication-consent/quickstart.md
+- [X] T030 Verify privacy-safe telemetry and consent/RBAC compliance for this feature in specs/features/authentication-consent/spec.md
 
 ## Dependencies & Execution Order
 

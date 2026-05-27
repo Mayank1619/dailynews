@@ -4,7 +4,7 @@
 
 **Created**: 2026-05-26
 
-**Status**: Draft
+**Status**: Complete
 
 **Input**: User description: "Feature: Authentication + Consent. Goal: Allow users to securely register/login and capture explicit consent preferences. Scope Phase 1 includes signup, login/logout, email verification, password reset, consent capture and storage, rate limiting and brute force protection, and blocked user enforcement. Preserve the provided API, data model, acceptance criteria, tests, and align the feature with the Daily Paper constitution."
 
@@ -171,3 +171,29 @@ As an admin, I want blocked users to be prevented from signing in or receiving n
 
 - Scope confirmed for this pass: Phase 1 setup, Phase 2 foundational work, and User Story 1 (P1) only.
 - Dependency baseline confirmed: Firebase Auth client bootstrap for web signup, Firebase Admin ID-token verification for API identity binding, and privacy-safe consent telemetry/audit hooks.
+
+## Telemetry & Privacy Compliance
+
+All telemetry events emitted by this feature are privacy-safe:
+
+- **No passwords** are ever included in any telemetry payload.
+- **No reset tokens** or session tokens appear in any event metadata.
+- **No raw email addresses** are logged; email-derived identifiers are hashed (SHA-256, truncated to 16 hex chars) via `ConsentAuditService`.
+- **Reason fields** in admin block/unblock events are sanitized to strip email-like patterns before emission.
+- All events carry a `feature: "authentication-consent"` label, an `occurredAt` ISO timestamp, and a `status` of `"success"` or `"error"` — no secrets.
+
+### Event Inventory
+
+| Event name | US | Status values | Notes |
+|---|---|---|---|
+| `secure_signup_succeeded` | US1 | `success` | uid, source, termsVersion, consent flags |
+| `secure_signup_failed` | US1 | `error` | source, reason (no PII) |
+| `login_attempt` | US2 | `success` | source only |
+| `login_success` | US2 | `success` | uid, source, emailVerified |
+| `login_failure` | US2 | `error` | source, reason (no PII) |
+| `logout` | US2 | `success` | uid, source |
+| `password_reset_requested` | US2 | `success` | source only (non-enumeration) |
+| `password_reset_completed` | US2 | `success` | source only |
+| `blocked_access_denied` | US2/US3 | `error` | uid, source |
+| `admin_blocked_account` | US3 | `success` | uid, adminUid, sanitized reason |
+| `admin_unblocked_account` | US3 | `success` | uid, adminUid |
