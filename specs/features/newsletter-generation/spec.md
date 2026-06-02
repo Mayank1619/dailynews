@@ -470,4 +470,12 @@ and its absence never breaks the overall newsletter structure.
 
 - Confirmed the local/default newsletter generation path now constructs deterministic fallback article summaries for requested topics when no Firestore adapter is present.
 - Confirmed topic grouping is case-insensitive and whitespace-normalized before comparing preference topics with article summary topics.
+
+## Implementation Update (2026-06-02, AI Generation Pipeline)
+
+- Added an efficient AI newsletter generator that sends compact JSON source packs to the OpenAI Responses API when `OPENAI_API_KEY` is configured.
+- Default model is configurable with `OPENAI_NEWSLETTER_MODEL` and defaults to `gpt-4.1-mini` for a balance of output quality and cost.
+- Generation caps source articles to the highest-scoring 18 items, limits stories to 3 per topic, and asks for 35-55 word source-grounded snippets to control token spend.
+- If AI credentials are absent or generation fails, the workflow falls back to deterministic source-linked sections so preview and rendering can still be tested.
+- Added protected Vercel route `POST /api/newsletter/preview` for admin-only newsletter preview generation.
 - Confirmed attribution dates are formatted in UTC to avoid local timezone date drift in rendered attribution text.

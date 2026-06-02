@@ -3,7 +3,6 @@
  * Handles HTML and text rendering with sanitization
  */
 
-import DOMPurify from 'isomorphic-dompurify';
 import {
   NewsletterRenderContext,
   NewsletterOutput,
