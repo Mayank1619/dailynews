@@ -126,6 +126,8 @@ As an administrator, I want lightweight operational analytics and consent-filter
 
 - **FR-ADMIN-ANL-001**: The system MUST provide analytics-lite counters for registrations, newsletter sends, and opens when available.
 - **FR-ADMIN-ANL-002**: The system MUST clearly indicate when a metric is unavailable rather than displaying inferred values.
+- **FR-ADMIN-ANL-003**: The system MUST show newsletter generation and delivery readiness, including AI generation status, email provider configuration status, and protected-route status.
+- **FR-ADMIN-ANL-004**: The system MUST let admins inspect recent generated newsletter issues with subject, audience, status, source count, generation mode, topics, and send timestamp where available.
 - **FR-ADMIN-EXP-001**: The system MUST export emails filtered by consent where `offers = true` or `productUpdates = true`, based on the admin’s selected export mode.
 - **FR-ADMIN-EXP-002**: The export output MUST include email, consent flags, and signup date for each included user.
 - **FR-ADMIN-EXP-003**: The system MUST exclude users with missing, revoked, or false consent from corresponding marketing exports.
@@ -194,3 +196,10 @@ As an administrator, I want lightweight operational analytics and consent-filter
 - Consent flags (`offers`, `productUpdates`) and signup date are already available in user data models from earlier features.
 - Export output is intended for operational use by authorized admins and follows existing privacy handling policies.
 - Phase 1 includes a single admin role; finer-grained sub-roles are deferred to later phases.
+
+## Implementation Update (2026-06-02, Newsletter Operations)
+
+- `/admin` now includes a Phase 1 operations console with Overview, Users, Newsletters, Content, and Growth sections.
+- The Newsletter section exposes recent issue status, generation mode, source count, topics, timestamps, and preview copy so generated newsletters can be inspected before the Firestore-backed archive is connected.
+- The readiness panel explicitly shows OpenAI generation as live and Brevo email delivery as blocked until `BREVO_API_KEY` and `BREVO_SENDER_EMAIL` are configured.
+- Current dashboard data is fixture-backed for UX validation. The next backend step is replacing fixtures with Firebase/Auth user counts, newsletter records, email logs, and Brevo delivery events behind Firebase admin-claim API guards.

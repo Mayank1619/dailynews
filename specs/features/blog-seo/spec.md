@@ -104,6 +104,9 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - **FR-BLOG-011**: The system MUST align blog page layout, typography hierarchy, spacing, and readability with the Design System and public-site direction.
 - **FR-BLOG-012**: The system MUST present post content in a trust-preserving format that includes publication date and avoids misleading or sensational framing.
 - **FR-BLOG-013**: The system MUST provide deterministic SEO metadata fallback behavior when optional SEO fields are absent.
+- **FR-BLOG-014**: The system MUST support a recurring editorial calendar for SEO posts derived from newsletter topics, including AI, technology, politics, finance, sports, horoscopes, local news, and sample newsletter themes.
+- **FR-BLOG-015**: The public site SHOULD provide sample newsletters that demonstrate what subscribers receive before signup.
+- **FR-BLOG-016**: The growth workflow SHOULD include short-form video concepts and landing-page hooks that explain the product, show preference selection, and preview inbox output.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -163,3 +166,23 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - Phase 1 content entry is manual; future digest-pipeline automation will feed the same `blog_posts` schema without changing public URL behavior.
 - Slug generation rules are deterministic and enforce unique public routes before publication.
 - Design and content presentation constraints inherit from the Design System and Public Site feature direction.
+
+## Growth Plan Update (2026-06-02)
+
+### SEO Cadence
+
+- Publish two posts per week from newsletter themes: "What changed in AI this week", "Market winners and losers", "Canadian politics digest", "Sports weekend brief", and "Horoscope plus culture roundup".
+- Each post should target one clear search intent, include a sample newsletter section, and link to signup plus preferences.
+- Reuse generated newsletter structure to reduce writing time: headline, why it matters, source-aware bullets, and a short CTA.
+
+### Sample Newsletter Library
+
+- Create public samples for AI/technology, markets/finance, sports, politics/world, horoscopes/culture, and local Canada news.
+- Each sample must show topic chips, generation date, source labels, and a visible "Create my version" route to signup.
+- Samples should be indexable public pages but not pretend to be live personalized output.
+
+### Short Video Plan
+
+- Weekly 20-40 second videos: problem hook, preference selection, AI-generated paper preview, inbox result, and Netfroot-powered credibility.
+- First five scripts: "News without the scroll", "Choose your topics", "Your AI morning paper", "Daily vs weekly", and "See a sample before signup".
+- Video pages and descriptions should point to the sample newsletter library and relevant blog posts.

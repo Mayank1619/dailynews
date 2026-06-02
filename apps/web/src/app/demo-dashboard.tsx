@@ -777,48 +777,272 @@ export function SettingsPage(): React.JSX.Element {
   );
 }
 
+type AdminTab = "overview" | "users" | "newsletters" | "content" | "growth";
+
+type AdminNewsletterIssue = {
+  id: string;
+  subject: string;
+  audience: string;
+  status: "sent" | "generated" | "blocked";
+  generatedAt: string;
+  sentAt?: string;
+  generationMode: "ai" | "fallback";
+  sourceCount: number;
+  openRate?: string;
+  topics: string[];
+  preview: string;
+};
+
+const adminIssues: AdminNewsletterIssue[] = [
+  {
+    id: "newsletter-openai-smoke-user-2026-06-02",
+    subject: "Daily News Brief - June 2, 2026",
+    audience: "OpenAI smoke test",
+    status: "generated",
+    generatedAt: "2026-06-02T18:10:00.000Z",
+    generationMode: "ai",
+    sourceCount: 3,
+    topics: ["New in AI", "Markets", "Climate technology"],
+    preview: "A source-linked AI briefing was generated successfully on production using gpt-4.1-mini."
+  },
+  {
+    id: "newsletter-demo-weekly-2026-06-01",
+    subject: "Weekly Paper - AI, Markets, and Culture",
+    audience: "Weekly subscribers",
+    status: "blocked",
+    generatedAt: "2026-06-01T12:00:00.000Z",
+    generationMode: "fallback",
+    sourceCount: 8,
+    topics: ["New in AI", "Markets", "Culture"],
+    preview: "Email delivery is blocked until Brevo credentials are configured in Vercel."
+  },
+  {
+    id: "newsletter-demo-daily-2026-05-31",
+    subject: "Daily Paper - May 31",
+    audience: "Daily subscribers",
+    status: "sent",
+    generatedAt: "2026-05-31T11:00:00.000Z",
+    sentAt: "2026-05-31T12:00:00.000Z",
+    generationMode: "fallback",
+    sourceCount: 12,
+    openRate: "42%",
+    topics: ["Technology", "Business", "World"],
+    preview: "Historical fixture used to model newsletter views, delivery metrics, and admin inspection."
+  }
+];
+
+const adminUsers = [
+  { id: "usr_001", email: "ma***@example.com", status: "active", joined: "2026-05-31", topics: 9, frequency: "Daily" },
+  { id: "usr_002", email: "ne***@example.com", status: "active", joined: "2026-05-29", topics: 14, frequency: "Weekly" },
+  { id: "usr_003", email: "te***@example.com", status: "paused", joined: "2026-05-22", topics: 4, frequency: "Weekdays" }
+] as const;
+
+const growthPlan = [
+  "Publish two searchable blog posts per week from strong newsletter themes.",
+  "Create one short video per week: problem, sample paper, preference setup, inbox result.",
+  "Add public sample newsletters for AI, markets, sports, horoscope, and local-news audiences.",
+  "Track signup conversion by source once analytics is connected."
+] as const;
+
+function statusColor(status: AdminNewsletterIssue["status"] | string): string {
+  if (status === "sent" || status === "active") return DESIGN_TOKENS.colors.success;
+  if (status === "blocked" || status === "paused") return DESIGN_TOKENS.colors.warning;
+  return DESIGN_TOKENS.colors.brandPrimary;
+}
+
+function AdminSection({
+  children,
+  title,
+  action
+}: {
+  children: React.ReactNode;
+  title: string;
+  action?: React.ReactNode;
+}): React.JSX.Element {
+  return (
+    <section style={adminSectionStyle}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <h2 style={{ font: DESIGN_TOKENS.typography.h2, margin: 0 }}>{title}</h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export function AdminPage(): React.JSX.Element {
-  const [showBreakdown, setShowBreakdown] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState<AdminTab>("overview");
+  const [selectedIssue, setSelectedIssue] = React.useState<AdminNewsletterIssue>(adminIssues[0]);
+  const sentCount = adminIssues.filter((issue) => issue.status === "sent").length;
+  const generatedCount = adminIssues.filter((issue) => issue.status === "generated").length;
+  const blockedCount = adminIssues.filter((issue) => issue.status === "blocked").length;
 
   return (
     <main style={shellStyle}>
-      <section style={panelStyle}>
+      <section style={{ ...panelStyle, width: "min(1180px, 100%)" }}>
+        <style>{adminStyles}</style>
         <AppNav />
-        <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Admin Operations</h1>
-        <button data-testid="health-dashboard" type="button" style={buttonBase}>
-          Health Dashboard
-        </button>
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginTop: 20 }}>
-          <div data-testid="success-rate" style={metricStyle}>Success Rate<br /><strong>98.4%</strong></div>
-          <div data-testid="failure-rate" style={metricStyle}>Failure Rate<br /><strong>1.6%</strong></div>
-          <div data-testid="total-sent" style={metricStyle}>Total Sent<br /><strong>12,480</strong></div>
-        </section>
-        <div style={{ display: "flex", gap: 12, marginTop: 18, flexWrap: "wrap" }}>
-          <button data-testid="refresh-metrics" type="button" style={buttonBase}>
-            Refresh Metrics
-          </button>
-          <button data-testid="view-breakdown" type="button" onClick={() => setShowBreakdown(true)} style={buttonBase}>
-            View Breakdown
-          </button>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "end" }}>
+          <div>
+            <p style={{ color: DESIGN_TOKENS.colors.accentHighlight, fontWeight: 900, margin: "0 0 6px" }}>Admin console</p>
+            <h1 style={{ font: DESIGN_TOKENS.typography.h1, margin: 0 }}>Daily Paper Operations</h1>
+            <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 740 }}>
+              Monitor users, generated newsletters, delivery readiness, source quality, and growth work from one control surface.
+            </p>
+          </div>
+          <a href="/blog" style={secondaryLinkStyle}>
+            View Blog
+          </a>
         </div>
-        {showBreakdown && (
-          <section style={{ marginTop: 20, display: "grid", gap: 16 }}>
-            <table data-testid="skip-reasons-table" style={tableStyle}>
+
+        <nav style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "22px 0" }} aria-label="Admin sections">
+          {(["overview", "users", "newsletters", "content", "growth"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              style={{
+                ...buttonBase,
+                background: activeTab === tab ? DESIGN_TOKENS.colors.brandPrimary : "rgba(7,9,18,0.74)",
+                color: activeTab === tab ? "#07111F" : DESIGN_TOKENS.colors.textPrimary
+              }}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </nav>
+
+        {activeTab === "overview" && (
+          <div style={{ display: "grid", gap: 18 }}>
+            <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12 }}>
+              <div data-testid="total-users" style={metricStyle}>Users<br /><strong>{adminUsers.length}</strong></div>
+              <div data-testid="total-sent" style={metricStyle}>Sent<br /><strong>{sentCount}</strong></div>
+              <div data-testid="total-generated" style={metricStyle}>Generated<br /><strong>{generatedCount}</strong></div>
+              <div data-testid="delivery-blocked" style={metricStyle}>Blocked<br /><strong>{blockedCount}</strong></div>
+              <div data-testid="success-rate" style={metricStyle}>Success Rate<br /><strong>98.4%</strong></div>
+            </section>
+
+            <AdminSection title="Readiness">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12, marginTop: 16 }}>
+                {[
+                  ["Firebase Auth", "Connected", DESIGN_TOKENS.colors.success],
+                  ["OpenAI generation", "Live", DESIGN_TOKENS.colors.success],
+                  ["Brevo email", "Needs credentials", DESIGN_TOKENS.colors.warning],
+                  ["Newsletter admin token", "Protected", DESIGN_TOKENS.colors.success]
+                ].map(([label, value, color]) => (
+                  <div key={label} style={readinessStyle}>
+                    <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{label}</span>
+                    <strong style={{ color }}>{value}</strong>
+                  </div>
+                ))}
+              </div>
+            </AdminSection>
+
+            <AdminSection title="Delivery Breakdown">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12, marginTop: 16 }}>
+                <table data-testid="skip-reasons-table" style={tableStyle}>
+                  <tbody>
+                    <tr><th>Skip reason</th><th>Count</th></tr>
+                    <tr><td>user_unsubscribed</td><td>42</td></tr>
+                    <tr><td>email_not_verified</td><td>18</td></tr>
+                    <tr><td>account_blocked</td><td>7</td></tr>
+                  </tbody>
+                </table>
+                <table data-testid="error-codes-table" style={tableStyle}>
+                  <tbody>
+                    <tr><th>Error code</th><th>Count</th></tr>
+                    <tr><td>brevo_not_configured</td><td>1</td></tr>
+                    <tr><td>provider_timeout</td><td>5</td></tr>
+                    <tr><td>retry_exhausted</td><td>2</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </AdminSection>
+          </div>
+        )}
+
+        {activeTab === "users" && (
+          <AdminSection title="Users">
+            <table style={{ ...tableStyle, marginTop: 16 }}>
               <tbody>
-                <tr><th>Skip reason</th><th>Count</th></tr>
-                <tr><td>user_unsubscribed</td><td>42</td></tr>
-                <tr><td>email_not_verified</td><td>18</td></tr>
-                <tr><td>account_blocked</td><td>7</td></tr>
+                <tr><th>User</th><th>Status</th><th>Joined</th><th>Topics</th><th>Frequency</th></tr>
+                {adminUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td>{user.email}</td>
+                    <td style={{ color: statusColor(user.status), fontWeight: 900 }}>{user.status}</td>
+                    <td>{user.joined}</td>
+                    <td>{user.topics}</td>
+                    <td>{user.frequency}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-            <table data-testid="error-codes-table" style={tableStyle}>
-              <tbody>
-                <tr><th>Error code</th><th>Count</th></tr>
-                <tr><td>provider_timeout</td><td>5</td></tr>
-                <tr><td>retry_exhausted</td><td>2</td></tr>
-              </tbody>
-            </table>
-          </section>
+          </AdminSection>
+        )}
+
+        {activeTab === "newsletters" && (
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(260px, 1fr) minmax(280px, 0.9fr)", gap: 16 }}>
+            <AdminSection title="Newsletter Issues">
+              <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
+                {adminIssues.map((issue) => (
+                  <button
+                    key={issue.id}
+                    type="button"
+                    onClick={() => setSelectedIssue(issue)}
+                    style={{
+                      ...issueButtonStyle,
+                      borderColor: selectedIssue.id === issue.id ? "rgba(34,211,238,0.88)" : "rgba(34,211,238,0.18)"
+                    }}
+                  >
+                    <span style={{ fontWeight: 900 }}>{issue.subject}</span>
+                    <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{issue.audience}</span>
+                    <span style={{ color: statusColor(issue.status), fontWeight: 900 }}>{issue.status}</span>
+                  </button>
+                ))}
+              </div>
+            </AdminSection>
+
+            <AdminSection
+              title="Issue Preview"
+              action={<span style={{ color: statusColor(selectedIssue.status), fontWeight: 900 }}>{selectedIssue.status}</span>}
+            >
+              <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
+                <h3 style={{ font: DESIGN_TOKENS.typography.h3, margin: 0 }}>{selectedIssue.subject}</h3>
+                <p style={{ color: DESIGN_TOKENS.colors.textSecondary, margin: 0 }}>{selectedIssue.preview}</p>
+                <p style={{ margin: 0 }}>Topics: {selectedIssue.topics.join(", ")}</p>
+                <p style={{ margin: 0 }}>Generation: {selectedIssue.generationMode} · {selectedIssue.sourceCount} sources</p>
+                <p style={{ margin: 0 }}>Generated: {new Date(selectedIssue.generatedAt).toLocaleString()}</p>
+                <p style={{ margin: 0 }}>Sent: {selectedIssue.sentAt ? new Date(selectedIssue.sentAt).toLocaleString() : "Not sent yet"}</p>
+                <button type="button" style={{ ...buttonBase, width: "fit-content" }}>
+                  View Full Newsletter
+                </button>
+              </div>
+            </AdminSection>
+          </div>
+        )}
+
+        {activeTab === "content" && (
+          <AdminSection title="Content Pipeline">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginTop: 16 }}>
+              <div style={metricStyle}>Approved Sources<br /><strong>18</strong></div>
+              <div style={metricStyle}>Draft Blog Posts<br /><strong>4</strong></div>
+              <div style={metricStyle}>Published Posts<br /><strong>3</strong></div>
+              <div style={metricStyle}>Sample Newsletters<br /><strong>5 planned</strong></div>
+            </div>
+          </AdminSection>
+        )}
+
+        {activeTab === "growth" && (
+          <AdminSection title="SEO and Marketing Plan">
+            <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
+              {growthPlan.map((item, index) => (
+                <div key={item} style={readinessStyle}>
+                  <span style={{ color: DESIGN_TOKENS.colors.accentHighlight, fontWeight: 900 }}>Step {index + 1}</span>
+                  <strong>{item}</strong>
+                </div>
+              ))}
+            </div>
+          </AdminSection>
         )}
       </section>
       <PoweredByNetfroot />
@@ -879,8 +1103,54 @@ const metricStyle: React.CSSProperties = {
   background: "rgba(7,9,18,0.72)"
 };
 
+const adminSectionStyle: React.CSSProperties = {
+  padding: 18,
+  borderRadius: 14,
+  border: "1px solid rgba(34,211,238,0.22)",
+  background: "rgba(7,9,18,0.58)"
+};
+
+const readinessStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 4,
+  minHeight: 74,
+  padding: 14,
+  borderRadius: 12,
+  border: "1px solid rgba(167,179,200,0.18)",
+  background: "rgba(17,24,39,0.72)"
+};
+
+const issueButtonStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 4,
+  width: "100%",
+  padding: 14,
+  borderRadius: 12,
+  border: "1px solid rgba(34,211,238,0.18)",
+  background: "rgba(17,24,39,0.76)",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  textAlign: "left",
+  cursor: "pointer"
+};
+
 const tableStyle: React.CSSProperties = {
   width: "100%",
   borderCollapse: "collapse",
   color: DESIGN_TOKENS.colors.textPrimary
 };
+
+const adminStyles = `
+  table th,
+  table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(167, 179, 200, 0.16);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  table th {
+    color: ${DESIGN_TOKENS.colors.brandPrimary};
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+`;
