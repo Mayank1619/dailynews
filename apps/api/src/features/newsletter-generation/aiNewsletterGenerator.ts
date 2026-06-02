@@ -60,7 +60,7 @@ type AiDraftPayload = {
 
 export class EfficientAiNewsletterGenerator {
   constructor(
-    private readonly apiKey = process.env.OPENAI_API_KEY,
+    private readonly apiKey = process.env.OPENAI_API_KEY?.trim(),
     private readonly modelName = process.env.OPENAI_NEWSLETTER_MODEL ?? "gpt-4.1-mini"
   ) {}
 

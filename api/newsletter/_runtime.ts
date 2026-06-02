@@ -137,7 +137,7 @@ export async function sendBrevoNewsletter(message: {
 
 async function generateDraft(date: Date, preferences: NewsletterPreferenceInput, articles: NewsletterArticleInput[]) {
   const modelName = process.env.OPENAI_NEWSLETTER_MODEL ?? "gpt-4.1-mini";
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
 
   if (!apiKey) {
     return deterministicDraft(date, preferences, articles, modelName);
