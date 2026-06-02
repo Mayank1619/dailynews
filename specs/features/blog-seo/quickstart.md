@@ -19,3 +19,9 @@ Validate the Phase 1 implementation slice for blog-seo.
 - Core acceptance scenario passes for blog-seo.
 - Constitution gates remain satisfied (trust, privacy/consent, design, verification).
 - No sensitive data appears in logs.
+
+## Local SPA Route Coverage
+- `/blog` now renders a dark neon public blog index with published entries and pagination.
+- `/blog?tag=...` supports topic discovery in the local SPA.
+- `/blog/:slug` renders published post content or a not-found state.
+- Verified on 2026-06-02 with `npm run build`, `npm run test:unit`, `npm run test:integration`, and `npm run test:e2e`.

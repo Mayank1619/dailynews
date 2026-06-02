@@ -1,6 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import BlogPage from "./app/blog/page";
+import {
+  AdminPage,
+  NewsletterPage,
+  OnboardingPage,
+  PreferencesPage,
+  SettingsPage,
+  UnsubscribeConfirmationPage
+} from "./app/demo-dashboard";
 import LoginPage from "./app/login/page";
 import Page from "./app/page";
 import SignupPage from "./app/signup/page";
@@ -18,6 +26,35 @@ function RouteView(): JSX.Element {
 
   if (path === "/blog") {
     return <BlogPage />;
+  }
+
+  if (path.startsWith("/blog/")) {
+    const slug = decodeURIComponent(path.replace("/blog/", ""));
+    return <BlogPage slug={slug} />;
+  }
+
+  if (path === "/onboarding") {
+    return <OnboardingPage />;
+  }
+
+  if (path === "/settings") {
+    return <SettingsPage />;
+  }
+
+  if (path === "/dashboard/preferences") {
+    return <PreferencesPage />;
+  }
+
+  if (path === "/dashboard/newsletter") {
+    return <NewsletterPage />;
+  }
+
+  if (path === "/admin") {
+    return <AdminPage />;
+  }
+
+  if (path === "/api/email/unsubscribe") {
+    return <UnsubscribeConfirmationPage />;
   }
 
   return <Page />;

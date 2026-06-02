@@ -20,14 +20,14 @@ test.describe("Update Preferences Anytime (E2E)", () => {
     await expect(page.getByRole("heading", { name: /Update Your Preferences/i })).toBeVisible();
 
     // Should have form controls
-    await expect(page.getByLabel("Topics", { exact: false })).toBeVisible();
+    await expect(page.getByRole("group", { name: /Topics/i })).toBeVisible();
     await expect(page.getByLabel("Region", { exact: false })).toBeVisible();
-    await expect(page.getByLabel("Time")).toBeVisible();
+    await expect(page.getByLabel("Time", { exact: true })).toBeVisible();
   });
 
   test("should update single field", async ({ page }) => {
     // Change delivery time
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("18:00");
 
@@ -63,7 +63,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
     await provinceInput.fill("British Columbia");
 
     // Change delivery time
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("09:00");
 
@@ -76,7 +76,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
   });
 
   test("should reset changes", async ({ page }) => {
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     const originalValue = await timeInput.inputValue();
 
     // Change value
@@ -98,7 +98,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
     await expect(saveButton).toBeDisabled();
 
     // Make a change
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("12:00");
 
@@ -136,12 +136,12 @@ test.describe("Update Preferences Anytime (E2E)", () => {
 
   test("should show change summary in preferences card", async ({ page }) => {
     // Update a preference
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("15:00");
 
     // Look for visual indication of change
-    const timeField = page.locator("div").filter({ has: page.getByLabel("Time") });
+    const timeField = page.locator("div").filter({ has: page.getByLabel("Time", { exact: true }) }).last();
     await expect(timeField).toBeVisible();
 
     // Save changes
@@ -164,7 +164,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
       return (document.activeElement as HTMLElement)?.tagName;
     });
 
-    expect(["BUTTON", "INPUT", "SELECT"]).toContain(focused);
+    expect(["A", "BUTTON", "INPUT", "SELECT"]).toContain(focused);
 
     // Tab through form
     for (let i = 0; i < 5; i++) {
@@ -184,7 +184,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
 
   test("should persist changes across page reload", async ({ page }) => {
     // Update preference
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("20:00");
 

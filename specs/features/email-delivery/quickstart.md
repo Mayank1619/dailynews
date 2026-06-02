@@ -19,3 +19,10 @@ Validate the Phase 1 implementation slice for email-delivery.
 - Core acceptance scenario passes for email-delivery.
 - Constitution gates remain satisfied (trust, privacy/consent, design, verification).
 - No sensitive data appears in logs.
+
+## Local SPA Route Coverage
+- `/settings` links users to delivery-time preferences and subscription controls.
+- `/dashboard/newsletter` supports unsubscribe/resubscribe behavior for local development.
+- `/admin` renders aggregate delivery-health metrics without personal data.
+- `/api/email/unsubscribe?token=...` has a Vercel serverless confirmation endpoint and a matching SPA fallback in local Vite.
+- Verified on 2026-06-02 with `npm run build`, `npm run test:unit`, `npm run test:integration`, and `npm run test:e2e`.

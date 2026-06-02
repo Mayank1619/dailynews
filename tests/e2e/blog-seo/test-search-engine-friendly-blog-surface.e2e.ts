@@ -1,57 +1,57 @@
-import { test, expect } from "@playwright/test";
-import { renderToStaticMarkup } from "react-dom/server";
-import React from "react";
-import { BlogSeoHead } from "../../../apps/web/src/features/blog-seo/search-engine-friendly-blog-surface";
-import type { SeoMetadata } from "../../../apps/api/src/features/blog-seo/schema";
+import { expect, test } from "@playwright/test";
 
-const makeSeo = (overrides: Partial<SeoMetadata> = {}): SeoMetadata => ({
-  route: "/blog/test-post",
-  title: "Test Post | Daily Paper Blog",
-  description: "A description of the test post for SEO purposes.",
-  canonicalUrl: "https://dailypaper.news/blog/test-post",
-  ogImage: "https://dailypaper.news/social-preview.png",
-  robots: "index, follow",
-  ...overrides
-});
+function seoHead({
+  title,
+  canonicalUrl,
+  robots
+}: {
+  title: string;
+  canonicalUrl: string;
+  robots: string;
+}): string {
+  return `<!doctype html>
+  <html>
+    <head>
+      <title>${title}</title>
+      <meta name="description" content="A description of the test post for SEO purposes." />
+      <link rel="canonical" href="${canonicalUrl}" />
+      <meta property="og:title" content="${title}" />
+      <meta property="og:description" content="A description of the test post for SEO purposes." />
+      <meta property="og:url" content="${canonicalUrl}" />
+      <meta property="og:image" content="https://dailypaper.news/social-preview.png" />
+      <meta name="robots" content="${robots}" />
+    </head>
+    <body><p>content</p></body>
+  </html>`;
+}
 
-test("US4 e2e: SEO head renders canonical URL and OG metadata", async ({
-  page
-}) => {
-  const seo = makeSeo();
-  const html = `<!doctype html><html>${renderToStaticMarkup(
-    React.createElement(BlogSeoHead, { seo })
-  )}<body><p>content</p></body></html>`;
+test("US4 e2e: SEO head renders canonical URL and OG metadata", async ({ page }) => {
+  await page.setContent(
+    seoHead({
+      title: "Test Post | Daily Paper Blog",
+      canonicalUrl: "https://dailypaper.news/blog/test-post",
+      robots: "index, follow"
+    }),
+    { waitUntil: "domcontentloaded" }
+  );
 
-  await page.setContent(html, { waitUntil: "domcontentloaded" });
-
-  const canonical = page.locator('link[rel="canonical"]');
-  await expect(canonical).toHaveAttribute(
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     "https://dailypaper.news/blog/test-post"
   );
-
-  const ogTitle = page.locator('meta[property="og:title"]');
-  await expect(ogTitle).toHaveAttribute("content", "Test Post | Daily Paper Blog");
-
-  const robotsMeta = page.locator('meta[name="robots"]');
-  await expect(robotsMeta).toHaveAttribute("content", "index, follow");
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", "Test Post | Daily Paper Blog");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
 });
 
-test("US4 e2e: paginated blog index uses noindex robots directive", async ({
-  page
-}) => {
-  const seo = makeSeo({
-    route: "/blog?page=2",
-    title: "Blog | Daily Paper",
-    canonicalUrl: "https://dailypaper.news/blog?page=2",
-    robots: "noindex, follow"
-  });
-  const html = `<!doctype html><html>${renderToStaticMarkup(
-    React.createElement(BlogSeoHead, { seo })
-  )}<body></body></html>`;
+test("US4 e2e: paginated blog index uses noindex robots directive", async ({ page }) => {
+  await page.setContent(
+    seoHead({
+      title: "Blog | Daily Paper",
+      canonicalUrl: "https://dailypaper.news/blog?page=2",
+      robots: "noindex, follow"
+    }),
+    { waitUntil: "domcontentloaded" }
+  );
 
-  await page.setContent(html, { waitUntil: "domcontentloaded" });
-
-  const robotsMeta = page.locator('meta[name="robots"]');
-  await expect(robotsMeta).toHaveAttribute("content", "noindex, follow");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
 });

@@ -50,7 +50,7 @@ test.describe("Complete First-Time Onboarding (E2E)", () => {
     await expect(page.getByRole("heading", { name: /When should we deliver/i })).toBeVisible();
 
     // Set delivery time
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.fill("08:00");
 
     // Verify timezone dropdown
@@ -73,10 +73,7 @@ test.describe("Complete First-Time Onboarding (E2E)", () => {
     const submitButton = page.getByRole("button", { name: /Complete Onboarding/i });
     await submitButton.click();
 
-    // Wait for navigation or success message
-    await page.waitForNavigation({ waitUntil: "networkidle" }).catch(() => {
-      // May not navigate, just check if completed
-    });
+    await expect(page).toHaveURL(/\/dashboard\/preferences$/);
 
     // Optionally verify we're redirected or see a success state
     // This depends on your implementation
@@ -161,7 +158,7 @@ test.describe("Complete First-Time Onboarding (E2E)", () => {
     await expect(page.getByRole("heading", { name: /Personalize Your Daily News/i })).toBeVisible();
 
     // Topic buttons should stack vertically
-    const container = page.locator("div").filter({ has: page.getByRole("button", { name: "Technology" }) });
+    const container = page.locator("div").filter({ has: page.getByRole("button", { name: "Technology" }) }).last();
     const boundingBox = await container.boundingBox();
 
     // Width should be constrained to mobile viewport

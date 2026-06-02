@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Email Delivery E2E', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to app
-    await page.goto('http://localhost:3000');
+    await page.goto('/');
     // Assume user is logged in via auth fixture
   });
 
@@ -46,6 +46,21 @@ test.describe('Email Delivery E2E', () => {
 
   test('US3: User can resubscribe to newsletter', async ({ page }) => {
     // Assume user is already unsubscribed
+    await page.addInitScript(() => {
+      window.localStorage.setItem(
+        "daily-paper-demo-preferences",
+        JSON.stringify({
+          topics: ["Technology", "Business"],
+          country: "Canada",
+          province: "Ontario",
+          deliveryTime: "08:00",
+          timezone: "America/Toronto",
+          newsletterEnabled: false
+        })
+      );
+    });
+    await page.goto('/');
+
     // Navigate to subscription settings
     await page.click('[data-testid="settings-link"]');
     await page.click('[data-testid="subscription-settings"]');
@@ -64,7 +79,7 @@ test.describe('Email Delivery E2E', () => {
 
   test('US5: Operator can view delivery health dashboard', async ({ page }) => {
     // Navigate to admin panel
-    await page.goto('http://localhost:3000/admin');
+    await page.goto('/admin');
 
     // Navigate to health dashboard
     await page.click('[data-testid="health-dashboard"]');
@@ -87,7 +102,7 @@ test.describe('Email Delivery E2E', () => {
 
   test('US5: Operator can see skip reasons and error codes', async ({ page }) => {
     // Navigate to admin panel
-    await page.goto('http://localhost:3000/admin');
+    await page.goto('/admin');
 
     // Navigate to health dashboard
     await page.click('[data-testid="health-dashboard"]');
@@ -118,7 +133,7 @@ test.describe('Email Delivery Unsubscribe Link E2E', () => {
   test('unsubscribe link brings user to confirmation page', async ({ page }) => {
     // Navigate using unsubscribe link
     const token = Buffer.from('test_user:12345').toString('base64');
-    await page.goto(`http://localhost:3000/api/email/unsubscribe?token=${token}`);
+    await page.goto(`/api/email/unsubscribe?token=${token}`);
 
     // Verify confirmation page appears
     await expect(page.locator('[data-testid="unsubscribe-confirmation"]')).toBeVisible();

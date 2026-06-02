@@ -43,7 +43,7 @@ test.describe('US3: E2E - Attribution and AI Label Verification', () => {
 
     // Regular story should not be labeled
     const regularStoryResult = results.find(r => r.storyId === 'story-2');
-    expect(regularStoryResult?.hasAILabel).toBe(true); // No summary label needed
+    expect(regularStoryResult?.hasAILabel).toBe(false); // No summary label needed
     expect(regularStoryResult?.aiLabelText).toBeUndefined();
 
     // All should have attribution
