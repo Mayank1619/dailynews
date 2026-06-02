@@ -201,6 +201,9 @@ and its absence never breaks the overall newsletter structure.
 - What happens when a user has saved preferences but no `article_summaries` exist for any of their
   topics on date D? Generation MUST proceed with an empty-topics fallback that surfaces a "No
   stories available today" message in each topic section rather than skipping generation entirely.
+- What happens in local development or tests before Firestore-backed article summaries are wired?
+  The default implementation MAY construct deterministic local fallback summaries for the declared
+  topics so rendering, attribution, and delivery-contract tests can run without live content.
 - What happens when the HTML template renders but `text` generation fails? The newsletter MUST NOT be
   marked `generated` unless both renditions are present; it MUST be marked `failed` and logged.
 - What happens when `articleRefs[]` would contain a duplicate due to the same article appearing in
@@ -274,6 +277,9 @@ and its absence never breaks the overall newsletter structure.
 - **FR-NL-015**: Generation MUST NOT begin for a user if no `article_summaries` records are
   available for any of their declared topics and no fallback content can be constructed; in this
   case the record MUST be marked `failed` with a descriptive reason logged.
+- **FR-NL-016**: Topic matching MUST tolerate case and whitespace differences between saved
+  preference topics and article summary topic labels so valid stories are not dropped because of
+  formatting mismatch.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -459,3 +465,9 @@ and its absence never breaks the overall newsletter structure.
 - Email client compatibility testing (Outlook, Gmail, Apple Mail, etc.) is an implementation-time
   concern; this spec requires mobile-first single-column rendering and Design System token alignment
   as the acceptance bar.
+
+## Implementation Update (2026-06-02)
+
+- Confirmed the local/default newsletter generation path now constructs deterministic fallback article summaries for requested topics when no Firestore adapter is present.
+- Confirmed topic grouping is case-insensitive and whitespace-normalized before comparing preference topics with article summary topics.
+- Confirmed attribution dates are formatted in UTC to avoid local timezone date drift in rendered attribution text.

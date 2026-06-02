@@ -10,6 +10,17 @@ import type {
   Region
 } from "./types";
 
+function nextIsoTimestamp(previous?: string): string {
+  const now = new Date();
+  const previousTime = previous ? new Date(previous).getTime() : Number.NaN;
+
+  if (Number.isFinite(previousTime) && now.getTime() <= previousTime) {
+    return new Date(previousTime + 1).toISOString();
+  }
+
+  return now.toISOString();
+}
+
 export interface IPreferencesRepository {
   getPreferenceProfile(userId: string): Promise<PreferenceProfile | null>;
   getOnboardingState(userId: string): Promise<OnboardingState | null>;
@@ -56,9 +67,10 @@ export class FirestorePreferencesRepository implements IPreferencesRepository {
     updates: Partial<PreferenceProfile>
   ): Promise<PreferenceProfile> {
     const docRef = doc(this.db, this.preferencesCollection, userId);
+    const existing = await this.getPreferenceProfile(userId);
     const updateData = {
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: nextIsoTimestamp(existing?.updatedAt)
     };
     
     await updateDoc(docRef, updateData);
@@ -82,7 +94,7 @@ export class FirestorePreferencesRepository implements IPreferencesRepository {
       userId,
       step: 1,
       completed: false,
-      updatedAt: new Date().toISOString()
+      updatedAt: nextIsoTimestamp()
     };
 
     const docRef = doc(this.db, this.onboardingCollection, userId);
@@ -96,9 +108,10 @@ export class FirestorePreferencesRepository implements IPreferencesRepository {
     state: Partial<OnboardingState>
   ): Promise<OnboardingState> {
     const docRef = doc(this.db, this.onboardingCollection, userId);
+    const existing = await this.getOnboardingState(userId);
     const updateData = {
       ...state,
-      updatedAt: new Date().toISOString()
+      updatedAt: nextIsoTimestamp(existing?.updatedAt)
     };
 
     await updateDoc(docRef, updateData);
@@ -141,7 +154,7 @@ export class MockPreferencesRepository implements IPreferencesRepository {
     const updated: PreferenceProfile = {
       ...existing,
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: nextIsoTimestamp(existing.updatedAt)
     };
 
     this.profiles.set(userId, updated);
@@ -159,7 +172,7 @@ export class MockPreferencesRepository implements IPreferencesRepository {
       userId,
       step: 1,
       completed: false,
-      updatedAt: new Date().toISOString()
+      updatedAt: nextIsoTimestamp()
     };
 
     this.states.set(userId, defaultState);
@@ -174,13 +187,13 @@ export class MockPreferencesRepository implements IPreferencesRepository {
       userId,
       step: 1,
       completed: false,
-      updatedAt: new Date().toISOString()
+      updatedAt: nextIsoTimestamp()
     };
 
     const updated: OnboardingState = {
       ...existing,
       ...state,
-      updatedAt: new Date().toISOString()
+      updatedAt: nextIsoTimestamp(existing.updatedAt)
     };
 
     this.states.set(userId, updated);

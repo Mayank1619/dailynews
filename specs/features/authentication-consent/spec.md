@@ -172,6 +172,14 @@ As an admin, I want blocked users to be prevented from signing in or receiving n
 - Scope confirmed for this pass: Phase 1 setup, Phase 2 foundational work, and User Story 1 (P1) only.
 - Dependency baseline confirmed: Firebase Auth client bootstrap for web signup, Firebase Admin ID-token verification for API identity binding, and privacy-safe consent telemetry/audit hooks.
 
+## Implementation Update (2026-06-02)
+
+- Confirmed the Vite web app uses Firebase Auth client SDK for email/password signup, login, sign-out, and password reset.
+- Confirmed `/api/auth/signup` is implemented as a Vercel serverless function that verifies the Firebase ID token with Firebase Admin before recording consent.
+- Confirmed Firebase Admin credentials may be supplied through `FIREBASE_SERVICE_ACCOUNT_KEY` or split `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, and `FIREBASE_PRIVATE_KEY` deployment variables.
+- Confirmed missing Firebase web configuration produces a user-facing setup message instead of exposing raw internal environment-variable errors.
+- Deferred the remaining HTTP auth endpoints (`/api/auth/login`, `/api/auth/logout`, `/api/auth/verify-email`, `/api/auth/reset-password`, `/api/auth/me`) to the broader authenticated dashboard/API phase because login/logout/reset currently use the Firebase client SDK directly.
+
 ## Telemetry & Privacy Compliance
 
 All telemetry events emitted by this feature are privacy-safe:

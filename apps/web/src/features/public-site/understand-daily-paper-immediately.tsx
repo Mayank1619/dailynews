@@ -42,7 +42,8 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
         font: DESIGN_TOKENS.typography.body,
         color: DESIGN_TOKENS.colors.textPrimary,
         background:
-          "radial-gradient(circle at 5% 0%, rgba(14,165,233,0.16), transparent 42%), radial-gradient(circle at 95% 0%, rgba(20,184,166,0.14), transparent 36%), linear-gradient(180deg, #F5F7FB 0%, #FFFFFF 100%)"
+          "radial-gradient(circle at 8% 0%, rgba(34,211,238,0.28), transparent 34%), radial-gradient(circle at 92% 8%, rgba(168,85,247,0.26), transparent 36%), radial-gradient(circle at 50% 100%, rgba(244,114,182,0.16), transparent 34%), linear-gradient(180deg, #070912 0%, #0B1020 100%)",
+        minHeight: "100vh"
       }}
       data-seo-title={seo.title}
       data-seo-description={seo.description}
@@ -62,7 +63,9 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
         <strong
           style={{
             font: DESIGN_TOKENS.typography.h3,
-            letterSpacing: "0.02em"
+            letterSpacing: 0,
+            color: DESIGN_TOKENS.colors.brandPrimary,
+            textShadow: "0 0 22px rgba(34,211,238,0.56)"
           }}
         >
           {hero.brand}
@@ -73,9 +76,10 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
             textDecoration: "none",
             padding: "10px 14px",
             borderRadius: 999,
-            border: "1px solid rgba(17,24,39,0.12)",
-            background: "rgba(255,255,255,0.78)",
-            backdropFilter: "blur(6px)"
+            border: "1px solid rgba(34,211,238,0.22)",
+            background: "rgba(17,24,39,0.72)",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 0 28px rgba(34,211,238,0.12)"
           }}
         >
           <ReachSignupAndLoginQuicklyActions includePrimary />
@@ -87,10 +91,11 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
           display: "grid",
           gap: DESIGN_TOKENS.spacing[1],
           marginBottom: DESIGN_TOKENS.spacing[2],
-          background: "rgba(255,255,255,0.74)",
-          border: "1px solid rgba(17,24,39,0.08)",
-          borderRadius: 24,
-          padding: `${DESIGN_TOKENS.spacing[2]}px ${DESIGN_TOKENS.spacing[2]}px`
+          background: "linear-gradient(135deg, rgba(17,24,39,0.92), rgba(12,17,34,0.86))",
+          border: "1px solid rgba(34,211,238,0.24)",
+          borderRadius: 18,
+          padding: `${DESIGN_TOKENS.spacing[2]}px ${DESIGN_TOKENS.spacing[2]}px`,
+          boxShadow: "0 24px 80px rgba(0,0,0,0.36), 0 0 44px rgba(168,85,247,0.12)"
         }}
       >
         <h1 style={{ font: DESIGN_TOKENS.typography.h1, margin: 0, maxWidth: 900 }}>{hero.headline}</h1>
@@ -103,14 +108,14 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
               padding: "12px 20px",
               borderRadius: 999,
               background: `linear-gradient(120deg, ${DESIGN_TOKENS.colors.brandPrimary}, ${DESIGN_TOKENS.colors.brandSecondary})`,
-              color: DESIGN_TOKENS.colors.bgSecondary,
+              color: "#07111F",
               textDecoration: "none",
               fontWeight: 700,
-              letterSpacing: "0.01em",
-              boxShadow: "0 14px 26px rgba(14,165,233,0.28)"
+              letterSpacing: 0,
+              boxShadow: "0 0 28px rgba(34,211,238,0.36), 0 14px 28px rgba(0,0,0,0.28)"
             }}
           >
-            Register
+            {hero.primaryCta.label}
           </a>
           <a
             href="/login"
@@ -118,12 +123,12 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
               width: "fit-content",
               padding: "12px 20px",
               borderRadius: 999,
-              background: DESIGN_TOKENS.colors.bgSecondary,
+              background: "rgba(7,9,18,0.7)",
               color: DESIGN_TOKENS.colors.textPrimary,
-              border: "1px solid rgba(17,24,39,0.14)",
+              border: "1px solid rgba(167,179,200,0.22)",
               textDecoration: "none",
               fontWeight: 700,
-              letterSpacing: "0.01em"
+              letterSpacing: 0
             }}
           >
             Login
@@ -135,9 +140,9 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
         aria-label="how-it-works"
         style={{
           marginBottom: DESIGN_TOKENS.spacing[2],
-          background: DESIGN_TOKENS.colors.bgSecondary,
-          border: "1px solid rgba(17,24,39,0.08)",
-          borderRadius: 20,
+          background: "rgba(17,24,39,0.72)",
+          border: "1px solid rgba(168,85,247,0.2)",
+          borderRadius: 16,
           padding: `${DESIGN_TOKENS.spacing[1]}px ${DESIGN_TOKENS.spacing[2]}px`
         }}
       >
@@ -155,17 +160,17 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
         aria-label="sample digest preview"
         style={{
           marginBottom: DESIGN_TOKENS.spacing[2],
-          background: DESIGN_TOKENS.colors.bgSecondary,
-          border: "1px solid rgba(17,24,39,0.08)",
-          borderRadius: 20,
+          background: "rgba(17,24,39,0.72)",
+          border: "1px solid rgba(244,114,182,0.24)",
+          borderRadius: 16,
           padding: `${DESIGN_TOKENS.spacing[1]}px ${DESIGN_TOKENS.spacing[2]}px`
         }}
       >
         <p
           style={{
             margin: 0,
-            color: DESIGN_TOKENS.colors.bgSecondary,
-            background: DESIGN_TOKENS.colors.accentHighlight,
+            color: "#0B1020",
+            background: `linear-gradient(120deg, ${DESIGN_TOKENS.colors.accentHighlight}, ${DESIGN_TOKENS.colors.warning})`,
             borderRadius: 999,
             padding: "6px 12px",
             width: "fit-content",
@@ -184,7 +189,7 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
           gap: DESIGN_TOKENS.spacing[1],
           flexWrap: "wrap",
           paddingTop: DESIGN_TOKENS.spacing[1],
-          borderTop: "1px solid rgba(17,24,39,0.1)"
+          borderTop: "1px solid rgba(167,179,200,0.18)"
         }}
       >
         {FOOTER_TRUST_LINKS.map((link) => (

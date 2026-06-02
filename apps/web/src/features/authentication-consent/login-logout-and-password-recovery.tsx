@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { DESIGN_TOKENS } from "../design-system/tokens";
-import { getFirebaseClientAuth } from "../../lib/firebaseAuthClient";
+import { getFirebaseAuthErrorMessage, getFirebaseClientAuth } from "../../lib/firebaseAuthClient";
 
 export const AUTH_LOGIN_COPY = {
   heading: "Sign in to Daily Paper",
@@ -42,36 +42,47 @@ export async function submitLogout(telemetry?: AuthTelemetryClient): Promise<voi
 }
 
 export async function submitForgotPassword(email: string, telemetry?: AuthTelemetryClient): Promise<void> {
-  const response = await fetch("/api/auth/forgot-password", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email })
-  });
+  let status = "success";
+
+  try {
+    await sendPasswordResetEmail(getFirebaseClientAuth(), email);
+  } catch (error) {
+    const message = getFirebaseAuthErrorMessage(error);
+    if (message.startsWith("Firebase authentication is not configured yet.")) {
+      throw new Error(message);
+    }
+
+    status = "handled";
+  }
 
   // Non-enumeration: ignore response body; always show same confirmation
-  await telemetry?.track("forgot_password_submitted", { status: response.status });
+  await telemetry?.track("forgot_password_submitted", { status });
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
 const cardStyle: React.CSSProperties = {
-  background: DESIGN_TOKENS.colors.bgSecondary,
+  background: "linear-gradient(135deg, rgba(17,24,39,0.94), rgba(12,17,34,0.9))",
   color: DESIGN_TOKENS.colors.textPrimary,
-  borderRadius: 16,
+  border: "1px solid rgba(34,211,238,0.22)",
+  borderRadius: 18,
   padding: DESIGN_TOKENS.spacing[3],
-  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.08)",
+  boxShadow: "0 24px 70px rgba(0,0,0,0.42), 0 0 38px rgba(168,85,247,0.12)",
   maxWidth: 480,
   margin: "0 auto"
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  border: `1px solid ${DESIGN_TOKENS.colors.textSecondary}`,
+  border: "1px solid rgba(167,179,200,0.32)",
   borderRadius: 10,
   padding: "10px 12px",
   marginTop: 6,
   marginBottom: 14,
-  font: DESIGN_TOKENS.typography.body
+  font: DESIGN_TOKENS.typography.body,
+  background: "rgba(7,9,18,0.82)",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  outlineColor: DESIGN_TOKENS.colors.brandPrimary
 };
 
 const submitStyle: React.CSSProperties = {
@@ -79,11 +90,12 @@ const submitStyle: React.CSSProperties = {
   border: 0,
   borderRadius: 10,
   padding: "12px 16px",
-  background: DESIGN_TOKENS.colors.brandPrimary,
-  color: DESIGN_TOKENS.colors.bgSecondary,
-  fontWeight: 600,
+  background: `linear-gradient(120deg, ${DESIGN_TOKENS.colors.brandPrimary}, ${DESIGN_TOKENS.colors.brandSecondary})`,
+  color: "#07111F",
+  fontWeight: 700,
   cursor: "pointer",
-  transition: `transform ${DESIGN_TOKENS.interaction.transitionMs}ms`
+  transition: `transform ${DESIGN_TOKENS.interaction.transitionMs}ms`,
+  boxShadow: "0 0 24px rgba(34,211,238,0.3)"
 };
 
 const linkStyle: React.CSSProperties = {
@@ -138,7 +150,7 @@ export function LoginForm(props: { telemetry?: AuthTelemetryClient }): React.JSX
       setStatus("success");
     } catch (err) {
       setStatus("error");
-      setErrorMessage(err instanceof Error ? err.message : "Login failed. Please try again.");
+      setErrorMessage(getFirebaseAuthErrorMessage(err));
     }
   }
 
@@ -201,15 +213,19 @@ export function ForgotPasswordForm(props: ForgotPasswordFormProps): React.JSX.El
   const [email, setEmail] = useState(props.initialEmail ?? "");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage("");
     try {
       await submitForgotPassword(email, props.telemetry);
+      setSubmitted(true);
+    } catch (error) {
+      setErrorMessage(getFirebaseAuthErrorMessage(error));
     } finally {
       setLoading(false);
-      setSubmitted(true);
     }
   }
 
@@ -237,6 +253,7 @@ export function ForgotPasswordForm(props: ForgotPasswordFormProps): React.JSX.El
           <button type="submit" style={submitStyle} disabled={loading}>
             {loading ? "Sending…" : AUTH_FORGOT_PASSWORD_COPY.submitLabel}
           </button>
+          {errorMessage ? <p style={errorStyle}>{errorMessage}</p> : null}
         </form>
       )}
       {props.onBack && (

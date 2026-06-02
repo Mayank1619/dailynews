@@ -4,10 +4,10 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { PauseOrResumeDeliveryService } from "../../../api/src/features/onboarding-preferences/pause-or-resume-delivery.service";
-import { MockPreferencesRepository } from "../../../api/src/features/onboarding-preferences/preferencesRepository";
-import { OnboardingPreferencesTelemetry } from "../../../api/src/features/onboarding-preferences/telemetry";
-import type { PreferenceProfile } from "../../../api/src/features/onboarding-preferences/types";
+import { PauseOrResumeDeliveryService } from "../../../apps/api/src/features/onboarding-preferences/pause-or-resume-delivery.service";
+import { MockPreferencesRepository } from "../../../apps/api/src/features/onboarding-preferences/preferencesRepository";
+import { OnboardingPreferencesTelemetry } from "../../../apps/api/src/features/onboarding-preferences/telemetry";
+import type { PreferenceProfile } from "../../../apps/api/src/features/onboarding-preferences/types";
 
 describe("Pause or Resume Delivery - Integration", () => {
   let service: PauseOrResumeDeliveryService;

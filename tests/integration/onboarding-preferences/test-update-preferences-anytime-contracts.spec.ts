@@ -4,10 +4,10 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { UpdatePreferencesAnytimeService } from "../../../api/src/features/onboarding-preferences/update-preferences-anytime.service";
-import { MockPreferencesRepository } from "../../../api/src/features/onboarding-preferences/preferencesRepository";
-import { OnboardingPreferencesTelemetry } from "../../../api/src/features/onboarding-preferences/telemetry";
-import type { PreferenceProfile } from "../../../api/src/features/onboarding-preferences/types";
+import { UpdatePreferencesAnytimeService } from "../../../apps/api/src/features/onboarding-preferences/update-preferences-anytime.service";
+import { MockPreferencesRepository } from "../../../apps/api/src/features/onboarding-preferences/preferencesRepository";
+import { OnboardingPreferencesTelemetry } from "../../../apps/api/src/features/onboarding-preferences/telemetry";
+import type { PreferenceProfile } from "../../../apps/api/src/features/onboarding-preferences/types";
 
 describe("Update Preferences Anytime - Integration", () => {
   let service: UpdatePreferencesAnytimeService;

@@ -1,5 +1,6 @@
 import React from "react";
 import { ReachSignupAndLoginQuicklyService } from "../../../../api/src/features/public-site/reach-signup-and-login-quickly.service";
+import { DESIGN_TOKENS } from "../design-system/tokens";
 
 const service = new ReachSignupAndLoginQuicklyService();
 
@@ -18,11 +19,11 @@ export function ReachSignupAndLoginQuicklyActions({ includePrimary = false }: Re
           key={action.route}
           href={action.route}
           style={{
-            color: "#111827",
+            color: DESIGN_TOKENS.colors.textPrimary,
             textDecoration: "none",
             fontWeight: 600,
             fontSize: 14,
-            letterSpacing: "0.01em"
+            letterSpacing: 0
           }}
         >
           {action.label}

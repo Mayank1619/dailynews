@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Feature: Public Site + Landing (Daily Paper). Goal: Provide a public-facing landing experience that explains Daily Paper and drives signup. As a visitor, I want to understand what Daily Paper does and sign up quickly. Phase 1 scope includes a public landing page, login and signup navigation, a how-it-works section, a sample newsletter preview, a link to the blog index page, and a footer with Privacy, Terms, and Contact. The experience must be minimal, bright, responsive, mobile-first, and use subtle gaming accents, with the primary CTA above the fold: Get Your Daily Paper. Preserve the landing route at /, CTA route to /signup, login route to /login, sample digest preview, blog navigation, fast loading, and SEO metadata for title, description, and social preview." 
+**Input**: User description: "Feature: Public Site + Landing (Daily Paper). Goal: Provide a public-facing landing experience that explains Daily Paper and drives signup. As a visitor, I want to understand what Daily Paper does and sign up quickly. Phase 1 scope includes a public landing page, login and signup navigation, a how-it-works section, a sample newsletter preview, a link to the blog index page, and a footer with Privacy, Terms, and Contact. The experience must be minimal, dark, responsive, mobile-first, youth-oriented, and use neon gaming accents, with the primary CTA above the fold: Get Your Daily Paper. Preserve the landing route at /, CTA route to /signup, login route to /login, sample digest preview, blog navigation, fast loading, and SEO metadata for title, description, and social preview." 
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -76,7 +76,7 @@ As a visitor, I want supporting content such as how Daily Paper works, a sample 
 - **FR-008**: The system MUST label the sample digest preview clearly enough that visitors understand it is an illustrative example rather than their live personal digest.
 - **FR-009**: The system MUST provide visible navigation to `/blog` from the landing experience.
 - **FR-010**: The system MUST include a footer with visible links for Privacy, Terms, and Contact.
-- **FR-011**: The system MUST preserve a minimal, bright, content-first presentation with restrained gaming-inspired accents, consistent with the Daily Paper constitution and design-system feature spec.
+- **FR-011**: The system MUST preserve a minimal, dark, content-first presentation with restrained neon gaming-inspired accents, consistent with the Daily Paper constitution and design-system feature spec.
 - **FR-012**: The system MUST keep the landing page responsive with a mobile-first layout that preserves readability, hierarchy, and action clarity across supported viewports.
 - **FR-013**: The system MUST provide landing-page metadata for title, description, and social preview so the public entry point is shareable and discoverable.
 - **FR-014**: The system MUST keep the landing experience lightweight enough that visitors can reach the primary message and CTA quickly without relying on heavy client-side behavior.
@@ -90,8 +90,8 @@ As a visitor, I want supporting content such as how Daily Paper works, a sample 
 
 ### Experience & Content Integrity Requirements *(mandatory for user-facing features)*
 
-- The landing page MUST follow the Daily Paper constitutional design direction: modern, bright, minimal, premium in readability, and content-first.
-- Gaming-inspired accents MUST remain subtle and secondary to reading clarity, trust signals, and conversion actions.
+- The landing page MUST follow the Daily Paper constitutional design direction: modern, dark, minimal, premium in readability, youthful, and content-first.
+- Neon gaming-inspired accents MUST remain secondary to reading clarity, trust signals, and conversion actions.
 - The primary CTA MUST remain the dominant interactive action in the hero area, with supporting navigation clearly secondary.
 - Public-facing copy MUST remain concise, neutral, and trustworthy, avoiding hype or exaggerated AI claims.
 - Any sample digest or article-like preview content MUST be framed honestly as illustrative content and MUST NOT imply fabricated sources or live personalization.
@@ -135,3 +135,9 @@ As a visitor, I want supporting content such as how Daily Paper works, a sample 
 - Localization, dynamic personalization, and post-signup onboarding flows are outside the scope of this public-site slice.
 - The landing page is the primary public entry point for Phase 1 and is intended for anonymous visitors evaluating the product for the first time.
 - Shared visual rules such as layout behavior, component hierarchy, and accessibility expectations inherit from the Daily Paper constitution and the design-system feature spec rather than being redefined here.
+
+## Implementation Update (2026-06-02)
+
+- Confirmed the landing page uses the active dark neon design-system baseline with cyan/violet CTA gradients, glass-style sections, and a dark full-page background.
+- Confirmed the primary CTA label is `Get Your Daily Paper` in both the header navigation and hero action.
+- Confirmed `/signup`, `/login`, and `/blog` remain public navigation targets in the Vite SPA router, with Vercel SPA rewrites configured separately in `vercel.json`.

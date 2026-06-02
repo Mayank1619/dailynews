@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { DESIGN_TOKENS } from "../design-system/tokens";
-import { getFirebaseClientAuth } from "../../lib/firebaseAuthClient";
+import { getFirebaseAuthErrorMessage, getFirebaseClientAuth } from "../../lib/firebaseAuthClient";
 
 export const AUTH_SIGNUP_COPY = {
   heading: "Create your Daily Paper account",
@@ -66,22 +66,27 @@ export async function submitSecureSignupWithConsent(
 }
 
 const cardStyle: React.CSSProperties = {
-  background: DESIGN_TOKENS.colors.bgSecondary,
+  background: "linear-gradient(135deg, rgba(17,24,39,0.94), rgba(12,17,34,0.9))",
   color: DESIGN_TOKENS.colors.textPrimary,
-  borderRadius: 16,
+  border: "1px solid rgba(34,211,238,0.22)",
+  borderRadius: 18,
   padding: DESIGN_TOKENS.spacing[3],
-  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.08)",
+  boxShadow: "0 24px 70px rgba(0,0,0,0.42), 0 0 38px rgba(168,85,247,0.12)",
   maxWidth: 560,
-  margin: "0 auto"
+  margin: "0 auto",
+  font: DESIGN_TOKENS.typography.body
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  border: `1px solid ${DESIGN_TOKENS.colors.textSecondary}`,
+  border: "1px solid rgba(167,179,200,0.32)",
   borderRadius: 10,
   padding: "10px 12px",
   marginTop: 6,
-  marginBottom: 14
+  marginBottom: 14,
+  background: "rgba(7,9,18,0.82)",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  outlineColor: DESIGN_TOKENS.colors.brandPrimary
 };
 
 const submitStyle: React.CSSProperties = {
@@ -89,10 +94,16 @@ const submitStyle: React.CSSProperties = {
   border: 0,
   borderRadius: 10,
   padding: "12px 16px",
-  background: DESIGN_TOKENS.colors.brandPrimary,
-  color: DESIGN_TOKENS.colors.bgSecondary,
-  fontWeight: 600,
-  cursor: "pointer"
+  background: `linear-gradient(120deg, ${DESIGN_TOKENS.colors.brandPrimary}, ${DESIGN_TOKENS.colors.brandSecondary})`,
+  color: "#07111F",
+  fontWeight: 700,
+  cursor: "pointer",
+  boxShadow: "0 0 24px rgba(34,211,238,0.3)"
+};
+
+const statusStyle: React.CSSProperties = {
+  marginTop: 16,
+  color: DESIGN_TOKENS.colors.warning
 };
 
 export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
@@ -111,7 +122,14 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
   };
 
   return (
-    <section style={{ padding: DESIGN_TOKENS.spacing[3], background: DESIGN_TOKENS.colors.bgPrimary }}>
+    <section
+      style={{
+        minHeight: "100vh",
+        padding: DESIGN_TOKENS.spacing[3],
+        background:
+          "radial-gradient(circle at 10% 0%, rgba(34,211,238,0.24), transparent 34%), radial-gradient(circle at 90% 8%, rgba(244,114,182,0.2), transparent 34%), #070912"
+      }}
+    >
       <form
         style={cardStyle}
         onSubmit={async (event) => {
@@ -121,11 +139,11 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
             await submitSecureSignupWithConsent(form);
             setStatusMessage(AUTH_SIGNUP_COPY.successMessage);
           } catch (error) {
-            setStatusMessage(error instanceof Error ? error.message : "Signup failed.");
+            setStatusMessage(getFirebaseAuthErrorMessage(error));
           }
         }}
       >
-        <h1 style={{ marginBottom: 8 }}>{AUTH_SIGNUP_COPY.heading}</h1>
+        <h1 style={{ font: DESIGN_TOKENS.typography.h2, marginBottom: 8 }}>{AUTH_SIGNUP_COPY.heading}</h1>
         <p style={{ color: DESIGN_TOKENS.colors.textSecondary, marginTop: 0 }}>{AUTH_SIGNUP_COPY.subheading}</p>
 
         <label>
@@ -182,7 +200,7 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
           {AUTH_SIGNUP_COPY.submitLabel}
         </button>
 
-        {statusMessage ? <p style={{ marginTop: 16 }}>{statusMessage}</p> : null}
+        {statusMessage ? <p style={statusStyle}>{statusMessage}</p> : null}
       </form>
     </section>
   );

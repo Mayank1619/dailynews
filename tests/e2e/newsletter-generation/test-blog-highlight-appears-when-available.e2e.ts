@@ -3,11 +3,11 @@
  * End-to-End tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { test, expect } from '@playwright/test';
 import { BlogHighlightService } from '../../../apps/api/src/features/newsletter-generation/blog-highlight-appears-when-available.service';
 
-describe('US6: E2E - Blog Highlight Conditional Display', () => {
-  it('e2e scenario: newsletter without blog highlight', async () => {
+test.describe('US6: E2E - Blog Highlight Conditional Display', () => {
+  test('e2e scenario: newsletter without blog highlight', async () => {
     const service = new BlogHighlightService();
     const date = new Date();
 
@@ -22,7 +22,7 @@ describe('US6: E2E - Blog Highlight Conditional Display', () => {
     expect(enriched.blogHighlight).toBeUndefined();
   });
 
-  it('e2e scenario: newsletter includes blog highlight when available', async () => {
+  test('e2e scenario: newsletter includes blog highlight when available', async () => {
     const service = new BlogHighlightService();
 
     const highlight = {
@@ -42,7 +42,7 @@ describe('US6: E2E - Blog Highlight Conditional Display', () => {
     expect(html).toContain('https://blog.dailynews.local/updates');
   });
 
-  it('e2e scenario: blog highlight properly formatted in HTML', () => {
+  test('e2e scenario: blog highlight properly formatted in HTML', () => {
     const service = new BlogHighlightService();
 
     const highlight = {
@@ -61,7 +61,7 @@ describe('US6: E2E - Blog Highlight Conditional Display', () => {
     expect(html).toContain('<h3>');
   });
 
-  it('e2e scenario: blog highlight properly formatted in text', () => {
+  test('e2e scenario: blog highlight properly formatted in text', () => {
     const service = new BlogHighlightService();
 
     const highlight = {
@@ -80,7 +80,7 @@ describe('US6: E2E - Blog Highlight Conditional Display', () => {
     expect(text).toContain('Read:');
   });
 
-  it('e2e scenario: newsletter structure intact with and without blog', async () => {
+  test('e2e scenario: newsletter structure intact with and without blog', async () => {
     const service = new BlogHighlightService();
 
     const baseNewsletter = {

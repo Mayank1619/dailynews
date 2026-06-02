@@ -3,12 +3,12 @@
  * End-to-End tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { test, expect } from '@playwright/test';
 import { PersonalizedDailyPaperService } from '../../../apps/api/src/features/newsletter-generation/receive-a-personalized-daily-paper-in-my-inbox.service';
 import { renderNewsletter } from '../../../apps/api/src/features/newsletter-generation/renderPipeline';
 
-describe('US1: E2E - Receive Personalized Daily Paper', () => {
-  it('should generate end-to-end newsletter for user', async () => {
+test.describe('US1: E2E - Receive Personalized Daily Paper', () => {
+  test('should generate end-to-end newsletter for user', async () => {
     const service = new PersonalizedDailyPaperService();
     
     const request = {
@@ -35,7 +35,7 @@ describe('US1: E2E - Receive Personalized Daily Paper', () => {
     expect(newsletter.generatedAt).toBeInstanceOf(Date);
   });
 
-  it('should render proper HTML structure', () => {
+  test('should render proper HTML structure', () => {
     const context = {
       userId: 'test-user',
       date: new Date('2026-05-27'),
@@ -79,7 +79,7 @@ describe('US1: E2E - Receive Personalized Daily Paper', () => {
     expect(output.text).toContain('[Summary]');
   });
 
-  it('e2e scenario: complete user journey from generation to preview', async () => {
+  test('e2e scenario: complete user journey from generation to preview', async () => {
     const userId = 'e2e-journey-user';
     const date = new Date('2026-05-27');
 

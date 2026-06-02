@@ -8,6 +8,17 @@ type FirebaseClientConfig = {
   appId: string;
 };
 
+const FIREBASE_SETUP_MESSAGE =
+  "Firebase authentication is not configured yet. Add the Firebase web app environment variables before creating accounts or signing in.";
+
+export function getFirebaseAuthErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message.startsWith("Missing Firebase client configuration")) {
+    return FIREBASE_SETUP_MESSAGE;
+  }
+
+  return error instanceof Error ? error.message : "Authentication failed. Please try again.";
+}
+
 function readConfigFromEnvironment(): FirebaseClientConfig {
   const viteEnv = (typeof import.meta !== "undefined" ? import.meta.env : undefined) as
     | Record<string, string | undefined>

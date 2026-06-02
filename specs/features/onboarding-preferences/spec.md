@@ -66,6 +66,7 @@ As a user, I want to pause or resume my newsletter so I can temporarily stop del
 - What happens when the user pauses delivery and later returns? The pause state must not erase saved topics, region, or delivery time.
 - What happens when a preferences save occurs during signup or onboarding flow interruption? The user must be able to return and complete the flow without losing already entered values.
 - What happens when the authenticated session is missing or expired? The system must require sign-in again before preferences can be viewed or updated.
+- What happens when multiple preference updates occur within the same millisecond? The system must still produce a distinct, monotonic `updatedAt` value so audit and next-generation checks can observe the change.
 
 ## Requirements *(mandatory)*
 
@@ -83,6 +84,7 @@ As a user, I want to pause or resume my newsletter so I can temporarily stop del
 - **FR-PREF-010**: The system MUST preserve previously saved preferences when only one field is changed.
 - **FR-PREF-011**: The system MUST keep the onboarding flow aligned with signup so the user can move from account creation to preferences setup without losing progress.
 - **FR-PREF-012**: The system MUST expose the backend contract endpoints required by the feature: GET /api/preferences and PUT /api/preferences.
+- **FR-PREF-013**: The system MUST update `updatedAt` monotonically on preference and onboarding-state changes, even when multiple updates happen within the same millisecond.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -164,3 +166,8 @@ As a user, I want to pause or resume my newsletter so I can temporarily stop del
 - Province or city entry is optional in Phase 1 and may be left blank without blocking save.
 - The pause/resume control is recommended for Phase 1 but remains optional if schedule or scope pressure requires deferral.
 - The onboarding flow is part of the broader signup -> onboarding -> first digest journey and is not a standalone public page.
+
+## Implementation Update (2026-06-02)
+
+- Confirmed unit and integration test imports now reference the actual `apps/api` source tree.
+- Confirmed preference and onboarding repository updates use monotonic ISO timestamps so rapid updates produce observable `updatedAt` changes.

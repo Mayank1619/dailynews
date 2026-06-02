@@ -3,11 +3,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CompleteFirstTimeOnboardingService } from "../../../api/src/features/onboarding-preferences/complete-first-time-onboarding.service";
-import { MockPreferencesRepository } from "../../../api/src/features/onboarding-preferences/preferencesRepository";
-import { OnboardingPreferencesTelemetry } from "../../../api/src/features/onboarding-preferences/telemetry";
-import { PreferenceValidator } from "../../../api/src/features/onboarding-preferences/validator";
-import type { CompleteFirstTimeOnboardingRequest } from "../../../api/src/features/onboarding-preferences/complete-first-time-onboarding.types";
+import { CompleteFirstTimeOnboardingService } from "../../../apps/api/src/features/onboarding-preferences/complete-first-time-onboarding.service";
+import { MockPreferencesRepository } from "../../../apps/api/src/features/onboarding-preferences/preferencesRepository";
+import { OnboardingPreferencesTelemetry } from "../../../apps/api/src/features/onboarding-preferences/telemetry";
+import { PreferenceValidator } from "../../../apps/api/src/features/onboarding-preferences/validator";
+import type { CompleteFirstTimeOnboardingRequest } from "../../../apps/api/src/features/onboarding-preferences/complete-first-time-onboarding.types";
 
 describe("Complete First-Time Onboarding Service", () => {
   let service: CompleteFirstTimeOnboardingService;
