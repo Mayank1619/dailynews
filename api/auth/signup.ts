@@ -1,5 +1,3 @@
-import { verifyFirebaseIdToken } from "../../apps/api/src/middleware/firebaseAuth";
-
 type VercelRequest = {
   method?: string;
   headers: Record<string, string | string[] | undefined>;
@@ -23,6 +21,14 @@ type SignupConsentBody = {
   };
 };
 
+type IdentityToolkitLookupResponse = {
+  users?: Array<{
+    localId: string;
+    email?: string;
+    emailVerified?: boolean;
+  }>;
+};
+
 function getHeader(headers: VercelRequest["headers"], name: string): string | undefined {
   const value = headers[name] ?? headers[name.toLowerCase()];
   return Array.isArray(value) ? value[0] : value;
@@ -36,6 +42,57 @@ function parseBody(body: unknown): SignupConsentBody {
   return (body ?? {}) as SignupConsentBody;
 }
 
+function getFirebaseWebApiKey(): string {
+  const apiKey = process.env.VITE_FIREBASE_API_KEY ?? process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing Firebase Web API key for token lookup.");
+  }
+
+  return apiKey;
+}
+
+async function verifyFirebaseToken(req: VercelRequest) {
+  const authorization = getHeader(req.headers, "authorization");
+  const idToken = authorization?.startsWith("Bearer ") ? authorization.slice("Bearer ".length) : "";
+
+  if (!idToken) {
+    throw new Error("Missing Firebase bearer token");
+  }
+
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(getFirebaseWebApiKey())}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Firebase token lookup failed.");
+  }
+
+  const lookup = (await response.json()) as IdentityToolkitLookupResponse;
+  const user = lookup.users?.[0];
+  if (!user?.localId) {
+    throw new Error("Firebase token lookup returned no user.");
+  }
+
+  return {
+    headers: req.headers,
+    auth: {
+      uid: user.localId,
+      email: user.email,
+      emailVerified: Boolean(user.emailVerified),
+      token: {
+        uid: user.localId,
+        email: user.email,
+        email_verified: Boolean(user.emailVerified)
+      }
+    }
+  };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
@@ -43,11 +100,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   try {
-    const verified = await verifyFirebaseIdToken({
-      headers: {
-        authorization: getHeader(req.headers, "authorization")
-      }
-    });
+    const verified = await verifyFirebaseToken(req);
     const body = parseBody(req.body);
     const consent = body.consent;
 
