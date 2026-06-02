@@ -41,11 +41,11 @@ export const DESIGN_TOKENS = {
   } satisfies ColorTokens,
   spacing: [8, 16, 24, 32, 48] as const,
   typography: {
-    headingFamily: "Space Grotesk, Plus Jakarta Sans, Segoe UI, sans-serif",
+    headingFamily: "Plus Jakarta Sans, Segoe UI, sans-serif",
     bodyFamily: "Plus Jakarta Sans, Segoe UI, sans-serif",
-    h1: "700 40px/1.12 Space Grotesk, Plus Jakarta Sans, Segoe UI, sans-serif",
-    h2: "700 28px/1.24 Space Grotesk, Plus Jakarta Sans, Segoe UI, sans-serif",
-    h3: "600 20px/1.32 Space Grotesk, Plus Jakarta Sans, Segoe UI, sans-serif",
+    h1: "800 40px/1.12 Plus Jakarta Sans, Segoe UI, sans-serif",
+    h2: "800 28px/1.24 Plus Jakarta Sans, Segoe UI, sans-serif",
+    h3: "700 20px/1.32 Plus Jakarta Sans, Segoe UI, sans-serif",
     body: "400 16px/1.65 Plus Jakarta Sans, Segoe UI, sans-serif"
   } satisfies TypographyTokens,
   layout: {

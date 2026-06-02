@@ -5,6 +5,7 @@ import { getFirebaseAuthErrorMessage, getFirebaseClientAuth } from "../lib/fireb
 
 type PreferenceState = {
   topics: string[];
+  frequency: "daily" | "weekdays" | "weekly";
   country: string;
   province: string;
   deliveryTime: string;
@@ -13,11 +14,42 @@ type PreferenceState = {
 };
 
 const STORAGE_KEY = "daily-paper-demo-preferences";
-const TOPICS = ["Technology", "Business", "Science", "Culture", "Sports", "World"];
+const TOPIC_GROUPS = [
+  {
+    name: "News",
+    topics: ["Politics", "World Affairs", "Canada", "Local News", "Policy", "Elections", "Development"]
+  },
+  {
+    name: "Money",
+    topics: ["Markets", "Personal Finance", "Startups", "Real Estate", "Crypto", "Weekly Winners", "Monthly Winners"]
+  },
+  {
+    name: "Technology",
+    topics: ["New in AI", "New in Technology", "Cybersecurity", "Consumer Gadgets", "Space", "Science"]
+  },
+  {
+    name: "Culture",
+    topics: ["Entertainment", "Movies", "Music", "Books", "Gaming", "Horoscopes"]
+  },
+  {
+    name: "Sports",
+    topics: ["Sports Headlines", "Football", "Basketball", "Cricket", "Soccer", "Tennis", "Formula 1", "Hockey"]
+  },
+  {
+    name: "Life",
+    topics: ["Health", "Travel", "Food", "Climate", "Education", "Career"]
+  }
+] as const;
+const FREQUENCIES = [
+  { value: "daily", label: "Daily", description: "A fresh paper every day." },
+  { value: "weekdays", label: "Weekdays", description: "Monday to Friday only." },
+  { value: "weekly", label: "Weekly", description: "A deeper weekly roundup." }
+] as const;
 const TIMEZONES = ["America/Toronto", "America/New_York", "America/Los_Angeles", "UTC"];
 
 const defaultPreferences: PreferenceState = {
-  topics: ["Technology", "Business"],
+  topics: [],
+  frequency: "daily",
   country: "Canada",
   province: "Ontario",
   deliveryTime: "08:00",
@@ -122,6 +154,7 @@ function AuthRequired({ auth }: { auth: AuthState }): React.JSX.Element | null {
         <section style={panelStyle}>
           <p style={{ color: DESIGN_TOKENS.colors.textSecondary }}>Checking your session...</p>
         </section>
+        <PoweredByNetfruit />
       </main>
     );
   }
@@ -147,24 +180,22 @@ function AuthRequired({ auth }: { auth: AuthState }): React.JSX.Element | null {
           </a>
         </div>
       </section>
+      <PoweredByNetfruit />
     </main>
   );
 }
 
 async function logoutAndReturnHome(): Promise<void> {
   await signOut(getFirebaseClientAuth());
-  window.location.assign("/");
+  window.location.assign("/login");
 }
 
 function AppNav({ user }: { user?: User | null }): React.JSX.Element {
   return (
     <header style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
       <nav style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        <a href="/" style={navLinkStyle}>
-          Home
-        </a>
         <a href="/settings" style={navLinkStyle}>
-          Settings
+          Dashboard
         </a>
         <a href="/dashboard/preferences" style={navLinkStyle}>
           Preferences
@@ -172,8 +203,8 @@ function AppNav({ user }: { user?: User | null }): React.JSX.Element {
         <a href="/dashboard/newsletter" style={navLinkStyle}>
           Newsletter
         </a>
-        <a href="/blog" style={navLinkStyle}>
-          Blog
+        <a href="/onboarding" style={navLinkStyle}>
+          Onboarding
         </a>
       </nav>
       {user ? (
@@ -203,6 +234,25 @@ const smallButtonStyle: React.CSSProperties = {
   cursor: "pointer",
   fontWeight: 800
 };
+
+function BackToSettings(): React.JSX.Element {
+  return (
+    <a href="/settings" style={{ ...secondaryLinkStyle, marginBottom: 18 }}>
+      Back to Dashboard
+    </a>
+  );
+}
+
+function PoweredByNetfruit(): React.JSX.Element {
+  return (
+    <footer style={{ width: "min(920px, 100%)", margin: "18px auto 0", color: DESIGN_TOKENS.colors.textSecondary }}>
+      Powered by{" "}
+      <a href="https://netfruit.com" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+        Netfruit
+      </a>
+    </footer>
+  );
+}
 
 function TopicButton({
   topic,
@@ -299,19 +349,30 @@ export function OnboardingPage(): React.JSX.Element {
     <main style={shellStyle}>
       <section style={panelStyle}>
         <AppNav user={auth.user} />
+        <BackToSettings />
         <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Personalize Your Daily News</h1>
 
         {step === 0 && (
           <section>
             <h2>What topics interest you?</h2>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", maxWidth: 680 }}>
-              {TOPICS.map((topic) => (
-                <TopicButton
-                  key={topic}
-                  topic={topic}
-                  selected={draft.topics.includes(topic)}
-                  onToggle={() => toggleTopic(topic)}
-                />
+            <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 720 }}>
+              Choose a few broad interests or go detailed. These selections become the AI prompt for your paper.
+            </p>
+            <div style={{ display: "grid", gap: 18 }}>
+              {TOPIC_GROUPS.map((group) => (
+                <section key={group.name}>
+                  <h3 style={{ font: DESIGN_TOKENS.typography.h3, margin: "0 0 8px" }}>{group.name}</h3>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", maxWidth: 840 }}>
+                    {group.topics.map((topic) => (
+                      <TopicButton
+                        key={topic}
+                        topic={topic}
+                        selected={draft.topics.includes(topic)}
+                        onToggle={() => toggleTopic(topic)}
+                      />
+                    ))}
+                  </div>
+                </section>
               ))}
             </div>
             {error && <p style={{ color: DESIGN_TOKENS.colors.error }}>{error}</p>}
@@ -345,7 +406,34 @@ export function OnboardingPage(): React.JSX.Element {
 
         {step === 2 && (
           <section style={{ display: "grid", gap: 16 }}>
-            <h2>When should we deliver?</h2>
+            <h2>How often should we deliver?</h2>
+            <fieldset style={{ border: "1px solid rgba(34,211,238,0.24)", borderRadius: 12, padding: 12 }}>
+              <legend>Frequency</legend>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
+                {FREQUENCIES.map((frequency) => (
+                  <label
+                    key={frequency.value}
+                    style={{
+                      border: `1px solid ${draft.frequency === frequency.value ? "rgba(34,211,238,0.88)" : "rgba(167,179,200,0.24)"}`,
+                      borderRadius: 12,
+                      padding: 12,
+                      background: draft.frequency === frequency.value ? "rgba(34,211,238,0.14)" : "rgba(7,9,18,0.62)",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="frequency"
+                      value={frequency.value}
+                      checked={draft.frequency === frequency.value}
+                      onChange={() => setDraft({ ...draft, frequency: frequency.value })}
+                    />
+                    <strong style={{ marginLeft: 8 }}>{frequency.label}</strong>
+                    <span style={{ display: "block", color: DESIGN_TOKENS.colors.textSecondary }}>{frequency.description}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <FieldLabel label="Time">
               <input
                 type="time"
@@ -376,6 +464,7 @@ export function OnboardingPage(): React.JSX.Element {
               <p>
                 Region: {draft.country}, {draft.province}
               </p>
+              <p>Frequency: {FREQUENCIES.find((frequency) => frequency.value === draft.frequency)?.label ?? draft.frequency}</p>
               <p>Delivery Time: {draft.deliveryTime} ({draft.timezone})</p>
             </div>
           </section>
@@ -398,6 +487,7 @@ export function OnboardingPage(): React.JSX.Element {
           )}
         </div>
       </section>
+      <PoweredByNetfruit />
     </main>
   );
 }
@@ -443,18 +533,58 @@ export function PreferencesPage(): React.JSX.Element {
     <main style={shellStyle}>
       <section style={panelStyle}>
         <AppNav user={auth.user} />
+        <BackToSettings />
         <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Update Your Preferences</h1>
         <div style={{ display: "grid", gap: 18 }}>
           <fieldset style={{ border: "1px solid rgba(34,211,238,0.24)", borderRadius: 12 }}>
             <legend>Topics</legend>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", padding: 8 }}>
-              {TOPICS.map((topic) => (
-                <TopicButton
-                  key={topic}
-                  topic={topic}
-                  selected={draft.topics.includes(topic)}
-                  onToggle={() => toggleTopic(topic)}
-                />
+            <div style={{ display: "grid", gap: 16, padding: 8 }}>
+              {TOPIC_GROUPS.map((group) => (
+                <section key={group.name}>
+                  <h3 style={{ font: DESIGN_TOKENS.typography.h3, margin: "0 0 8px" }}>{group.name}</h3>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    {group.topics.map((topic) => (
+                      <TopicButton
+                        key={topic}
+                        topic={topic}
+                        selected={draft.topics.includes(topic)}
+                        onToggle={() => toggleTopic(topic)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset style={{ border: "1px solid rgba(34,211,238,0.24)", borderRadius: 12, padding: 12 }}>
+            <legend>Frequency</legend>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
+              {FREQUENCIES.map((frequency) => (
+                <label
+                  key={frequency.value}
+                  style={{
+                    border: `1px solid ${draft.frequency === frequency.value ? "rgba(34,211,238,0.88)" : "rgba(167,179,200,0.24)"}`,
+                    borderRadius: 12,
+                    padding: 12,
+                    background: draft.frequency === frequency.value ? "rgba(34,211,238,0.14)" : "rgba(7,9,18,0.62)",
+                    cursor: "pointer"
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="preference-frequency"
+                    value={frequency.value}
+                    checked={draft.frequency === frequency.value}
+                    onChange={() => {
+                      setDraft({ ...draft, frequency: frequency.value });
+                      setMessage("");
+                      setError("");
+                    }}
+                  />
+                  <strong style={{ marginLeft: 8 }}>{frequency.label}</strong>
+                  <span style={{ display: "block", color: DESIGN_TOKENS.colors.textSecondary }}>{frequency.description}</span>
+                </label>
               ))}
             </div>
           </fieldset>
@@ -519,6 +649,7 @@ export function PreferencesPage(): React.JSX.Element {
         )}
         {error && <p style={{ color: DESIGN_TOKENS.colors.error }}>{error}</p>}
       </section>
+      <PoweredByNetfruit />
     </main>
   );
 }
@@ -536,6 +667,7 @@ export function NewsletterPage(): React.JSX.Element {
     <main style={shellStyle}>
       <section style={panelStyle}>
         <AppNav user={auth.user} />
+        <BackToSettings />
         <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Newsletter Delivery</h1>
         <label
           style={{
@@ -576,14 +708,16 @@ export function NewsletterPage(): React.JSX.Element {
 
         <section style={{ marginTop: 24 }}>
           <h2>Saved Preferences</h2>
-          <p>Topics: {preferences.topics.join(", ")}</p>
+          <p>Topics: {preferences.topics.length ? preferences.topics.join(", ") : "No topics chosen yet"}</p>
           <p>Region: {preferences.country}, {preferences.province}</p>
+          <p>Frequency: {FREQUENCIES.find((frequency) => frequency.value === preferences.frequency)?.label ?? preferences.frequency}</p>
           <p>Delivery Time: {preferences.deliveryTime} ({preferences.timezone})</p>
           <p style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
             Your preferences are always saved, even when delivery is paused.
           </p>
         </section>
       </section>
+      <PoweredByNetfruit />
     </main>
   );
 }
@@ -610,25 +744,35 @@ export function SettingsPage(): React.JSX.Element {
           </div>
           <div style={metricStyle}>
             Topics<br />
-            <strong>{preferences.topics.length}</strong>
+            <strong>{preferences.topics.length ? preferences.topics.length : "None yet"}</strong>
           </div>
           <div style={metricStyle}>
-            Delivery<br />
+            Frequency<br />
+            <strong>{FREQUENCIES.find((frequency) => frequency.value === preferences.frequency)?.label ?? preferences.frequency}</strong>
+          </div>
+          <div style={metricStyle}>
+            Time<br />
             <strong>{preferences.deliveryTime}</strong>
           </div>
         </section>
+        {preferences.topics.length === 0 ? (
+          <p style={{ color: DESIGN_TOKENS.colors.warning }}>
+            No topics are selected yet. Start onboarding or open preferences to choose what your AI paper should cover.
+          </p>
+        ) : null}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <a data-testid="email-preferences" href="/dashboard/preferences" style={ctaLinkStyle}>
-            Email Preferences
+            Choose Topics
           </a>
           <a data-testid="subscription-settings" href="/dashboard/newsletter" style={ctaLinkStyle}>
-            Subscription Settings
+            Manage Subscription
           </a>
           <a href="/onboarding" style={secondaryLinkStyle}>
             Restart Onboarding
           </a>
         </div>
       </section>
+      <PoweredByNetfruit />
     </main>
   );
 }
@@ -677,6 +821,7 @@ export function AdminPage(): React.JSX.Element {
           </section>
         )}
       </section>
+      <PoweredByNetfruit />
     </main>
   );
 }
@@ -701,6 +846,7 @@ export function UnsubscribeConfirmationPage(): React.JSX.Element {
           Manage Newsletter
         </a>
       </section>
+      <PoweredByNetfruit />
     </main>
   );
 }

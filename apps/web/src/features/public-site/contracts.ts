@@ -23,8 +23,7 @@ export const PRIMARY_CTA: PublicRouteAction = {
 
 export const PUBLIC_NAV_ACTIONS: PublicRouteAction[] = [
   PRIMARY_CTA,
-  { id: "login", label: "Login", route: "/login" },
-  { id: "blog", label: "Blog", route: "/blog" }
+  { id: "login", label: "Login", route: "/login" }
 ];
 
 export const HOW_IT_WORKS_STEPS = [

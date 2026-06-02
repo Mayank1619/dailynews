@@ -190,6 +190,12 @@ As an admin, I want blocked users to be prevented from signing in or receiving n
 - Confirmed login now redirects authenticated users to `/settings`, which links to preference updates and newsletter subscription controls.
 - Confirmed Google and Facebook provider buttons are present on signup and login, backed by Firebase popup sign-in; provider success depends on the corresponding Firebase provider configuration.
 
+## Implementation Update (2026-06-02, Auth UX Polish)
+
+- Confirmed login and signup now render as full-screen dark neon account surfaces rather than compact centered boxes.
+- Confirmed Google and Facebook buttons appear below the primary email/password flow, with the login page showing the create-account prompt before social options.
+- Confirmed account and public surfaces include a "Powered by Netfruit" footer link.
+
 ## Telemetry & Privacy Compliance
 
 All telemetry events emitted by this feature are privacy-safe:

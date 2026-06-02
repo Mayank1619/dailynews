@@ -89,6 +89,9 @@ As a user, I want to pause or resume my newsletter so I can temporarily stop del
 - **FR-PREF-013**: The system MUST update `updatedAt` monotonically on preference and onboarding-state changes, even when multiple updates happen within the same millisecond.
 - **FR-PREF-014**: The authenticated web dashboard MUST provide direct controls for preference updates, newsletter unsubscribe/resubscribe, and delivery frequency or time changes.
 - **FR-PREF-015**: User preference storage MUST be scoped to the authenticated user identity so accounts sharing a browser do not overwrite each other's dashboard choices.
+- **FR-PREF-016**: Topic selection SHOULD expose grouped detailed interests, including politics, finance, AI, technology, sports subtopics, culture, horoscopes, and life categories, while preserving simple multi-select controls.
+- **FR-PREF-017**: Users SHOULD be able to choose newsletter frequency from daily, weekdays, or weekly delivery.
+- **FR-PREF-018**: Authenticated dashboard navigation MUST avoid public marketing/blog links that make users feel signed out; account pages SHOULD provide a back path to the dashboard.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -181,3 +184,9 @@ As a user, I want to pause or resume my newsletter so I can temporarily stop del
 - Confirmed `/onboarding`, `/settings`, `/dashboard/preferences`, and `/dashboard/newsletter` require a Firebase-authenticated user in the web app.
 - Confirmed the local web preference store is keyed by Firebase UID for the current browser implementation.
 - Confirmed `/settings` provides the post-login hub for email preferences, newsletter subscription state, and restarting onboarding.
+
+## Implementation Update (2026-06-02, Preference UX Polish)
+
+- Confirmed onboarding starts with no preselected topics and offers grouped topic chips across news, finance, technology/AI, culture, sports, and life.
+- Confirmed frequency choices are available in onboarding and editable later from preferences.
+- Confirmed account pages remove public Home/Blog links, include back-to-dashboard controls, and add a Netfruit footer link.

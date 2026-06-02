@@ -57,8 +57,8 @@ export default function BlogPage({ slug }: BlogPageProps): JSX.Element {
       <section style={panelStyle}>
         <nav style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
           <a href="/" style={navLinkStyle}>Home</a>
-          <a href="/signup" style={navLinkStyle}>Get Your Daily Paper</a>
-          <a href="/dashboard/preferences" style={navLinkStyle}>Preferences</a>
+          <a href="/settings" style={navLinkStyle}>Dashboard</a>
+          <a href="/login" style={navLinkStyle}>Sign In</a>
         </nav>
         <style>{blogStyles}</style>
         <div className="blog-surface">

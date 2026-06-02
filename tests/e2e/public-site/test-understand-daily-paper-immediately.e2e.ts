@@ -12,7 +12,6 @@ test("US1 e2e: landing experience communicates value and exposes CTA", async ({ 
       <a href="${hero.primaryCta.route}">${hero.primaryCta.label}</a>
       <nav>
         <a href="${nav[0].route}">${nav[0].label}</a>
-        <a href="${nav[1].route}">${nav[1].label}</a>
       </nav>
     </main>
   `;
@@ -21,5 +20,5 @@ test("US1 e2e: landing experience communicates value and exposes CTA", async ({ 
   await expect(page.getByRole("heading", { name: "Daily Paper" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Get Your Daily Paper" })).toHaveAttribute("href", "/signup");
   await expect(page.getByRole("link", { name: "Login" })).toHaveAttribute("href", "/login");
-  await expect(page.getByRole("link", { name: "Blog" })).toHaveAttribute("href", "/blog");
+  await expect(page.getByRole("link", { name: "Blog" })).toHaveCount(0);
 });

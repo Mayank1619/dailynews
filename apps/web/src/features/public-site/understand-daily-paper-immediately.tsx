@@ -197,6 +197,12 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
             {link.label}
           </a>
         ))}
+        <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
+          Powered by{" "}
+          <a href="https://netfruit.com" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+            Netfruit
+          </a>
+        </span>
       </footer>
     </main>
   );

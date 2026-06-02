@@ -10,7 +10,7 @@ type ReachSignupAndLoginQuicklyActionsProps = Readonly<{
 
 export function ReachSignupAndLoginQuicklyActions({ includePrimary = false }: ReachSignupAndLoginQuicklyActionsProps): React.JSX.Element {
   const routes = service.getActionRoutes();
-  const actions = includePrimary ? [routes.primary, routes.login, routes.blog] : [routes.login, routes.blog];
+  const actions = includePrimary ? [routes.primary, routes.login] : [routes.login];
 
   return (
     <nav aria-label="public quick actions" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>

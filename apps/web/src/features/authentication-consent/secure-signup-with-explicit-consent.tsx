@@ -135,7 +135,8 @@ const cardStyle: React.CSSProperties = {
   borderRadius: 18,
   padding: DESIGN_TOKENS.spacing[3],
   boxShadow: "0 24px 70px rgba(0,0,0,0.42), 0 0 38px rgba(168,85,247,0.12)",
-  maxWidth: 560,
+  width: "100%",
+  maxWidth: 680,
   margin: "0 auto",
   font: DESIGN_TOKENS.typography.body
 };
@@ -168,7 +169,7 @@ const socialGridStyle: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
   gap: 10,
-  marginBottom: 18
+  marginTop: 14
 };
 
 const socialButtonStyle: React.CSSProperties = {
@@ -222,10 +223,27 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
       style={{
         minHeight: "100vh",
         padding: DESIGN_TOKENS.spacing[3],
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+        alignItems: "center",
+        gap: DESIGN_TOKENS.spacing[3],
         background:
           "radial-gradient(circle at 10% 0%, rgba(34,211,238,0.24), transparent 34%), radial-gradient(circle at 90% 8%, rgba(244,114,182,0.2), transparent 34%), #070912"
       }}
     >
+      <aside style={{ maxWidth: 560 }}>
+        <p style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800, margin: 0 }}>Daily Paper</p>
+        <h1 style={{ font: DESIGN_TOKENS.typography.h1, margin: "8px 0 12px" }}>Build a paper that sounds like you.</h1>
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 520 }}>
+          Create the account first, then choose the exact topics, frequency, region, and delivery time for your AI-generated newsletter.
+        </p>
+        <p style={{ marginTop: DESIGN_TOKENS.spacing[2], color: DESIGN_TOKENS.colors.textSecondary }}>
+          Powered by{" "}
+          <a href="https://netfruit.com" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+            Netfruit
+          </a>
+        </p>
+      </aside>
       <form
         style={cardStyle}
         onSubmit={async (event) => {
@@ -247,28 +265,6 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
       >
         <h1 style={{ font: DESIGN_TOKENS.typography.h2, marginBottom: 8 }}>{AUTH_SIGNUP_COPY.heading}</h1>
         <p style={{ color: DESIGN_TOKENS.colors.textSecondary, marginTop: 0 }}>{AUTH_SIGNUP_COPY.subheading}</p>
-
-        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, fontWeight: 800, marginBottom: 8 }}>
-          {AUTH_SIGNUP_COPY.socialHeading}
-        </p>
-        <div style={socialGridStyle}>
-          <button
-            type="button"
-            style={socialButtonStyle}
-            disabled={isSubmitting}
-            onClick={() => void handleSocialSignup("google")}
-          >
-            {AUTH_SIGNUP_COPY.googleLabel}
-          </button>
-          <button
-            type="button"
-            style={socialButtonStyle}
-            disabled={isSubmitting}
-            onClick={() => void handleSocialSignup("facebook")}
-          >
-            {AUTH_SIGNUP_COPY.facebookLabel}
-          </button>
-        </div>
 
         <label>
           {AUTH_SIGNUP_COPY.emailLabel}
@@ -325,6 +321,34 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
         </button>
 
         {statusMessage ? <p style={statusStyle}>{statusMessage}</p> : null}
+
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, fontWeight: 800, marginBottom: 8 }}>
+          {AUTH_SIGNUP_COPY.socialHeading}
+        </p>
+        <div style={socialGridStyle}>
+          <button
+            type="button"
+            style={socialButtonStyle}
+            disabled={isSubmitting}
+            onClick={() => void handleSocialSignup("google")}
+          >
+            {AUTH_SIGNUP_COPY.googleLabel}
+          </button>
+          <button
+            type="button"
+            style={socialButtonStyle}
+            disabled={isSubmitting}
+            onClick={() => void handleSocialSignup("facebook")}
+          >
+            {AUTH_SIGNUP_COPY.facebookLabel}
+          </button>
+        </div>
+        <p style={{ textAlign: "center", color: DESIGN_TOKENS.colors.textSecondary }}>
+          Already have an account?{" "}
+          <a href="/login" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+            Sign in
+          </a>
+        </p>
       </form>
     </section>
   );

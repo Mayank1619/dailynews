@@ -104,7 +104,8 @@ const cardStyle: React.CSSProperties = {
   borderRadius: 18,
   padding: DESIGN_TOKENS.spacing[3],
   boxShadow: "0 24px 70px rgba(0,0,0,0.42), 0 0 38px rgba(168,85,247,0.12)",
-  maxWidth: 480,
+  width: "100%",
+  maxWidth: 640,
   margin: "0 auto"
 };
 
@@ -138,7 +139,7 @@ const socialGridStyle: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
   gap: 10,
-  marginBottom: 18
+  marginTop: 14
 };
 
 const socialButtonStyle: React.CSSProperties = {
@@ -226,27 +227,6 @@ export function LoginForm(props: { telemetry?: AuthTelemetryClient }): React.JSX
       <h1 style={{ font: DESIGN_TOKENS.typography.h2, marginBottom: DESIGN_TOKENS.spacing[1] }}>
         {AUTH_LOGIN_COPY.heading}
       </h1>
-      <p style={{ color: DESIGN_TOKENS.colors.textSecondary, fontWeight: 800, marginTop: 0, marginBottom: 8 }}>
-        {AUTH_LOGIN_COPY.socialHeading}
-      </p>
-      <div style={socialGridStyle}>
-        <button
-          type="button"
-          style={socialButtonStyle}
-          disabled={status === "loading"}
-          onClick={() => void handleSocialLogin("google")}
-        >
-          {AUTH_LOGIN_COPY.googleLabel}
-        </button>
-        <button
-          type="button"
-          style={socialButtonStyle}
-          disabled={status === "loading"}
-          onClick={() => void handleSocialLogin("facebook")}
-        >
-          {AUTH_LOGIN_COPY.facebookLabel}
-        </button>
-      </div>
       <form onSubmit={(e) => void handleSubmit(e)} noValidate>
         <label htmlFor="login-email" style={{ font: DESIGN_TOKENS.typography.body }}>
           {AUTH_LOGIN_COPY.emailLabel}
@@ -285,6 +265,33 @@ export function LoginForm(props: { telemetry?: AuthTelemetryClient }): React.JSX
         {status === "success" && <p style={successStyle}>{AUTH_LOGIN_COPY.successMessage}</p>}
         {status === "error" && <p style={errorStyle}>{errorMessage}</p>}
       </form>
+      <p style={{ textAlign: "center", color: DESIGN_TOKENS.colors.textSecondary }}>
+        New here?{" "}
+        <a href="/signup" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+          Create an account
+        </a>
+      </p>
+      <p style={{ color: DESIGN_TOKENS.colors.textSecondary, fontWeight: 800, marginBottom: 8 }}>
+        {AUTH_LOGIN_COPY.socialHeading}
+      </p>
+      <div style={socialGridStyle}>
+        <button
+          type="button"
+          style={socialButtonStyle}
+          disabled={status === "loading"}
+          onClick={() => void handleSocialLogin("google")}
+        >
+          {AUTH_LOGIN_COPY.googleLabel}
+        </button>
+        <button
+          type="button"
+          style={socialButtonStyle}
+          disabled={status === "loading"}
+          onClick={() => void handleSocialLogin("facebook")}
+        >
+          {AUTH_LOGIN_COPY.facebookLabel}
+        </button>
+      </div>
     </div>
   );
 }
