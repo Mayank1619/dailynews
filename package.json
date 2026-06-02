@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "firebase:emulators": "npx firebase-tools@14.18.0 emulators:start --project demo-daily-paper --only auth,firestore",
+    "firebase:emulators:auth": "npx firebase-tools@14.18.0 emulators:start --project demo-daily-paper --only auth",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "vitest run tests/unit --passWithNoTests",
     "test:integration": "vitest run tests/integration apps/web/tests/a11y --passWithNoTests",

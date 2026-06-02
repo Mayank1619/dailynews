@@ -46,6 +46,10 @@ function getFirebaseAdminApp(): App {
     });
   }
 
+  if (projectId) {
+    return initializeApp({ projectId });
+  }
+
   return initializeApp();
 }
 

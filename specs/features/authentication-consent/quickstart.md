@@ -23,6 +23,8 @@ This runbook covers how to run the authentication-consent feature end-to-end —
 | `FIREBASE_PROJECT_ID` | Project ID used by Firebase Admin SDK (API server) |
 | `FIREBASE_CLIENT_EMAIL` | Firebase Admin client email for split Vercel secret configuration |
 | `FIREBASE_PRIVATE_KEY` | Firebase Admin private key for split Vercel secret configuration |
+| `VITE_FIREBASE_AUTH_EMULATOR_HOST` | Optional local Auth emulator host for the Vite client |
+| `FIREBASE_AUTH_EMULATOR_HOST` | Optional local Auth emulator host for Firebase Admin |
 
 > **Tip**: For the current Vite app, use the `VITE_FIREBASE_*` variables at the repository root or in Vercel. `NEXT_PUBLIC_*` remains accepted by the client helper for compatibility with earlier Next.js-oriented specs. Never commit real secret values.
 
@@ -56,6 +58,31 @@ Uses `page.setContent` and route mocking — no real Firebase project needed.
 
 ---
 
+## Running Locally with Firebase Emulators
+
+1. Copy `.env.example` to `.env.local`.
+2. Use the demo local values:
+   ```sh
+   VITE_FIREBASE_API_KEY=demo-api-key
+   VITE_FIREBASE_AUTH_DOMAIN=demo-daily-paper.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=demo-daily-paper
+   VITE_FIREBASE_APP_ID=1:000000000000:web:daily-paper-demo
+   VITE_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099
+   FIREBASE_PROJECT_ID=demo-daily-paper
+   FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099
+   ```
+3. Start the Auth/Firestore emulators:
+   ```sh
+   npm run firebase:emulators
+   ```
+4. In another terminal, start the Vite app:
+   ```sh
+   npm run dev
+   ```
+5. Open `/signup` and `/login` to test real Firebase Auth emulator account creation and sign-in.
+
+---
+
 ## Running End-to-End with Live Firebase
 
 1. Create a Firebase project at <https://console.firebase.google.com>.
@@ -81,9 +108,8 @@ Uses `page.setContent` and route mocking — no real Firebase project needed.
 
 ---
 
-## Known Limitations (Local Dev Without Firebase Emulator)
+## Known Limitations
 
-- **No Firebase Emulator**: Unit and integration tests mock all Firebase SDK calls. If you want to test real token flows locally, set up the [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite).
 - **Token verification**: `firebaseAuth.ts` middleware calls `getAuth().verifyIdToken()`. Without a real project, emulator, or Vercel Admin secret, this will fail. In tests this is always injected as a mock.
 - **Email delivery**: Firebase's `sendPasswordResetEmail` / `sendEmailVerification` won't send emails in test/dev without a real project configured.
 - **Blocked status**: The `userStatusRepository` is a stub in tests. In production, wire it to Firestore or Firebase custom claims.
@@ -97,6 +123,6 @@ All tests pass with mock Firebase dependencies (no live project required):
 
 - **Unit tests**: Pass — services and business logic validated with Vitest + mocks
 - **Integration tests**: Pass — contract boundaries validated with Vitest + mocks
-- **E2E tests**: Partially pass — service-level and implemented public/auth scenarios run, while dashboard/blog/email browser journeys remain blocked until those routes are implemented
+- **E2E tests**: Pass — public, auth, blog, onboarding, dashboard, email, and newsletter browser journeys are covered
 
-> Note: Full end-to-end test results against a live Firebase project require a real Firebase configuration and the remaining dashboard/blog/email routes. Unit and integration tests remain the authoritative green checks for the current implementation slice.
+> Note: Full end-to-end tests against a live Firebase project still require real Firebase project configuration or the local emulator variables above.
