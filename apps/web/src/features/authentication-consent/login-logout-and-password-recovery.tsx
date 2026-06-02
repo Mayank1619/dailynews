@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import {
+  FacebookAuthProvider,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut
+} from "firebase/auth";
 import { DESIGN_TOKENS } from "../design-system/tokens";
 import { getFirebaseAuthErrorMessage, getFirebaseClientAuth } from "../../lib/firebaseAuthClient";
 
@@ -7,6 +14,9 @@ export const AUTH_LOGIN_COPY = {
   heading: "Sign in to Daily Paper",
   emailLabel: "Email",
   passwordLabel: "Password",
+  socialHeading: "Or continue with",
+  googleLabel: "Google",
+  facebookLabel: "Facebook",
   submitLabel: "Sign in",
   forgotPasswordLink: "Forgot password?",
   successMessage: "You are now signed in."
@@ -25,6 +35,8 @@ export type LoginForm = {
   password: string;
 };
 
+export type SocialAuthProviderId = "google" | "facebook";
+
 export type AuthTelemetryClient = {
   track: (eventName: string, metadata: Record<string, string | number | boolean>) => void | Promise<void>;
 };
@@ -33,6 +45,30 @@ export async function submitLogin(form: LoginForm, telemetry?: AuthTelemetryClie
   const credentials = await signInWithEmailAndPassword(getFirebaseClientAuth(), form.email, form.password);
   const idToken = await credentials.user.getIdToken();
   await telemetry?.track("login_submitted", { emailVerified: credentials.user.emailVerified });
+  return idToken;
+}
+
+function createSocialProvider(providerId: SocialAuthProviderId): GoogleAuthProvider | FacebookAuthProvider {
+  if (providerId === "google") {
+    const provider = new GoogleAuthProvider();
+    provider.addScope("email");
+    provider.addScope("profile");
+    return provider;
+  }
+
+  const provider = new FacebookAuthProvider();
+  provider.addScope("email");
+  provider.addScope("public_profile");
+  return provider;
+}
+
+export async function submitSocialLogin(
+  providerId: SocialAuthProviderId,
+  telemetry?: AuthTelemetryClient
+): Promise<string> {
+  const credentials = await signInWithPopup(getFirebaseClientAuth(), createSocialProvider(providerId));
+  const idToken = await credentials.user.getIdToken();
+  await telemetry?.track("social_login_submitted", { provider: providerId, emailVerified: credentials.user.emailVerified });
   return idToken;
 }
 
@@ -98,6 +134,23 @@ const submitStyle: React.CSSProperties = {
   boxShadow: "0 0 24px rgba(34,211,238,0.3)"
 };
 
+const socialGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: 10,
+  marginBottom: 18
+};
+
+const socialButtonStyle: React.CSSProperties = {
+  border: "1px solid rgba(34,211,238,0.28)",
+  borderRadius: 10,
+  padding: "11px 14px",
+  background: "rgba(7,9,18,0.82)",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  fontWeight: 800,
+  cursor: "pointer"
+};
+
 const linkStyle: React.CSSProperties = {
   color: DESIGN_TOKENS.colors.brandPrimary,
   background: "none",
@@ -148,9 +201,23 @@ export function LoginForm(props: { telemetry?: AuthTelemetryClient }): React.JSX
     try {
       await submitLogin({ email: formState.email, password: formState.password }, props.telemetry);
       setStatus("success");
+      window.location.assign("/settings");
     } catch (err) {
       setStatus("error");
       setErrorMessage(getFirebaseAuthErrorMessage(err));
+    }
+  }
+
+  async function handleSocialLogin(providerId: SocialAuthProviderId): Promise<void> {
+    setStatus("loading");
+    setErrorMessage("");
+    try {
+      await submitSocialLogin(providerId, props.telemetry);
+      setStatus("success");
+      window.location.assign("/settings");
+    } catch (error) {
+      setStatus("error");
+      setErrorMessage(getFirebaseAuthErrorMessage(error));
     }
   }
 
@@ -159,6 +226,27 @@ export function LoginForm(props: { telemetry?: AuthTelemetryClient }): React.JSX
       <h1 style={{ font: DESIGN_TOKENS.typography.h2, marginBottom: DESIGN_TOKENS.spacing[1] }}>
         {AUTH_LOGIN_COPY.heading}
       </h1>
+      <p style={{ color: DESIGN_TOKENS.colors.textSecondary, fontWeight: 800, marginTop: 0, marginBottom: 8 }}>
+        {AUTH_LOGIN_COPY.socialHeading}
+      </p>
+      <div style={socialGridStyle}>
+        <button
+          type="button"
+          style={socialButtonStyle}
+          disabled={status === "loading"}
+          onClick={() => void handleSocialLogin("google")}
+        >
+          {AUTH_LOGIN_COPY.googleLabel}
+        </button>
+        <button
+          type="button"
+          style={socialButtonStyle}
+          disabled={status === "loading"}
+          onClick={() => void handleSocialLogin("facebook")}
+        >
+          {AUTH_LOGIN_COPY.facebookLabel}
+        </button>
+      </div>
       <form onSubmit={(e) => void handleSubmit(e)} noValidate>
         <label htmlFor="login-email" style={{ font: DESIGN_TOKENS.typography.body }}>
           {AUTH_LOGIN_COPY.emailLabel}

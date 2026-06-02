@@ -1,5 +1,7 @@
 import React from "react";
+import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { DESIGN_TOKENS } from "../features/design-system/tokens";
+import { getFirebaseAuthErrorMessage, getFirebaseClientAuth } from "../lib/firebaseAuthClient";
 
 type PreferenceState = {
   topics: string[];
@@ -21,6 +23,12 @@ const defaultPreferences: PreferenceState = {
   deliveryTime: "08:00",
   timezone: "America/Toronto",
   newsletterEnabled: true
+};
+
+type AuthState = {
+  user: User | null;
+  loading: boolean;
+  error: string;
 };
 
 const shellStyle: React.CSSProperties = {
@@ -52,10 +60,14 @@ const buttonBase: React.CSSProperties = {
   fontWeight: 700
 };
 
-function readPreferences(): PreferenceState {
+function getPreferenceStorageKey(userId?: string): string {
+  return userId ? `${STORAGE_KEY}:${userId}` : STORAGE_KEY;
+}
+
+function readPreferences(userId?: string): PreferenceState {
   if (typeof window === "undefined") return defaultPreferences;
 
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  const raw = window.localStorage.getItem(getPreferenceStorageKey(userId));
   if (!raw) return defaultPreferences;
 
   try {
@@ -65,37 +77,114 @@ function readPreferences(): PreferenceState {
   }
 }
 
-function savePreferences(preferences: PreferenceState): void {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+function savePreferences(preferences: PreferenceState, userId?: string): void {
+  window.localStorage.setItem(getPreferenceStorageKey(userId), JSON.stringify(preferences));
 }
 
-function usePreferences(): [PreferenceState, (next: PreferenceState) => void] {
-  const [preferences, setPreferences] = React.useState<PreferenceState>(() => readPreferences());
+function usePreferences(userId?: string): [PreferenceState, (next: PreferenceState) => void] {
+  const [preferences, setPreferences] = React.useState<PreferenceState>(() => readPreferences(userId));
+
+  React.useEffect(() => {
+    setPreferences(readPreferences(userId));
+  }, [userId]);
 
   const persist = React.useCallback((next: PreferenceState) => {
     setPreferences(next);
-    savePreferences(next);
-  }, []);
+    savePreferences(next, userId);
+  }, [userId]);
 
   return [preferences, persist];
 }
 
-function AppNav(): React.JSX.Element {
+function useAuthState(): AuthState {
+  const [state, setState] = React.useState<AuthState>({ user: null, loading: true, error: "" });
+
+  React.useEffect(() => {
+    try {
+      const unsubscribe = onAuthStateChanged(getFirebaseClientAuth(), (user) => {
+        setState({ user, loading: false, error: "" });
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      setState({ user: null, loading: false, error: getFirebaseAuthErrorMessage(error) });
+      return undefined;
+    }
+  }, []);
+
+  return state;
+}
+
+function AuthRequired({ auth }: { auth: AuthState }): React.JSX.Element | null {
+  if (auth.loading) {
+    return (
+      <main style={shellStyle}>
+        <section style={panelStyle}>
+          <p style={{ color: DESIGN_TOKENS.colors.textSecondary }}>Checking your session...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (auth.user) {
+    return null;
+  }
+
   return (
-    <nav style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-      <a href="/" style={navLinkStyle}>
-        Home
-      </a>
-      <a href="/dashboard/preferences" style={navLinkStyle}>
-        Preferences
-      </a>
-      <a href="/dashboard/newsletter" style={navLinkStyle}>
-        Newsletter
-      </a>
-      <a href="/blog" style={navLinkStyle}>
-        Blog
-      </a>
-    </nav>
+    <main style={shellStyle}>
+      <section style={panelStyle}>
+        <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Sign in to manage your paper</h1>
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
+          Your newsletter preferences, delivery schedule, and unsubscribe controls are available after sign in.
+        </p>
+        {auth.error ? <p style={{ color: DESIGN_TOKENS.colors.error }}>{auth.error}</p> : null}
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <a href="/login" style={ctaLinkStyle}>
+            Sign In
+          </a>
+          <a href="/signup" style={secondaryLinkStyle}>
+            Create Account
+          </a>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+async function logoutAndReturnHome(): Promise<void> {
+  await signOut(getFirebaseClientAuth());
+  window.location.assign("/");
+}
+
+function AppNav({ user }: { user?: User | null }): React.JSX.Element {
+  return (
+    <header style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+      <nav style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <a href="/" style={navLinkStyle}>
+          Home
+        </a>
+        <a href="/settings" style={navLinkStyle}>
+          Settings
+        </a>
+        <a href="/dashboard/preferences" style={navLinkStyle}>
+          Preferences
+        </a>
+        <a href="/dashboard/newsletter" style={navLinkStyle}>
+          Newsletter
+        </a>
+        <a href="/blog" style={navLinkStyle}>
+          Blog
+        </a>
+      </nav>
+      {user ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{user.email ?? "Signed in"}</span>
+          <button type="button" style={smallButtonStyle} onClick={() => void logoutAndReturnHome()}>
+            Sign Out
+          </button>
+        </div>
+      ) : null}
+    </header>
   );
 }
 
@@ -103,6 +192,16 @@ const navLinkStyle: React.CSSProperties = {
   color: DESIGN_TOKENS.colors.brandPrimary,
   textDecoration: "none",
   fontWeight: 700
+};
+
+const smallButtonStyle: React.CSSProperties = {
+  border: "1px solid rgba(34,211,238,0.26)",
+  borderRadius: 999,
+  background: "rgba(7,9,18,0.74)",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  padding: "8px 12px",
+  cursor: "pointer",
+  fontWeight: 800
 };
 
 function TopicButton({
@@ -157,10 +256,21 @@ const inputStyle: React.CSSProperties = {
 };
 
 export function OnboardingPage(): React.JSX.Element {
-  const [, persist] = usePreferences();
-  const [draft, setDraft] = React.useState<PreferenceState>(() => ({ ...readPreferences(), topics: [] }));
+  const auth = useAuthState();
+  const userId = auth.user?.uid;
+  const [, persist] = usePreferences(userId);
+  const [draft, setDraft] = React.useState<PreferenceState>(() => ({ ...readPreferences(userId), topics: [] }));
   const [step, setStep] = React.useState(0);
   const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    if (userId) {
+      setDraft({ ...readPreferences(userId), topics: [] });
+    }
+  }, [userId]);
+
+  const guard = AuthRequired({ auth });
+  if (guard) return guard;
 
   const toggleTopic = (topic: string): void => {
     setDraft((current) => ({
@@ -188,7 +298,7 @@ export function OnboardingPage(): React.JSX.Element {
   return (
     <main style={shellStyle}>
       <section style={panelStyle}>
-        <AppNav />
+        <AppNav user={auth.user} />
         <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Personalize Your Daily News</h1>
 
         {step === 0 && (
@@ -293,12 +403,17 @@ export function OnboardingPage(): React.JSX.Element {
 }
 
 export function PreferencesPage(): React.JSX.Element {
-  const [saved, persist] = usePreferences();
+  const auth = useAuthState();
+  const userId = auth.user?.uid;
+  const [saved, persist] = usePreferences(userId);
   const [draft, setDraft] = React.useState<PreferenceState>(saved);
   const [message, setMessage] = React.useState("");
   const [error, setError] = React.useState("");
 
   React.useEffect(() => setDraft(saved), [saved]);
+
+  const guard = AuthRequired({ auth });
+  if (guard) return guard;
 
   const isDirty = JSON.stringify(saved) !== JSON.stringify(draft);
 
@@ -327,7 +442,7 @@ export function PreferencesPage(): React.JSX.Element {
   return (
     <main style={shellStyle}>
       <section style={panelStyle}>
-        <AppNav />
+        <AppNav user={auth.user} />
         <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Update Your Preferences</h1>
         <div style={{ display: "grid", gap: 18 }}>
           <fieldset style={{ border: "1px solid rgba(34,211,238,0.24)", borderRadius: 12 }}>
@@ -409,14 +524,18 @@ export function PreferencesPage(): React.JSX.Element {
 }
 
 export function NewsletterPage(): React.JSX.Element {
-  const [preferences, persist] = usePreferences();
+  const auth = useAuthState();
+  const [preferences, persist] = usePreferences(auth.user?.uid);
 
   const setEnabled = (newsletterEnabled: boolean): void => persist({ ...preferences, newsletterEnabled });
+
+  const guard = AuthRequired({ auth });
+  if (guard) return guard;
 
   return (
     <main style={shellStyle}>
       <section style={panelStyle}>
-        <AppNav />
+        <AppNav user={auth.user} />
         <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Newsletter Delivery</h1>
         <label
           style={{
@@ -470,17 +589,43 @@ export function NewsletterPage(): React.JSX.Element {
 }
 
 export function SettingsPage(): React.JSX.Element {
+  const auth = useAuthState();
+  const [preferences] = usePreferences(auth.user?.uid);
+
+  const guard = AuthRequired({ auth });
+  if (guard) return guard;
+
   return (
     <main style={shellStyle}>
       <section style={panelStyle}>
-        <AppNav />
-        <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Settings</h1>
+        <AppNav user={auth.user} />
+        <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Your Daily Paper Settings</h1>
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 680 }}>
+          Manage what you receive, when it arrives, and whether newsletter delivery is active.
+        </p>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12, margin: "20px 0" }}>
+          <div style={metricStyle}>
+            Newsletter<br />
+            <strong>{preferences.newsletterEnabled ? "Subscribed" : "Paused"}</strong>
+          </div>
+          <div style={metricStyle}>
+            Topics<br />
+            <strong>{preferences.topics.length}</strong>
+          </div>
+          <div style={metricStyle}>
+            Delivery<br />
+            <strong>{preferences.deliveryTime}</strong>
+          </div>
+        </section>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <a data-testid="email-preferences" href="/dashboard/preferences" style={ctaLinkStyle}>
             Email Preferences
           </a>
           <a data-testid="subscription-settings" href="/dashboard/newsletter" style={ctaLinkStyle}>
             Subscription Settings
+          </a>
+          <a href="/onboarding" style={secondaryLinkStyle}>
+            Restart Onboarding
           </a>
         </div>
       </section>
@@ -566,6 +711,17 @@ const ctaLinkStyle: React.CSSProperties = {
   borderRadius: 999,
   background: `linear-gradient(120deg, ${DESIGN_TOKENS.colors.brandPrimary}, ${DESIGN_TOKENS.colors.brandSecondary})`,
   color: "#07111F",
+  textDecoration: "none",
+  fontWeight: 800
+};
+
+const secondaryLinkStyle: React.CSSProperties = {
+  display: "inline-block",
+  padding: "12px 16px",
+  borderRadius: 999,
+  border: "1px solid rgba(34,211,238,0.34)",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  background: "rgba(7,9,18,0.74)",
   textDecoration: "none",
   fontWeight: 800
 };

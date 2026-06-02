@@ -17,6 +17,24 @@ export function getFirebaseAuthErrorMessage(error: unknown): string {
     return FIREBASE_SETUP_MESSAGE;
   }
 
+  const code = typeof error === "object" && error && "code" in error ? String((error as { code?: string }).code) : "";
+
+  if (code === "auth/operation-not-allowed") {
+    return "This sign-in option is not enabled yet. Enable the provider in Firebase Authentication before using it.";
+  }
+
+  if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+    return "The sign-in window was closed before it finished.";
+  }
+
+  if (code === "auth/account-exists-with-different-credential") {
+    return "An account already exists for this email with a different sign-in method.";
+  }
+
+  if (code === "auth/unauthorized-domain") {
+    return "This domain is not authorized for Firebase sign-in yet.";
+  }
+
   return error instanceof Error ? error.message : "Authentication failed. Please try again.";
 }
 

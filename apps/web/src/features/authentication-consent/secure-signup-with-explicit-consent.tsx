@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  FacebookAuthProvider,
+  GoogleAuthProvider,
+  signInWithPopup,
+  type UserCredential
+} from "firebase/auth";
 import { DESIGN_TOKENS } from "../design-system/tokens";
 import { getFirebaseAuthErrorMessage, getFirebaseClientAuth } from "../../lib/firebaseAuthClient";
 
@@ -8,12 +14,17 @@ export const AUTH_SIGNUP_COPY = {
   subheading: "Use email signup and choose exactly which updates you want.",
   emailLabel: "Email",
   passwordLabel: "Password",
+  socialHeading: "Or continue with",
+  googleLabel: "Google",
+  facebookLabel: "Facebook",
   newsletterLabel: "I agree to receive the Daily Paper newsletter (required)",
   productUpdatesLabel: "Send me product updates (optional)",
   offersLabel: "Send me offers and promotions (optional)",
   submitLabel: "Create account",
   successMessage: "Signup complete. Please verify your email before newsletter delivery."
 } as const;
+
+export type SocialAuthProviderId = "google" | "facebook";
 
 export type SecureSignupConsentForm = {
   email: string;
@@ -65,6 +76,58 @@ export async function submitSecureSignupWithConsent(
   });
 }
 
+function createSocialProvider(providerId: SocialAuthProviderId): GoogleAuthProvider | FacebookAuthProvider {
+  if (providerId === "google") {
+    const provider = new GoogleAuthProvider();
+    provider.addScope("email");
+    provider.addScope("profile");
+    return provider;
+  }
+
+  const provider = new FacebookAuthProvider();
+  provider.addScope("email");
+  provider.addScope("public_profile");
+  return provider;
+}
+
+export async function submitSocialSignupWithConsent(
+  providerId: SocialAuthProviderId,
+  form: Omit<SecureSignupConsentForm, "email" | "password">,
+  telemetry?: AuthTelemetryClient
+): Promise<void> {
+  const credentials: UserCredential = await signInWithPopup(getFirebaseClientAuth(), createSocialProvider(providerId));
+  const idToken = await credentials.user.getIdToken();
+
+  const response = await fetch("/api/auth/signup", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`
+    },
+    body: JSON.stringify({
+      consent: {
+        newsletter: form.newsletter,
+        productUpdates: form.productUpdates,
+        offers: form.offers,
+        termsVersion: form.termsVersion
+      }
+    })
+  });
+
+  if (!response.ok) {
+    await telemetry?.track("social_signup_failed", { provider: providerId, status: response.status });
+    throw new Error(`Signup failed with status ${response.status}`);
+  }
+
+  await telemetry?.track("social_signup_submitted", {
+    provider: providerId,
+    newsletter: form.newsletter,
+    productUpdates: form.productUpdates,
+    offers: form.offers,
+    termsVersion: form.termsVersion
+  });
+}
+
 const cardStyle: React.CSSProperties = {
   background: "linear-gradient(135deg, rgba(17,24,39,0.94), rgba(12,17,34,0.9))",
   color: DESIGN_TOKENS.colors.textPrimary,
@@ -101,6 +164,23 @@ const submitStyle: React.CSSProperties = {
   boxShadow: "0 0 24px rgba(34,211,238,0.3)"
 };
 
+const socialGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: 10,
+  marginBottom: 18
+};
+
+const socialButtonStyle: React.CSSProperties = {
+  border: "1px solid rgba(34,211,238,0.28)",
+  borderRadius: 10,
+  padding: "11px 14px",
+  background: "rgba(7,9,18,0.82)",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  fontWeight: 800,
+  cursor: "pointer"
+};
+
 const statusStyle: React.CSSProperties = {
   marginTop: 16,
   color: DESIGN_TOKENS.colors.warning
@@ -116,9 +196,25 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
     termsVersion: "2026.05"
   });
   const [statusMessage, setStatusMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const setField = <K extends keyof SecureSignupConsentForm>(key: K, value: SecureSignupConsentForm[K]) => {
     setForm((previous) => ({ ...previous, [key]: value }));
+  };
+
+  const handleSocialSignup = async (providerId: SocialAuthProviderId): Promise<void> => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    setStatusMessage("");
+    try {
+      await submitSocialSignupWithConsent(providerId, form);
+      window.location.assign("/onboarding");
+    } catch (error) {
+      setStatusMessage(getFirebaseAuthErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -134,17 +230,45 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
         style={cardStyle}
         onSubmit={async (event) => {
           event.preventDefault();
+          if (isSubmitting) return;
+
+          setIsSubmitting(true);
           setStatusMessage("");
           try {
             await submitSecureSignupWithConsent(form);
             setStatusMessage(AUTH_SIGNUP_COPY.successMessage);
+            window.location.assign("/onboarding");
           } catch (error) {
             setStatusMessage(getFirebaseAuthErrorMessage(error));
+          } finally {
+            setIsSubmitting(false);
           }
         }}
       >
         <h1 style={{ font: DESIGN_TOKENS.typography.h2, marginBottom: 8 }}>{AUTH_SIGNUP_COPY.heading}</h1>
         <p style={{ color: DESIGN_TOKENS.colors.textSecondary, marginTop: 0 }}>{AUTH_SIGNUP_COPY.subheading}</p>
+
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, fontWeight: 800, marginBottom: 8 }}>
+          {AUTH_SIGNUP_COPY.socialHeading}
+        </p>
+        <div style={socialGridStyle}>
+          <button
+            type="button"
+            style={socialButtonStyle}
+            disabled={isSubmitting}
+            onClick={() => void handleSocialSignup("google")}
+          >
+            {AUTH_SIGNUP_COPY.googleLabel}
+          </button>
+          <button
+            type="button"
+            style={socialButtonStyle}
+            disabled={isSubmitting}
+            onClick={() => void handleSocialSignup("facebook")}
+          >
+            {AUTH_SIGNUP_COPY.facebookLabel}
+          </button>
+        </div>
 
         <label>
           {AUTH_SIGNUP_COPY.emailLabel}
@@ -196,8 +320,8 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
           <span>{AUTH_SIGNUP_COPY.offersLabel}</span>
         </label>
 
-        <button type="submit" style={submitStyle}>
-          {AUTH_SIGNUP_COPY.submitLabel}
+        <button type="submit" style={submitStyle} disabled={isSubmitting}>
+          {isSubmitting ? "Creating account..." : AUTH_SIGNUP_COPY.submitLabel}
         </button>
 
         {statusMessage ? <p style={statusStyle}>{statusMessage}</p> : null}

@@ -23,6 +23,7 @@ As a signed-in user, I want to choose my topics, region, and delivery time durin
 1. **Given** I am signed in and have no saved preferences, **When** I open onboarding, **Then** I see a clear empty state that invites me to choose topics, region, and delivery time.
 2. **Given** I select at least one topic, a region, and a delivery time, **When** I save, **Then** the preferences are stored and the dashboard shows my selections.
 3. **Given** I try to save without selecting any topics, **When** I submit the form, **Then** I see an error that requires me to choose at least one topic.
+4. **Given** I finish signup, **When** authentication succeeds, **Then** I am sent directly into onboarding instead of being left on the signup page.
 
 ---
 
@@ -39,6 +40,7 @@ As a returning user, I want to update my preferences after onboarding so my dige
 1. **Given** I already have saved preferences, **When** I edit my topics, region, or delivery time, **Then** the new values replace the previous ones and remain visible after refresh.
 2. **Given** I save a preference change, **When** the next digest is generated, **Then** the digest uses the updated preferences.
 3. **Given** I update my preferences from the dashboard, **When** I return later, **Then** I see the latest saved selections.
+4. **Given** I sign in as a returning user, **When** login succeeds, **Then** I land on an account settings hub that links to preference and newsletter controls.
 
 ---
 
@@ -85,6 +87,8 @@ As a user, I want to pause or resume my newsletter so I can temporarily stop del
 - **FR-PREF-011**: The system MUST keep the onboarding flow aligned with signup so the user can move from account creation to preferences setup without losing progress.
 - **FR-PREF-012**: The system MUST expose the backend contract endpoints required by the feature: GET /api/preferences and PUT /api/preferences.
 - **FR-PREF-013**: The system MUST update `updatedAt` monotonically on preference and onboarding-state changes, even when multiple updates happen within the same millisecond.
+- **FR-PREF-014**: The authenticated web dashboard MUST provide direct controls for preference updates, newsletter unsubscribe/resubscribe, and delivery frequency or time changes.
+- **FR-PREF-015**: User preference storage MUST be scoped to the authenticated user identity so accounts sharing a browser do not overwrite each other's dashboard choices.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -171,3 +175,9 @@ As a user, I want to pause or resume my newsletter so I can temporarily stop del
 
 - Confirmed unit and integration test imports now reference the actual `apps/api` source tree.
 - Confirmed preference and onboarding repository updates use monotonic ISO timestamps so rapid updates produce observable `updatedAt` changes.
+
+## Implementation Update (2026-06-02, Web Dashboard Flow)
+
+- Confirmed `/onboarding`, `/settings`, `/dashboard/preferences`, and `/dashboard/newsletter` require a Firebase-authenticated user in the web app.
+- Confirmed the local web preference store is keyed by Firebase UID for the current browser implementation.
+- Confirmed `/settings` provides the post-login hub for email preferences, newsletter subscription state, and restarting onboarding.
