@@ -194,7 +194,7 @@ As an admin, I want blocked users to be prevented from signing in or receiving n
 
 - Confirmed login and signup now render as full-screen dark neon account surfaces rather than compact centered boxes.
 - Confirmed Google and Facebook buttons appear below the primary email/password flow, with the login page showing the create-account prompt before social options.
-- Confirmed account and public surfaces include a "Powered by Netfruit" footer link.
+- Confirmed account and public surfaces include a "Powered by Netfroot" footer link.
 
 ## Telemetry & Privacy Compliance
 

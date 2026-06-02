@@ -154,7 +154,7 @@ function AuthRequired({ auth }: { auth: AuthState }): React.JSX.Element | null {
         <section style={panelStyle}>
           <p style={{ color: DESIGN_TOKENS.colors.textSecondary }}>Checking your session...</p>
         </section>
-        <PoweredByNetfruit />
+        <PoweredByNetfroot />
       </main>
     );
   }
@@ -180,7 +180,7 @@ function AuthRequired({ auth }: { auth: AuthState }): React.JSX.Element | null {
           </a>
         </div>
       </section>
-      <PoweredByNetfruit />
+      <PoweredByNetfroot />
     </main>
   );
 }
@@ -243,12 +243,12 @@ function BackToSettings(): React.JSX.Element {
   );
 }
 
-function PoweredByNetfruit(): React.JSX.Element {
+function PoweredByNetfroot(): React.JSX.Element {
   return (
     <footer style={{ width: "min(920px, 100%)", margin: "18px auto 0", color: DESIGN_TOKENS.colors.textSecondary }}>
       Powered by{" "}
-      <a href="https://netfruit.com" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
-        Netfruit
+      <a href="https://www.netfroot.com/" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+        Netfroot
       </a>
     </footer>
   );
@@ -487,7 +487,7 @@ export function OnboardingPage(): React.JSX.Element {
           )}
         </div>
       </section>
-      <PoweredByNetfruit />
+      <PoweredByNetfroot />
     </main>
   );
 }
@@ -649,7 +649,7 @@ export function PreferencesPage(): React.JSX.Element {
         )}
         {error && <p style={{ color: DESIGN_TOKENS.colors.error }}>{error}</p>}
       </section>
-      <PoweredByNetfruit />
+      <PoweredByNetfroot />
     </main>
   );
 }
@@ -717,7 +717,7 @@ export function NewsletterPage(): React.JSX.Element {
           </p>
         </section>
       </section>
-      <PoweredByNetfruit />
+      <PoweredByNetfroot />
     </main>
   );
 }
@@ -772,7 +772,7 @@ export function SettingsPage(): React.JSX.Element {
           </a>
         </div>
       </section>
-      <PoweredByNetfruit />
+      <PoweredByNetfroot />
     </main>
   );
 }
@@ -821,7 +821,7 @@ export function AdminPage(): React.JSX.Element {
           </section>
         )}
       </section>
-      <PoweredByNetfruit />
+      <PoweredByNetfroot />
     </main>
   );
 }
@@ -846,7 +846,7 @@ export function UnsubscribeConfirmationPage(): React.JSX.Element {
           Manage Newsletter
         </a>
       </section>
-      <PoweredByNetfruit />
+      <PoweredByNetfroot />
     </main>
   );
 }

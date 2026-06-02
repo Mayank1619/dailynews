@@ -189,4 +189,4 @@ As a user, I want to pause or resume my newsletter so I can temporarily stop del
 
 - Confirmed onboarding starts with no preselected topics and offers grouped topic chips across news, finance, technology/AI, culture, sports, and life.
 - Confirmed frequency choices are available in onboarding and editable later from preferences.
-- Confirmed account pages remove public Home/Blog links, include back-to-dashboard controls, and add a Netfruit footer link.
+- Confirmed account pages remove public Home/Blog links, include back-to-dashboard controls, and add a Netfroot footer link.

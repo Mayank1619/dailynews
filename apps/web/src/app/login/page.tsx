@@ -24,8 +24,8 @@ export default function LoginPage(): JSX.Element {
         </p>
         <p style={{ marginTop: DESIGN_TOKENS.spacing[2], color: DESIGN_TOKENS.colors.textSecondary }}>
           Powered by{" "}
-          <a href="https://netfruit.com" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
-            Netfruit
+          <a href="https://www.netfroot.com/" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+            Netfroot
           </a>
         </p>
       </section>
