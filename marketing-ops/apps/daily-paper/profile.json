@@ -1,0 +1,32 @@
+{
+  "appId": "daily-paper",
+  "productName": "Daily Paper",
+  "publicUrl": "https://dailynews-theta-ten.vercel.app",
+  "positioning": "A personalized AI daily paper for readers who want useful news without the scroll.",
+  "audience": "Young professionals and students who want useful news without scrolling.",
+  "topic": "why a personalized daily news briefing helps people make better everyday decisions",
+  "themes": [
+    "source-linked AI summaries",
+    "topic preferences",
+    "15-day free trial",
+    "daily or weekly delivery",
+    "in-app paper preview"
+  ],
+  "routes": {
+    "sample": "/samples/ai-daily-paper",
+    "cta": "/signup",
+    "pricing": "/pricing"
+  },
+  "platforms": [
+    "youtube-shorts",
+    "instagram-reels",
+    "facebook-reels"
+  ],
+  "preferredHandles": {
+    "youtube": "DailyPaperAI",
+    "instagram": "dailypaper.ai",
+    "facebookPage": "Daily Paper AI"
+  },
+  "postingMode": "review-only",
+  "dailyVideoCount": 1
+}

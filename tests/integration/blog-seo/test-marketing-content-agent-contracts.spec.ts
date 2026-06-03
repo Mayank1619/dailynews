@@ -51,4 +51,36 @@ describe("marketing content agent contracts", () => {
       process.env.OPENAI_API_KEY = originalKey;
     }
   });
+
+  it("supports Astroya as a separate app profile for the same Make.com framework", async () => {
+    const originalKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const result = await generateMakeMarketingCampaign({
+        date: "2026-06-03T08:00:00.000Z",
+        appId: "astroya",
+        productName: "Astroya SoulPath",
+        positioning: "A calm astrology and palmistry guidance experience for reflective self-discovery.",
+        topic: "personal astrology and palmistry guidance for reflective self-discovery",
+        audience: "spiritually curious adults",
+        newsletterThemes: ["Vedic astrology", "Western astrology", "palmistry", "AI-powered consultation"],
+        baseUrl: "https://www.astroya.ca",
+        sampleRoute: "/how-it-works",
+        ctaRoute: "/signup",
+        platforms: ["blog", "instagram-reels", "youtube-shorts", "facebook-reels"],
+        dailyVideoCount: 1
+      });
+
+      expect(result.app.appId).toBe("astroya");
+      expect(result.app.baseUrl).toBe("https://www.astroya.ca");
+      expect(result.contentKit.blogDraft.title).toContain("Astroya");
+      expect(result.contentKit.blogDraft.tags).toContain("astrology");
+      expect(result.publishingQueue.blogDraft.destination).toContain("Astroya");
+      expect(result.publishingQueue.videoBriefs.every((brief) => brief.productionMode === "script-only")).toBe(true);
+      expect(result.requiredUserInputs.join(" ")).toContain("Astroya SoulPath social account access");
+    } finally {
+      process.env.OPENAI_API_KEY = originalKey;
+    }
+  });
 });

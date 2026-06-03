@@ -60,6 +60,15 @@ Added on 2026-06-03:
 
 Daily Paper should be the first app profile. After one week of successful drafts and signup-source tracking, duplicate the Make scenario for Astoria and change only the app profile, routes, brand voice, and sample content.
 
+Updated on 2026-06-03:
+
+- The Make campaign endpoint now supports product-specific profiles, including Astroya SoulPath.
+- `/admin` Growth includes a marketing app selector for Daily Paper and Astroya SoulPath.
+- Local marketing operations files live in `marketing-ops/`.
+- Draft output can be stored locally in `marketing-ops/draft-queue/`; that folder is gitignored for generated data.
+- Separate YouTube, Instagram, and Facebook accounts should be created for each app before Make.com publishing is enabled.
+- Account creation, external permissions, and final posting remain confirmation-required browser actions.
+
 ### Minimal Make.com Scenario
 
 1. Scheduler: run once daily.
@@ -69,6 +78,14 @@ Daily Paper should be the first app profile. After one week of successful drafts
 5. Store: create rows in Google Sheets, Airtable, or Notion.
 6. Approval: send owner a daily digest by email or Slack.
 7. Publishing: keep posts in draft/review until direct platform posting is explicitly enabled.
+
+Astroya profile:
+
+- Product: Astroya SoulPath
+- URL: `https://www.astroya.ca`
+- Positioning: calm astrology and palmistry guidance for reflective self-discovery
+- Platforms: YouTube Shorts, Instagram Reels, Facebook Reels/Page
+- Safety rule: avoid guaranteed predictions and frame content as reflection, not medical, financial, legal, or relationship certainty.
 
 Cost control:
 

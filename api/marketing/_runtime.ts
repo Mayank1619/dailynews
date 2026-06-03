@@ -7,6 +7,8 @@ export type MarketingSourceSummary = {
 
 export type MarketingAgentRequest = {
   date?: Date | string;
+  productName?: string;
+  positioning?: string;
   topic?: string;
   audience?: string;
   newsletterThemes?: string[];
@@ -145,6 +147,8 @@ type AiMarketingPayload = {
   publishingPlan?: MarketingAgentResult["publishingPlan"];
 };
 
+const DEFAULT_PRODUCT_NAME = "Daily Paper";
+const DEFAULT_POSITIONING = "A personalized AI daily paper for readers who want useful news without the scroll.";
 const DEFAULT_TOPIC = "why reading a short daily news briefing helps people make better everyday decisions";
 const DEFAULT_AUDIENCE = "busy young professionals and students who want useful news without doomscrolling";
 const DEFAULT_THEMES = ["personalized AI morning paper", "source-linked summaries", "15-day free trial", "daily or weekly delivery"];
@@ -173,9 +177,10 @@ export async function generateDailyMarketingContent(request: MarketingAgentReque
       body: JSON.stringify({
         model: modelName,
         instructions: [
-          "Create one SEO blog draft and three short-form video scripts for Daily Paper.",
+          `Create one SEO blog draft and three short-form video scripts for ${normalized.productName}.`,
           "Use source summaries only for factual current claims. If sources are absent, write evergreen product education.",
           "Avoid hype, fake testimonials, invented metrics, and unsupported financial, political, legal, or medical certainty.",
+          "For wellness, spirituality, astrology, or palmistry products, frame output as reflective entertainment and self-discovery, not medical, financial, or guaranteed life advice.",
           "Return valid JSON only."
         ].join(" "),
         input: buildCompactMarketingPrompt(normalized),
@@ -224,6 +229,8 @@ export async function generateMakeMarketingCampaign(request: MakeMarketingCampai
     baseUrl: normalized.baseUrl,
     ctaRoute: normalized.ctaRoute,
     date: normalized.date,
+    positioning: normalized.positioning,
+    productName: normalized.productName,
     sampleRoute: normalized.sampleRoute,
     topic: normalized.topic
   });
@@ -309,9 +316,9 @@ export function buildMakeMarketingCampaign(
         slug: contentKit.blogDraft.slug,
         targetUrl: blogUrl,
         status: "draft",
-        destination: "Daily Paper blog admin queue"
+        destination: `${request.productName} blog admin queue`
       },
-      socialPosts: request.platforms.flatMap((platform) => buildSocialPosts(platform, contentKit, sampleUrl, signupUrl)),
+      socialPosts: request.platforms.flatMap((platform) => buildSocialPosts(platform, contentKit, sampleUrl, signupUrl, request.productName)),
       videoBriefs: videoPlatforms.flatMap((platform) =>
         selectedVideoScripts.map((script) => ({
           platform,
@@ -324,7 +331,7 @@ export function buildMakeMarketingCampaign(
       )
     },
     costGuardrails: [
-      "Use the Daily Paper endpoint for AI generation so Make only routes assets.",
+      `Use the ${request.productName} campaign endpoint payload for AI generation so Make only routes assets.`,
       "Generate one reusable short-video script per day and cross-post it instead of rendering unique videos per platform.",
       "Store drafts in Google Sheets or Airtable before adding paid social schedulers.",
       "Use script-only video briefs until a paid video generation budget is approved.",
@@ -333,8 +340,8 @@ export function buildMakeMarketingCampaign(
     requiredUserInputs: [
       "NEWSLETTER_ADMIN_TOKEN in Vercel and Make HTTP headers",
       "A Make.com scenario owner account",
-      "A Google Sheet, Airtable base, or Notion database for draft storage",
-      "Social account access for Instagram, Facebook, YouTube, and LinkedIn when publishing is enabled",
+      `A Google Sheet, Airtable base, Notion database, or local queue for ${request.productName} draft storage`,
+      `${request.productName} social account access for Instagram, Facebook, YouTube, and LinkedIn when publishing is enabled`,
       "Optional Buffer/Metricool/Later account if direct social scheduling becomes cheaper than native modules"
     ]
   };
@@ -343,7 +350,8 @@ export function buildMakeMarketingCampaign(
 export function buildCompactMarketingPrompt(request: Required<MarketingAgentRequest> & { date: Date }): string {
   return JSON.stringify({
     date: request.date.toISOString().slice(0, 10),
-    product: "Daily Paper",
+    product: request.productName,
+    positioning: request.positioning,
     topic: request.topic,
     audience: request.audience,
     themes: request.newsletterThemes,
@@ -376,12 +384,21 @@ export function buildFallbackMarketingContent(
 ): MarketingAgentResult {
   const date = request.date.toISOString().slice(0, 10);
   const keyword = keywordFromTopic(request.topic);
-  const title = "How a Daily News Habit Helps You Make Better Decisions";
+  const productName = request.productName;
+  const isDailyPaper = productName.toLowerCase().includes("daily paper");
+  const title = isDailyPaper ? "How a Daily News Habit Helps You Make Better Decisions" : `How ${productName} Turns Curiosity Into Reflection`;
   const slugValue = `${slug(keyword)}-${date}`;
   const sampleUrl = routeUrl(request.baseUrl, request.sampleRoute);
   const signupUrl = routeUrl(request.baseUrl, request.ctaRoute);
   const sourceBlock = renderSourceBlock(request.sourceSummaries);
   const themeSentence = request.newsletterThemes.slice(0, 4).join(", ");
+  const habitLine = isDailyPaper
+    ? "Most people do not need more noise in the morning. They need a smaller, clearer briefing that helps them understand what changed, what matters, and what they can ignore for now."
+    : "Most people do not need a louder feed when they are looking for meaning. They need a calmer way to reflect, notice patterns, and decide what they want to explore next.";
+  const productLine = isDailyPaper
+    ? "Daily Paper is built around that idea. Readers choose the topics they care about, such as AI, technology, politics, markets, sports, culture, horoscopes, and local news. The product then turns those preferences into a concise paper-style briefing with source-linked summaries."
+    : `${productName} is built around that idea. Visitors can explore astrology, palmistry, birth details, and AI-assisted reflection in a calm experience that frames guidance as self-discovery rather than certainty.`;
+  const ctaLabel = isDailyPaper ? "Daily Paper samples" : `${productName} experience`;
 
   return {
     date,
@@ -391,35 +408,43 @@ export function buildFallbackMarketingContent(
       title,
       slug: slugValue,
       metaTitle: title,
-      metaDescription: "See how a short, personalized Daily Paper briefing can turn news overload into clearer everyday decisions.",
-      excerpt: "A short daily briefing can help readers stay informed without losing the morning to endless feeds.",
+      metaDescription: isDailyPaper
+        ? "See how a short, personalized Daily Paper briefing can turn news overload into clearer everyday decisions."
+        : `See how ${productName} creates a calm, reflective astrology and palmistry experience for self-discovery.`,
+      excerpt: isDailyPaper
+        ? "A short daily briefing can help readers stay informed without losing the morning to endless feeds."
+        : `${productName} gives curious visitors a calmer way to explore astrology, palmistry, and personal reflection.`,
       bodyMarkdown: [
         `# ${title}`,
         "",
-        "Most people do not need more noise in the morning. They need a smaller, clearer briefing that helps them understand what changed, what matters, and what they can ignore for now.",
+        habitLine,
         "",
-        "Daily Paper is built around that idea. Readers choose the topics they care about, such as AI, technology, politics, markets, sports, culture, horoscopes, and local news. The product then turns those preferences into a concise paper-style briefing with source-linked summaries.",
+        productLine,
         "",
-        "## Why a shorter briefing works",
+        `## Why ${isDailyPaper ? "a shorter briefing" : "a calmer guidance flow"} works`,
         "",
-        "A focused briefing gives readers a repeatable habit: scan the top changes, understand the context, and move on with the day. That matters for students, founders, professionals, and anyone who wants to sound informed without living inside a feed.",
+        isDailyPaper
+          ? "A focused briefing gives readers a repeatable habit: scan the top changes, understand the context, and move on with the day. That matters for students, founders, professionals, and anyone who wants to sound informed without living inside a feed."
+          : "A focused reflection flow gives visitors a repeatable ritual: share the details they are comfortable sharing, read a grounded interpretation, and decide what resonates. It is useful for people who want a softer alternative to generic horoscope content.",
         "",
-        "## What Daily Paper makes easier",
+        `## What ${productName} makes easier`,
         "",
-        `The first version of the experience focuses on ${themeSentence}. That combination is important because useful news is not just about more headlines. It is about relevance, timing, and clarity.`,
+        `The first version of the experience focuses on ${themeSentence}. ${request.positioning}`,
         "",
         sourceBlock,
         "",
-        "## A better morning loop",
+        `## A better ${isDailyPaper ? "morning loop" : "reflection loop"}`,
         "",
-        "Instead of opening several apps, a reader can start with one personalized paper, follow the source links when something matters, and skip the rest. Over time, that creates a calmer relationship with news and a more useful way to keep up.",
+        isDailyPaper
+          ? "Instead of opening several apps, a reader can start with one personalized paper, follow the source links when something matters, and skip the rest. Over time, that creates a calmer relationship with news and a more useful way to keep up."
+          : "Instead of bouncing between generic readings, a visitor can move through one guided experience, compare the insight with their own lived context, and continue the conversation when they want deeper reflection.",
         "",
-        "## Try a sample",
+        `## Try ${productName}`,
         "",
-        `Start with a public sample at [Daily Paper samples](${sampleUrl}), then create your own version from your preferences. New users can start at [signup](${signupUrl}).`
+        `Start with the [${ctaLabel}](${sampleUrl}), then continue from [${productName} signup](${signupUrl}).`
       ].join("\n"),
-      tags: ["daily news", "AI newsletter", "personalized news", "productivity", "news habits"],
-      category: "Productivity and news habits",
+      tags: isDailyPaper ? ["daily news", "AI newsletter", "personalized news", "productivity", "news habits"] : ["astrology", "palmistry", "self-discovery", "AI guidance", "spiritual reflection"],
+      category: isDailyPaper ? "Productivity and news habits" : "Astrology and self-discovery",
       targetKeyword: keyword,
       canonicalPath: `/blog/${slugValue}`,
       ctaRoute: request.ctaRoute,
@@ -433,7 +458,8 @@ export function buildFallbackMarketingContent(
         "Keep the blog title under 60 characters where possible.",
         "Keep the meta description under 155 characters.",
         "Verify links to the signup page and sample newsletter page.",
-        "Review captions for exaggerated claims or fake testimonials before posting."
+        "Review captions for exaggerated claims or fake testimonials before posting.",
+        "For astrology or palmistry content, avoid guaranteed predictions and keep guidance framed as reflective self-discovery."
       ],
       channels: ["Blog", "Instagram Reels", "YouTube Shorts", "Facebook Reels", "LinkedIn"],
       automationNotes: [
@@ -453,6 +479,8 @@ export function buildFallbackMarketingContent(
 function normalizeRequest(request: MarketingAgentRequest): Required<MarketingAgentRequest> & { date: Date } {
   return {
     date: request.date ? new Date(request.date) : new Date(),
+    productName: cleanText(request.productName, DEFAULT_PRODUCT_NAME),
+    positioning: cleanText(request.positioning, DEFAULT_POSITIONING),
     topic: cleanText(request.topic, DEFAULT_TOPIC),
     audience: cleanText(request.audience, DEFAULT_AUDIENCE),
     newsletterThemes: request.newsletterThemes?.length ? request.newsletterThemes.map((theme) => cleanText(theme, "")).filter(Boolean) : DEFAULT_THEMES,
@@ -468,8 +496,8 @@ function normalizeCampaignRequest(request: MakeMarketingCampaignRequest): Requir
   return {
     ...normalized,
     appId: cleanText(request.appId, "daily-paper"),
-    productName: cleanText(request.productName, "Daily Paper"),
-    positioning: cleanText(request.positioning, "A personalized AI daily paper for readers who want useful news without the scroll."),
+    productName: normalized.productName,
+    positioning: normalized.positioning,
     strategy: request.strategy ?? "minimal-cost",
     platforms: request.platforms?.length ? request.platforms.filter(isKnownPlatform) : DEFAULT_MARKETING_PLATFORMS,
     dailyVideoCount: Math.max(1, Math.min(Number(request.dailyVideoCount ?? 1), 3))
@@ -515,97 +543,108 @@ function sanitizeAiPayload(
 function sanitizeVideo(script: GeneratedVideoScript, defaultRoute: string): GeneratedVideoScript {
   return {
     durationSeconds: script.durationSeconds,
-    title: cleanText(script.title, `Daily Paper ${script.durationSeconds}s short`).slice(0, 80),
-    hook: cleanText(script.hook, "Your morning news does not need to be a scroll session.").slice(0, 160),
+    title: cleanText(script.title, `${DEFAULT_PRODUCT_NAME} ${script.durationSeconds}s short`).slice(0, 80),
+    hook: cleanText(script.hook, "Your daily habit does not need to be a scroll session.").slice(0, 160),
     scenes: script.scenes.slice(0, 6).map((scene) => ({
       timecode: cleanText(scene.timecode, "0:00"),
-      visual: cleanText(scene.visual, "Show Daily Paper interface and sample newsletter."),
-      voiceover: cleanText(scene.voiceover, "Choose your topics and get a clean briefing."),
-      onscreenText: cleanText(scene.onscreenText, "Your news, simplified.")
+      visual: cleanText(scene.visual, "Show the product interface and sample output."),
+      voiceover: cleanText(scene.voiceover, "Choose your path and get a clean result."),
+      onscreenText: cleanText(scene.onscreenText, "Your daily habit, simplified.")
     })),
-    caption: cleanText(script.caption, "Try a cleaner way to read the news with Daily Paper.").slice(0, 280),
+    caption: cleanText(script.caption, "Try a cleaner daily reflection habit.").slice(0, 280),
     hashtags: uniqueStrings(script.hashtags).slice(0, 10),
     targetRoute: normalizeRoute(script.targetRoute, defaultRoute)
   };
 }
 
 function buildFallbackVideo(duration: 10 | 15 | 30, request: Required<MarketingAgentRequest> & { date: Date }): GeneratedVideoScript {
+  const productName = request.productName;
+  const isDailyPaper = productName.toLowerCase().includes("daily paper");
+  const topicPicker = isDailyPaper ? "topic picker" : "guided SoulPath flow";
+  const sampleOutput = isDailyPaper ? "sample newsletter" : "personalized guidance preview";
+  const coreHashtags = isDailyPaper
+    ? ["#DailyPaper", "#AINewsletter", "#NewsBriefing", "#Productivity", "#NewsWithoutTheScroll"]
+    : ["#Astroya", "#Astrology", "#Palmistry", "#SelfDiscovery", "#SpiritualReflection"];
   const sceneSets: Record<10 | 15 | 30, GeneratedVideoScene[]> = {
     10: [
       {
         timecode: "0-3s",
-        visual: "Fast cuts of crowded news feeds switching to the Daily Paper topic picker.",
-        voiceover: "News should not eat your whole morning.",
-        onscreenText: "Too much news?"
+        visual: `Fast cuts of noisy feeds switching to the ${productName} ${topicPicker}.`,
+        voiceover: isDailyPaper ? "News should not eat your whole morning." : "Self-reflection should feel calm, not confusing.",
+        onscreenText: isDailyPaper ? "Too much news?" : "Looking for clarity?"
       },
       {
         timecode: "3-7s",
-        visual: "Select AI, markets, sports, politics, and horoscopes.",
-        voiceover: "Choose what you care about.",
-        onscreenText: "Pick your topics"
+        visual: isDailyPaper ? "Select AI, markets, sports, politics, and horoscopes." : "Select guidance categories, birth details, and a palmistry path.",
+        voiceover: isDailyPaper ? "Choose what you care about." : "Share the path you want to explore.",
+        onscreenText: isDailyPaper ? "Pick your topics" : "Choose your path"
       },
       {
         timecode: "7-10s",
-        visual: "Show a clean sample newsletter with source labels.",
-        voiceover: "Get one clean Daily Paper.",
+        visual: `Show a clean ${sampleOutput}.`,
+        voiceover: `Start with ${productName}.`,
         onscreenText: "Try it free"
       }
     ],
     15: [
       {
         timecode: "0-4s",
-        visual: "Phone screen opens several news apps, then pauses.",
-        voiceover: "If your morning starts with five tabs and no clear answer, try this.",
-        onscreenText: "Morning news, simplified"
+        visual: isDailyPaper ? "Phone screen opens several news apps, then pauses." : "Phone screen scrolls generic horoscope posts, then pauses.",
+        voiceover: isDailyPaper ? "If your morning starts with five tabs and no clear answer, try this." : "If generic horoscope posts feel too shallow, try a more personal reflection flow.",
+        onscreenText: isDailyPaper ? "Morning news, simplified" : "Personal reflection, simplified"
       },
       {
         timecode: "4-10s",
-        visual: "Daily Paper preferences: topics, region, daily or weekly.",
-        voiceover: "Daily Paper lets you choose the topics and delivery rhythm.",
-        onscreenText: "AI, finance, sports, culture"
+        visual: isDailyPaper ? "Daily Paper preferences: topics, region, daily or weekly." : "Astroya flow: categories, birth details, palm upload, guidance result.",
+        voiceover: `${productName} lets you shape the experience around you.`,
+        onscreenText: isDailyPaper ? "AI, finance, sports, culture" : "Astrology + palmistry"
       },
       {
         timecode: "10-15s",
-        visual: "Inbox preview and public sample page.",
-        voiceover: "One source-linked briefing, built around you.",
-        onscreenText: "Start with a sample"
+        visual: `${sampleOutput} and signup page.`,
+        voiceover: isDailyPaper ? "One source-linked briefing, built around you." : "Reflective guidance, built around your details.",
+        onscreenText: "Start free"
       }
     ],
     30: [
       {
         timecode: "0-5s",
-        visual: "Split-screen: endless feed on one side, calm Daily Paper page on the other.",
-        voiceover: "Most news apps are built for scrolling. Daily Paper is built for finishing.",
-        onscreenText: "Stop scrolling. Start briefed."
+        visual: isDailyPaper ? "Split-screen: endless feed on one side, calm Daily Paper page on the other." : "Split-screen: generic horoscope feed on one side, calm Astroya flow on the other.",
+        voiceover: isDailyPaper ? "Most news apps are built for scrolling. Daily Paper is built for finishing." : "Most astrology content is built for quick posts. Astroya is built for deeper reflection.",
+        onscreenText: isDailyPaper ? "Stop scrolling. Start briefed." : "Less noise. More reflection."
       },
       {
         timecode: "5-12s",
-        visual: "User chooses detailed preferences across AI, technology, politics, finance, sports, horoscopes, and local news.",
-        voiceover: "Pick the topics you actually follow, from AI and markets to sports, culture, and local stories.",
-        onscreenText: "Choose your paper"
+        visual: isDailyPaper ? "User chooses detailed preferences across AI, technology, politics, finance, sports, horoscopes, and local news." : "User moves through guidance categories, birth details, and palm upload.",
+        voiceover: isDailyPaper ? "Pick the topics you actually follow, from AI and markets to sports, culture, and local stories." : "Choose what you want to understand, then add the details that make the reading personal.",
+        onscreenText: isDailyPaper ? "Choose your paper" : "Choose your SoulPath"
       },
       {
         timecode: "12-21s",
-        visual: "Newsletter preview shows short sections with source labels.",
-        voiceover: "Daily Paper turns those preferences into a clean briefing with source-linked summaries.",
-        onscreenText: "Source-linked summaries"
+        visual: isDailyPaper ? "Newsletter preview shows short sections with source labels." : "Guidance preview shows a calm, structured reading.",
+        voiceover: isDailyPaper ? "Daily Paper turns those preferences into a clean briefing with source-linked summaries." : "Astroya turns your path into a reflective reading you can explore further.",
+        onscreenText: isDailyPaper ? "Source-linked summaries" : "Reflective guidance"
       },
       {
         timecode: "21-30s",
-        visual: "Sample newsletter page transitions to signup.",
-        voiceover: "Read a sample, then create your own. New users get a 15-day free trial.",
-        onscreenText: "Try Daily Paper free"
+        visual: `${sampleOutput} transitions to signup.`,
+        voiceover: isDailyPaper ? "Read a sample, then create your own. New users get a 15-day free trial." : "Start with a free guidance flow and see what resonates.",
+        onscreenText: `Try ${productName} free`
       }
     ]
   };
 
   return {
     durationSeconds: duration,
-    title: `${duration}s Daily Paper short: news without the scroll`,
-    hook: duration === 10 ? "News should not eat your whole morning." : "Your morning news does not need to be a scroll session.",
+    title: `${duration}s ${productName} short: ${isDailyPaper ? "news without the scroll" : "reflection without the noise"}`,
+    hook: duration === 10
+      ? (isDailyPaper ? "News should not eat your whole morning." : "Self-reflection should feel calm, not confusing.")
+      : (isDailyPaper ? "Your morning news does not need to be a scroll session." : "Your astrology reading can be personal without feeling overwhelming."),
     scenes: sceneSets[duration],
-    caption: `Your news, chosen by you and summarized into one clean Daily Paper. Start with a sample: ${request.sampleRoute}`,
-    hashtags: ["#DailyPaper", "#AINewsletter", "#NewsBriefing", "#Productivity", "#NewsWithoutTheScroll"],
+    caption: isDailyPaper
+      ? `Your news, chosen by you and summarized into one clean Daily Paper. Start with a sample: ${request.sampleRoute}`
+      : `Explore astrology, palmistry, and reflective AI guidance with ${productName}. Start here: ${request.ctaRoute}`,
+    hashtags: coreHashtags,
     targetRoute: request.ctaRoute
   };
 }
@@ -739,6 +778,7 @@ function routeUrl(baseUrl: string, route: string): string {
 
 function keywordFromTopic(topic: string): string {
   const cleaned = topic.toLowerCase().replace(/[^a-z0-9\s-]+/g, " ").replace(/\s+/g, " ").trim();
+  if (cleaned.includes("astro") || cleaned.includes("palm") || cleaned.includes("soulpath")) return "personalized astrology guidance";
   if (cleaned.includes("daily news")) return "daily news briefing";
   if (cleaned.includes("newsletter")) return "personalized AI newsletter";
   return "daily news habit";
@@ -762,15 +802,19 @@ function buildSocialPosts(
   platform: MarketingPlatform,
   contentKit: MarketingAgentResult,
   sampleUrl: string,
-  signupUrl: string
+  signupUrl: string,
+  productName: string
 ): MakeMarketingCampaignResult["publishingQueue"]["socialPosts"] {
+  const isDailyPaper = productName.toLowerCase().includes("daily paper");
+  const hashtags = isDailyPaper ? ["#DailyPaper", "#AINewsletter", "#NewsBriefing"] : ["#Astroya", "#Astrology", "#Palmistry", "#SelfDiscovery"];
+
   if (platform === "blog") {
     return [
       {
         platform,
         format: "blog-link",
-        copy: `${contentKit.blogDraft.excerpt} Read the draft and try a sample Daily Paper: ${sampleUrl}`,
-        hashtags: ["#DailyPaper", "#AINewsletter", "#NewsBriefing"],
+        copy: `${contentKit.blogDraft.excerpt} Explore ${productName}: ${sampleUrl}`,
+        hashtags,
         targetUrl: sampleUrl,
         status: "draft"
       }
@@ -782,8 +826,8 @@ function buildSocialPosts(
       {
         platform,
         format: "blog-link",
-        copy: `${contentKit.blogDraft.title}\n\n${contentKit.blogDraft.excerpt}\n\nDaily Paper helps readers choose topics and receive a cleaner briefing. Start here: ${signupUrl}`,
-        hashtags: ["#AI", "#News", "#Productivity"],
+        copy: `${contentKit.blogDraft.title}\n\n${contentKit.blogDraft.excerpt}\n\n${productName} helps people ${isDailyPaper ? "choose topics and receive a cleaner briefing" : "move through a calmer reflection experience"}. Start here: ${signupUrl}`,
+        hashtags: isDailyPaper ? ["#AI", "#News", "#Productivity"] : ["#Astrology", "#Wellness", "#SelfDiscovery"],
         targetUrl: signupUrl,
         status: "draft"
       }

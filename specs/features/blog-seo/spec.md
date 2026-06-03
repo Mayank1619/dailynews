@@ -215,3 +215,11 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - The response includes a monthly Make operation estimate, free-tier fit label, scenario setup checklist, social post drafts, script-only video briefs, cost guardrails, and required user inputs.
 - `/admin` Growth panel now supports generating the Make.com campaign kit from the browser.
 - The workflow intentionally avoids paid video rendering and direct social autopublish in the starter phase.
+
+## Multi-App Marketing Update (2026-06-03)
+
+- The Make.com campaign workflow now supports app-specific profiles so Daily Paper and Astroya SoulPath can use the same endpoint without sharing copy, URLs, hashtags, or queues.
+- Admin Growth includes a marketing app selector for Daily Paper and Astroya SoulPath.
+- Astroya output uses `https://www.astroya.ca`, astrology/palmistry/self-discovery framing, and reflective-content safety rules.
+- Local marketing operations docs and profile JSON files live under `marketing-ops/`.
+- Generated local draft files are stored under `marketing-ops/draft-queue/`, which is ignored by git except for its README.

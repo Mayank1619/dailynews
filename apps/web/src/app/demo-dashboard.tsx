@@ -2063,6 +2063,33 @@ const growthPlan = [
   "Track signup conversion by source once analytics is connected."
 ] as const;
 
+const marketingAppProfiles = {
+  "daily-paper": {
+    appId: "daily-paper",
+    productName: "Daily Paper",
+    positioning: "A personalized AI daily paper for readers who want useful news without the scroll.",
+    baseUrl: "https://dailynews-theta-ten.vercel.app",
+    sampleRoute: "/samples/ai-daily-paper",
+    ctaRoute: "/signup",
+    topic: "why a personalized daily news briefing helps people make better everyday decisions",
+    audience: "young professionals and students who want useful news without scrolling",
+    themes: ["source-linked AI summaries", "topic preferences", "15-day free trial", "daily or weekly delivery"]
+  },
+  astroya: {
+    appId: "astroya",
+    productName: "Astroya SoulPath",
+    positioning: "A calm astrology and palmistry guidance experience for people who want reflective self-discovery without generic horoscope noise.",
+    baseUrl: "https://www.astroya.ca",
+    sampleRoute: "/how-it-works",
+    ctaRoute: "/signup",
+    topic: "why personalized astrology and palmistry guidance helps people reflect with more clarity",
+    audience: "spiritually curious adults who want a calm, personal astrology and palmistry experience",
+    themes: ["Vedic and Western astrology", "palmistry-assisted reflection", "birth details", "AI-powered consultation"]
+  }
+} as const;
+
+type MarketingAppId = keyof typeof marketingAppProfiles;
+
 const defaultMarketingTopic = "why a personalized daily news briefing helps people make better everyday decisions";
 const defaultMarketingAudience = "young professionals and students who want useful news without scrolling";
 
@@ -2094,6 +2121,7 @@ function AdminSection({
 
 function MarketingAgentPanel(): React.JSX.Element {
   const [adminToken, setAdminToken] = React.useState("");
+  const [selectedAppId, setSelectedAppId] = React.useState<MarketingAppId>("daily-paper");
   const [topic, setTopic] = React.useState(defaultMarketingTopic);
   const [audience, setAudience] = React.useState(defaultMarketingAudience);
   const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
@@ -2102,6 +2130,18 @@ function MarketingAgentPanel(): React.JSX.Element {
   const [makeMessage, setMakeMessage] = React.useState("");
   const [result, setResult] = React.useState<MarketingAgentResult | null>(null);
   const [makeResult, setMakeResult] = React.useState<MakeCampaignResult | null>(null);
+  const selectedApp = marketingAppProfiles[selectedAppId];
+
+  const selectMarketingApp = (appId: MarketingAppId): void => {
+    const profile = marketingAppProfiles[appId];
+    setSelectedAppId(appId);
+    setTopic(profile.topic);
+    setAudience(profile.audience);
+    setResult(null);
+    setMakeResult(null);
+    setMessage("");
+    setMakeMessage("");
+  };
 
   const generate = async (): Promise<void> => {
     if (!adminToken.trim()) {
@@ -2128,16 +2168,14 @@ function MarketingAgentPanel(): React.JSX.Element {
           Authorization: `Bearer ${adminToken.trim()}`
         },
         body: JSON.stringify({
+          productName: selectedApp.productName,
+          positioning: selectedApp.positioning,
           topic,
           audience,
-          newsletterThemes: [
-            "source-linked AI summaries",
-            "topic preferences",
-            "15-day free trial",
-            "daily or weekly delivery"
-          ],
-          sampleRoute: "/samples/ai-daily-paper",
-          ctaRoute: "/signup"
+          newsletterThemes: selectedApp.themes,
+          baseUrl: selectedApp.baseUrl,
+          sampleRoute: selectedApp.sampleRoute,
+          ctaRoute: selectedApp.ctaRoute
         })
       });
 
@@ -2180,16 +2218,18 @@ function MarketingAgentPanel(): React.JSX.Element {
           Authorization: `Bearer ${adminToken.trim()}`
         },
         body: JSON.stringify({
-          appId: "daily-paper",
-          productName: "Daily Paper",
-          positioning: "A personalized AI daily paper for readers who want useful news without the scroll.",
+          appId: selectedApp.appId,
+          productName: selectedApp.productName,
+          positioning: selectedApp.positioning,
           strategy: "minimal-cost",
           platforms: ["blog", "instagram-reels", "youtube-shorts", "facebook-reels"],
           dailyVideoCount: 1,
           topic,
           audience,
-          sampleRoute: "/samples/ai-daily-paper",
-          ctaRoute: "/signup"
+          newsletterThemes: selectedApp.themes,
+          baseUrl: selectedApp.baseUrl,
+          sampleRoute: selectedApp.sampleRoute,
+          ctaRoute: selectedApp.ctaRoute
         })
       });
 
@@ -2200,7 +2240,7 @@ function MarketingAgentPanel(): React.JSX.Element {
       const payload = (await response.json()) as MakeCampaignResult;
       setMakeResult(payload);
       setMakeStatus("success");
-      setMakeMessage("Make.com campaign kit generated. Use it to build the first low-cost Daily Paper scenario.");
+      setMakeMessage(`Make.com campaign kit generated. Use it to build the first low-cost ${selectedApp.productName} scenario.`);
     } catch {
       setMakeStatus("error");
       setMakeMessage("We could not generate the Make.com campaign kit. Check the admin token and try again.");
@@ -2210,6 +2250,18 @@ function MarketingAgentPanel(): React.JSX.Element {
   return (
     <AdminSection title="AI Marketing Agent">
       <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
+        <FieldLabel label="Marketing app">
+          <select
+            aria-label="Marketing app"
+            value={selectedAppId}
+            onChange={(event) => selectMarketingApp(event.target.value as MarketingAppId)}
+            style={inputStyle}
+          >
+            <option value="daily-paper">Daily Paper</option>
+            <option value="astroya">Astroya SoulPath</option>
+          </select>
+        </FieldLabel>
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
           <FieldLabel label="Admin token">
             <input

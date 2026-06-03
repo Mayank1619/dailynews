@@ -9,6 +9,8 @@ import {
 
 const request: MarketingAgentRequest = {
   date: new Date("2026-06-02T08:00:00.000Z"),
+  productName: "Daily Paper",
+  positioning: "A personalized AI daily paper for readers who want useful news without the scroll.",
   topic: "why personalized daily news helps young professionals make better everyday decisions",
   audience: "young professionals who want useful news without scrolling",
   newsletterThemes: ["source-linked AI summaries", "topic preferences", "15-day free trial"],
@@ -30,6 +32,8 @@ describe("marketing content agent", () => {
     const prompt = buildCompactMarketingPrompt({
       ...request,
       date: new Date(request.date as Date),
+      productName: request.productName ?? "",
+      positioning: request.positioning ?? "",
       topic: request.topic ?? "",
       audience: request.audience ?? "",
       newsletterThemes: request.newsletterThemes ?? [],
@@ -49,6 +53,8 @@ describe("marketing content agent", () => {
     const result = buildFallbackMarketingContent({
       ...request,
       date: new Date(request.date as Date),
+      productName: request.productName ?? "",
+      positioning: request.positioning ?? "",
       topic: request.topic ?? "",
       audience: request.audience ?? "",
       newsletterThemes: request.newsletterThemes ?? [],
@@ -86,6 +92,8 @@ describe("marketing content agent", () => {
     const contentKit = buildFallbackMarketingContent({
       ...request,
       date: new Date(request.date as Date),
+      productName: request.productName ?? "",
+      positioning: request.positioning ?? "",
       topic: request.topic ?? "",
       audience: request.audience ?? "",
       newsletterThemes: request.newsletterThemes ?? [],
@@ -99,6 +107,8 @@ describe("marketing content agent", () => {
       {
         ...request,
         date: new Date(request.date as Date),
+        productName: request.productName ?? "",
+        positioning: request.positioning ?? "",
         topic: request.topic ?? "",
         audience: request.audience ?? "",
         newsletterThemes: request.newsletterThemes ?? [],
@@ -107,8 +117,6 @@ describe("marketing content agent", () => {
         sampleRoute: request.sampleRoute ?? "",
         ctaRoute: request.ctaRoute ?? "",
         appId: "daily-paper",
-        productName: "Daily Paper",
-        positioning: "A personalized AI daily paper.",
         strategy: "minimal-cost",
         platforms: ["blog", "instagram-reels", "youtube-shorts", "facebook-reels"],
         dailyVideoCount: 1
@@ -122,5 +130,60 @@ describe("marketing content agent", () => {
     expect(campaign.publishingQueue.videoBriefs.every((brief) => brief.productionMode === "script-only")).toBe(true);
     expect(campaign.costGuardrails.join(" ")).toContain("video briefs");
     expect(campaign.requiredUserInputs.join(" ")).toContain("Make.com");
+  });
+
+  it("builds a separate Astroya campaign without Daily Paper wording", () => {
+    const astroyaRequest: MarketingAgentRequest = {
+      date: new Date("2026-06-03T08:00:00.000Z"),
+      productName: "Astroya SoulPath",
+      positioning: "A calm astrology and palmistry guidance experience for reflective self-discovery.",
+      topic: "why personalized astrology and palmistry guidance helps people reflect with more clarity",
+      audience: "spiritually curious adults who want a calm personal guidance flow",
+      newsletterThemes: ["Vedic and Western astrology", "palmistry-assisted reflection", "birth details", "AI-powered consultation"],
+      sourceSummaries: [],
+      baseUrl: "https://www.astroya.ca",
+      sampleRoute: "/how-it-works",
+      ctaRoute: "/signup"
+    };
+    const contentKit = buildFallbackMarketingContent({
+      ...astroyaRequest,
+      date: new Date(astroyaRequest.date as Date),
+      productName: astroyaRequest.productName ?? "",
+      positioning: astroyaRequest.positioning ?? "",
+      topic: astroyaRequest.topic ?? "",
+      audience: astroyaRequest.audience ?? "",
+      newsletterThemes: astroyaRequest.newsletterThemes ?? [],
+      sourceSummaries: astroyaRequest.sourceSummaries ?? [],
+      baseUrl: astroyaRequest.baseUrl ?? "",
+      sampleRoute: astroyaRequest.sampleRoute ?? "",
+      ctaRoute: astroyaRequest.ctaRoute ?? ""
+    });
+    const campaign = buildMakeMarketingCampaign(
+      {
+        ...astroyaRequest,
+        date: new Date(astroyaRequest.date as Date),
+        productName: astroyaRequest.productName ?? "",
+        positioning: astroyaRequest.positioning ?? "",
+        topic: astroyaRequest.topic ?? "",
+        audience: astroyaRequest.audience ?? "",
+        newsletterThemes: astroyaRequest.newsletterThemes ?? [],
+        sourceSummaries: astroyaRequest.sourceSummaries ?? [],
+        baseUrl: astroyaRequest.baseUrl ?? "",
+        sampleRoute: astroyaRequest.sampleRoute ?? "",
+        ctaRoute: astroyaRequest.ctaRoute ?? "",
+        appId: "astroya",
+        strategy: "minimal-cost",
+        platforms: ["blog", "instagram-reels", "youtube-shorts", "facebook-reels"],
+        dailyVideoCount: 1
+      },
+      contentKit
+    );
+
+    expect(campaign.app.productName).toBe("Astroya SoulPath");
+    expect(campaign.publishingQueue.blogDraft.targetUrl).toContain("https://www.astroya.ca");
+    expect(campaign.publishingQueue.socialPosts[0].copy).toContain("Astroya SoulPath");
+    expect(campaign.publishingQueue.socialPosts.flatMap((post) => post.hashtags)).toContain("#Astroya");
+    expect(campaign.contentKit.blogDraft.bodyMarkdown).toContain("self-discovery");
+    expect(campaign.contentKit.blogDraft.bodyMarkdown).not.toContain("Daily Paper is built around");
   });
 });
