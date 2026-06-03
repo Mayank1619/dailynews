@@ -27,6 +27,14 @@
     "instagram": "dailypaper.ai",
     "facebookPage": "Daily Paper AI"
   },
+  "socialAccounts": {
+    "youtube": {
+      "status": "created",
+      "channelId": "UC4ecXk84jfrVvXhxecJXYUA",
+      "studioUrl": "https://studio.youtube.com/channel/UC4ecXk84jfrVvXhxecJXYUA",
+      "publicUrl": "https://www.youtube.com/channel/UC4ecXk84jfrVvXhxecJXYUA"
+    }
+  },
   "postingMode": "auto-publish-when-secrets-present",
   "dailyVideoCount": 1
 }
