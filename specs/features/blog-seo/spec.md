@@ -110,6 +110,8 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - **FR-BLOG-017**: The system MUST expose an admin-only marketing content generation workflow that can produce one SEO blog draft plus 10-second, 15-second, and 30-second short-form video scripts from a topic, audience, newsletter themes, and optional source summaries.
 - **FR-BLOG-018**: The marketing generation workflow MUST return review controls, channel recommendations, signup/sample internal links, and automation notes before any generated content can become publicly published.
 - **FR-BLOG-019**: The marketing generation workflow MUST use supplied source summaries only for factual current-event claims and MUST fall back to evergreen product education when no source summaries are provided.
+- **FR-BLOG-020**: The system MUST expose an admin-only Make.com campaign workflow that returns a low-cost scenario blueprint, draft queues, operation estimate, required inputs, and cost guardrails for Daily Paper before expanding the same framework to Astoria.
+- **FR-BLOG-021**: The Make.com campaign workflow MUST default to draft/review output and script-only video briefs, with no direct autopublish or paid video generation unless explicitly enabled later.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -153,6 +155,7 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - **E2E**: Validate `/blog/[slug]` loads for published posts and returns not-found for draft or unknown slugs.
 - **E2E**: Validate category/tag and date filters return only matching published posts.
 - **E2E**: Validate the admin Growth panel can request a marketing kit, render the blog/video output, and avoid displaying the admin token.
+- **E2E**: Validate the admin Growth panel can request a Make.com campaign kit, render operation estimates and draft queues, and avoid displaying the admin token.
 
 ## Success Criteria *(mandatory)*
 
@@ -165,6 +168,7 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - **SC-005**: At least 90% of test participants can locate a relevant post by tag or date filter within 60 seconds.
 - **SC-006**: 100% of blog pages reviewed for release meet Design System readability and hierarchy checks.
 - **SC-007**: 100% of generated marketing content responses include one blog draft, exactly three video scripts, CTA/sample routes, and a human-review checklist.
+- **SC-008**: 100% of Make.com campaign responses include a scenario blueprint, monthly operation estimate, draft social queue, script-only video briefs, required inputs, and no autopublish behavior.
 
 ## Assumptions
 
@@ -202,3 +206,12 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - Added `/admin` Growth panel UI for entering the admin token, choosing topic/audience, calling the protected endpoint, and reviewing generated output in the browser.
 - OpenAI generation uses compact JSON input and strict JSON output when `OPENAI_API_KEY` is configured; deterministic fallback keeps the flow usable when the AI provider is unavailable.
 - The workflow generates drafts only. Public auto-publishing remains blocked until a persistent blog store and admin publish/review workflow are connected.
+
+## Make.com Framework Update (2026-06-03)
+
+- Added protected Vercel route `POST /api/marketing/make-campaign` for a Make.com-ready organic marketing campaign kit.
+- The workflow accepts Daily Paper app profile fields, topic, audience, platforms, sample route, CTA route, and `dailyVideoCount`.
+- The default strategy is `minimal-cost`: Make calls one app endpoint, stores drafts, sends an approval digest, and routes platform draft rows.
+- The response includes a monthly Make operation estimate, free-tier fit label, scenario setup checklist, social post drafts, script-only video briefs, cost guardrails, and required user inputs.
+- `/admin` Growth panel now supports generating the Make.com campaign kit from the browser.
+- The workflow intentionally avoids paid video rendering and direct social autopublish in the starter phase.

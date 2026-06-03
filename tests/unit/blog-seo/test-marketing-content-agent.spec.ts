@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildCompactMarketingPrompt,
   buildFallbackMarketingContent,
+  buildMakeMarketingCampaign,
   generateDailyMarketingContent,
   type MarketingAgentRequest
 } from "../../../apps/api/src/features/blog-seo/marketingContentAgent";
@@ -79,5 +80,47 @@ describe("marketing content agent", () => {
     } finally {
       process.env.OPENAI_API_KEY = originalKey;
     }
+  });
+
+  it("builds a free-tier-friendly Make.com campaign kit for Daily Paper", () => {
+    const contentKit = buildFallbackMarketingContent({
+      ...request,
+      date: new Date(request.date as Date),
+      topic: request.topic ?? "",
+      audience: request.audience ?? "",
+      newsletterThemes: request.newsletterThemes ?? [],
+      sourceSummaries: request.sourceSummaries ?? [],
+      baseUrl: request.baseUrl ?? "",
+      sampleRoute: request.sampleRoute ?? "",
+      ctaRoute: request.ctaRoute ?? ""
+    });
+
+    const campaign = buildMakeMarketingCampaign(
+      {
+        ...request,
+        date: new Date(request.date as Date),
+        topic: request.topic ?? "",
+        audience: request.audience ?? "",
+        newsletterThemes: request.newsletterThemes ?? [],
+        sourceSummaries: request.sourceSummaries ?? [],
+        baseUrl: request.baseUrl ?? "",
+        sampleRoute: request.sampleRoute ?? "",
+        ctaRoute: request.ctaRoute ?? "",
+        appId: "daily-paper",
+        productName: "Daily Paper",
+        positioning: "A personalized AI daily paper.",
+        strategy: "minimal-cost",
+        platforms: ["blog", "instagram-reels", "youtube-shorts", "facebook-reels"],
+        dailyVideoCount: 1
+      },
+      contentKit
+    );
+
+    expect(campaign.makeScenario.minimumPlanFit).toBe("free-tier-friendly");
+    expect(campaign.makeScenario.monthlyOperationEstimate).toBeLessThanOrEqual(1000);
+    expect(campaign.publishingQueue.blogDraft.status).toBe("draft");
+    expect(campaign.publishingQueue.videoBriefs.every((brief) => brief.productionMode === "script-only")).toBe(true);
+    expect(campaign.costGuardrails.join(" ")).toContain("video briefs");
+    expect(campaign.requiredUserInputs.join(" ")).toContain("Make.com");
   });
 });

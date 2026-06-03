@@ -95,6 +95,10 @@
 - [ ] T035 [P] Update feature documentation and runbook notes in specs/features/blog-seo/quickstart.md
 - [ ] T036 Run full test suite for this feature and capture results in specs/features/blog-seo/quickstart.md
 - [ ] T037 Verify privacy-safe telemetry and consent/RBAC compliance for this feature in specs/features/blog-seo/spec.md
+- [x] T038 [P] Add Make.com campaign endpoint and reusable campaign contracts for low-cost marketing automation
+- [x] T039 [P] Add unit and integration coverage for Make.com scenario output and operation guardrails
+- [x] T040 [P] Add admin Growth panel control for generating the Make.com campaign kit
+- [ ] T041 Configure the actual Make.com scenario with the user's Make account and social draft storage
 
 ## Dependencies & Execution Order
 

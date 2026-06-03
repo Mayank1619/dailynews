@@ -46,6 +46,37 @@ Suggested future tiers:
 
 ## Automated SEO Engine
 
+### Make.com Starter Framework
+
+Added on 2026-06-03:
+
+- `POST /api/marketing/make-campaign` returns a Make.com-ready campaign kit for Daily Paper.
+- The route is protected by the same `NEWSLETTER_ADMIN_TOKEN` bearer-token guard as the marketing generator.
+- The default scenario is designed for low cost: one daily Scheduler run, one HTTP request into the app, one storage row, one approval digest, and draft rows per platform.
+- Default platforms are Blog, Instagram Reels, YouTube Shorts, and Facebook Reels.
+- The starter flow creates script-only video briefs and captions. It does not call a paid video rendering provider.
+- The response includes Make scenario steps, estimated monthly operations, setup checklist, social draft queue, script-only video briefs, cost guardrails, and required inputs.
+- `/admin` Growth now includes a "Generate Make.com Campaign Kit" button so the operator can create the first campaign payload from the browser.
+
+Daily Paper should be the first app profile. After one week of successful drafts and signup-source tracking, duplicate the Make scenario for Astoria and change only the app profile, routes, brand voice, and sample content.
+
+### Minimal Make.com Scenario
+
+1. Scheduler: run once daily.
+2. HTTP: `POST https://dailynews-theta-ten.vercel.app/api/marketing/make-campaign`.
+3. Header: `Authorization: Bearer {{NEWSLETTER_ADMIN_TOKEN}}`.
+4. Body: product profile, topic, audience, platform list, `dailyVideoCount: 1`.
+5. Store: create rows in Google Sheets, Airtable, or Notion.
+6. Approval: send owner a daily digest by email or Slack.
+7. Publishing: keep posts in draft/review until direct platform posting is explicitly enabled.
+
+Cost control:
+
+- Let the app endpoint do AI generation so Make only routes payloads.
+- Cross-post one reusable video concept per day instead of generating unique videos per platform.
+- Keep video rendering manual or Canva/CapCut-template based until the first two weeks of organic performance are measured.
+- Add Buffer, Metricool, Later, or native social modules only after the draft queue proves useful.
+
 ### Implemented Marketing Agent
 
 Completed on 2026-06-02:

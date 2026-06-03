@@ -87,3 +87,92 @@ test("admin growth tab generates and renders a marketing content kit", async ({ 
   expect(authorization).toBe("Bearer test-admin-token");
   expect(requestTopic).toBe("news habits for students");
 });
+
+test("admin growth tab generates a Make.com campaign kit", async ({ page }) => {
+  let authorization = "";
+  let strategy = "";
+
+  await page.route("**/api/marketing/make-campaign", async (route) => {
+    const request = route.request();
+    authorization = request.headers().authorization ?? "";
+    strategy = String((request.postDataJSON() as { strategy?: string }).strategy ?? "");
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        date: "2026-06-03",
+        app: {
+          productName: "Daily Paper",
+          baseUrl: "https://dailynews-theta-ten.vercel.app",
+          positioning: "A personalized AI daily paper."
+        },
+        strategy: "minimal-cost",
+        makeScenario: {
+          name: "Daily Paper daily organic marketing factory",
+          trigger: "Make Scheduler, once per day",
+          cadence: "Daily draft generation with human approval before posting",
+          monthlyOperationEstimate: 270,
+          minimumPlanFit: "free-tier-friendly",
+          steps: [
+            {
+              order: 1,
+              module: "Scheduler",
+              action: "Run once daily during the chosen marketing window.",
+              estimatedOperationsPerRun: 1,
+              notes: "Start with Daily Paper."
+            },
+            {
+              order: 2,
+              module: "HTTP",
+              action: "POST to /api/marketing/make-campaign with the admin bearer token.",
+              estimatedOperationsPerRun: 1,
+              notes: "The app handles generation."
+            }
+          ],
+          setupChecklist: ["Create a Make scenario."]
+        },
+        publishingQueue: {
+          socialPosts: [
+            {
+              platform: "instagram-reels",
+              format: "short-video-caption",
+              copy: "Choose your topics. Get one clean paper.",
+              targetUrl: "/signup",
+              status: "draft"
+            }
+          ],
+          videoBriefs: [
+            {
+              platform: "instagram-reels",
+              durationSeconds: 15,
+              title: "Choose your paper",
+              productionMode: "script-only",
+              estimatedExternalVideoCostUsd: 0
+            }
+          ]
+        },
+        costGuardrails: [
+          "Use the Daily Paper endpoint for AI generation so Make only routes assets.",
+          "Use script-only video briefs until a paid video generation budget is approved."
+        ],
+        requiredUserInputs: ["NEWSLETTER_ADMIN_TOKEN"]
+      })
+    });
+  });
+
+  await page.goto("/admin");
+  await page.getByRole("button", { name: "Growth" }).click();
+  await page.getByLabel("Marketing admin token").fill("test-admin-token");
+  await page.getByRole("button", { name: "Generate Make.com Campaign Kit" }).click();
+
+  await expect(page.getByTestId("make-campaign-result")).toBeVisible();
+  await expect(page.getByText("Daily Paper daily organic marketing factory")).toBeVisible();
+  await expect(page.getByText("Estimated monthly operations: 270")).toBeVisible();
+  await expect(page.getByText("1 social drafts")).toBeVisible();
+  await expect(page.getByText("External video cost: $0 in this starter flow")).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("test-admin-token");
+
+  expect(authorization).toBe("Bearer test-admin-token");
+  expect(strategy).toBe("minimal-cost");
+});

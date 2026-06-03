@@ -67,6 +67,73 @@ export type MarketingAgentResult = {
   };
 };
 
+export type MarketingPlatform = "blog" | "instagram-reels" | "facebook-reels" | "youtube-shorts" | "linkedin";
+
+export type MakeMarketingCampaignRequest = MarketingAgentRequest & {
+  appId?: string;
+  productName?: string;
+  positioning?: string;
+  strategy?: "minimal-cost" | "growth";
+  platforms?: MarketingPlatform[];
+  dailyVideoCount?: number;
+};
+
+export type MakeScenarioStep = {
+  order: number;
+  module: string;
+  action: string;
+  estimatedOperationsPerRun: number;
+  notes: string;
+};
+
+export type MakeMarketingCampaignResult = {
+  date: string;
+  app: {
+    appId: string;
+    productName: string;
+    baseUrl: string;
+    positioning: string;
+  };
+  strategy: "minimal-cost" | "growth";
+  contentKit: MarketingAgentResult;
+  makeScenario: {
+    name: string;
+    trigger: string;
+    cadence: string;
+    monthlyOperationEstimate: number;
+    minimumPlanFit: "free-tier-friendly" | "paid-plan-likely";
+    steps: MakeScenarioStep[];
+    setupChecklist: string[];
+  };
+  publishingQueue: {
+    blogDraft: {
+      title: string;
+      slug: string;
+      targetUrl: string;
+      status: "draft";
+      destination: string;
+    };
+    socialPosts: Array<{
+      platform: MarketingPlatform;
+      format: "blog-link" | "short-video-caption";
+      copy: string;
+      hashtags: string[];
+      targetUrl: string;
+      status: "draft";
+    }>;
+    videoBriefs: Array<{
+      platform: Exclude<MarketingPlatform, "blog" | "linkedin">;
+      durationSeconds: number;
+      title: string;
+      hook: string;
+      productionMode: "script-only";
+      estimatedExternalVideoCostUsd: 0;
+    }>;
+  };
+  costGuardrails: string[];
+  requiredUserInputs: string[];
+};
+
 type OpenAIResponse = {
   output_text?: string;
   output?: Array<{ content?: Array<{ text?: string }> }>;
@@ -85,6 +152,7 @@ const DEFAULT_BASE_URL = "https://dailynews-theta-ten.vercel.app";
 const DEFAULT_SAMPLE_ROUTE = "/samples/ai-daily-paper";
 const DEFAULT_CTA_ROUTE = "/signup";
 const VIDEO_DURATIONS = [10, 15, 30] as const;
+const DEFAULT_MARKETING_PLATFORMS: MarketingPlatform[] = ["blog", "instagram-reels", "youtube-shorts", "facebook-reels"];
 
 export async function generateDailyMarketingContent(request: MarketingAgentRequest = {}): Promise<MarketingAgentResult> {
   const normalized = normalizeRequest(request);
@@ -146,6 +214,130 @@ export async function generateDailyMarketingContent(request: MarketingAgentReque
   } catch {
     return buildFallbackMarketingContent(normalized, modelName);
   }
+}
+
+export async function generateMakeMarketingCampaign(request: MakeMarketingCampaignRequest = {}): Promise<MakeMarketingCampaignResult> {
+  const normalized = normalizeCampaignRequest(request);
+  const contentKit = await generateDailyMarketingContent({
+    ...request,
+    audience: normalized.audience,
+    baseUrl: normalized.baseUrl,
+    ctaRoute: normalized.ctaRoute,
+    date: normalized.date,
+    sampleRoute: normalized.sampleRoute,
+    topic: normalized.topic
+  });
+
+  return buildMakeMarketingCampaign(normalized, contentKit);
+}
+
+export function buildMakeMarketingCampaign(
+  request: Required<MakeMarketingCampaignRequest> & { date: Date },
+  contentKit: MarketingAgentResult
+): MakeMarketingCampaignResult {
+  const videoPlatforms = request.platforms.filter(isVideoPlatform);
+  const selectedVideoScripts = contentKit.videoScripts.slice(0, Math.max(1, Math.min(request.dailyVideoCount, contentKit.videoScripts.length)));
+  const operationEstimate = estimateMonthlyMakeOperations(request.platforms.length, selectedVideoScripts.length);
+  const sampleUrl = routeUrl(request.baseUrl, request.sampleRoute);
+  const signupUrl = routeUrl(request.baseUrl, request.ctaRoute);
+  const blogUrl = routeUrl(request.baseUrl, contentKit.blogDraft.canonicalPath);
+
+  return {
+    date: contentKit.date,
+    app: {
+      appId: request.appId,
+      productName: request.productName,
+      baseUrl: request.baseUrl,
+      positioning: request.positioning
+    },
+    strategy: request.strategy,
+    contentKit,
+    makeScenario: {
+      name: `${request.productName} daily organic marketing factory`,
+      trigger: "Make Scheduler, once per day",
+      cadence: "Daily draft generation with human approval before posting",
+      monthlyOperationEstimate: operationEstimate,
+      minimumPlanFit: operationEstimate <= 1000 ? "free-tier-friendly" : "paid-plan-likely",
+      steps: [
+        {
+          order: 1,
+          module: "Scheduler",
+          action: "Run once daily during the chosen marketing window.",
+          estimatedOperationsPerRun: 1,
+          notes: "Start with one daily run for Daily Paper before adding Astoria."
+        },
+        {
+          order: 2,
+          module: "HTTP",
+          action: "POST to /api/marketing/make-campaign with the admin bearer token.",
+          estimatedOperationsPerRun: 1,
+          notes: "The app handles OpenAI/fallback generation, so Make does not need a second AI module."
+        },
+        {
+          order: 3,
+          module: "Google Sheets or Airtable",
+          action: "Store the blog draft, captions, links, and approval status.",
+          estimatedOperationsPerRun: 1,
+          notes: "Use a lightweight queue first; publishing can be added after the review loop works."
+        },
+        {
+          order: 4,
+          module: "Email or Slack",
+          action: "Send the daily approval digest to the owner.",
+          estimatedOperationsPerRun: 1,
+          notes: "This prevents accidental autoposting and keeps quality control cheap."
+        },
+        {
+          order: 5,
+          module: "Router",
+          action: "Create one draft task per enabled platform.",
+          estimatedOperationsPerRun: request.platforms.length,
+          notes: "For now, route to draft rows or Buffer queues rather than direct publishing."
+        }
+      ],
+      setupChecklist: [
+        "Create a Make scenario with Scheduler, HTTP, storage, approval digest, and platform draft routes.",
+        "Set the HTTP Authorization header to Bearer NEWSLETTER_ADMIN_TOKEN.",
+        "Create storage columns for app, date, blog title, slug, social caption, platform, approval status, and posted URL.",
+        "Keep video rendering off until the first week of captions and scripts performs well.",
+        "After Daily Paper is stable, duplicate the scenario and switch the app profile to Astoria."
+      ]
+    },
+    publishingQueue: {
+      blogDraft: {
+        title: contentKit.blogDraft.title,
+        slug: contentKit.blogDraft.slug,
+        targetUrl: blogUrl,
+        status: "draft",
+        destination: "Daily Paper blog admin queue"
+      },
+      socialPosts: request.platforms.flatMap((platform) => buildSocialPosts(platform, contentKit, sampleUrl, signupUrl)),
+      videoBriefs: videoPlatforms.flatMap((platform) =>
+        selectedVideoScripts.map((script) => ({
+          platform,
+          durationSeconds: script.durationSeconds,
+          title: script.title,
+          hook: script.hook,
+          productionMode: "script-only" as const,
+          estimatedExternalVideoCostUsd: 0 as const
+        }))
+      )
+    },
+    costGuardrails: [
+      "Use the Daily Paper endpoint for AI generation so Make only routes assets.",
+      "Generate one reusable short-video script per day and cross-post it instead of rendering unique videos per platform.",
+      "Store drafts in Google Sheets or Airtable before adding paid social schedulers.",
+      "Use script-only video briefs until a paid video generation budget is approved.",
+      "Review weekly signup source data before increasing daily runs or platform count."
+    ],
+    requiredUserInputs: [
+      "NEWSLETTER_ADMIN_TOKEN in Vercel and Make HTTP headers",
+      "A Make.com scenario owner account",
+      "A Google Sheet, Airtable base, or Notion database for draft storage",
+      "Social account access for Instagram, Facebook, YouTube, and LinkedIn when publishing is enabled",
+      "Optional Buffer/Metricool/Later account if direct social scheduling becomes cheaper than native modules"
+    ]
+  };
 }
 
 export function buildCompactMarketingPrompt(request: Required<MarketingAgentRequest> & { date: Date }): string {
@@ -268,6 +460,19 @@ function normalizeRequest(request: MarketingAgentRequest): Required<MarketingAge
     baseUrl: cleanText(request.baseUrl, DEFAULT_BASE_URL).replace(/\/$/, ""),
     sampleRoute: normalizeRoute(request.sampleRoute, DEFAULT_SAMPLE_ROUTE),
     ctaRoute: normalizeRoute(request.ctaRoute, DEFAULT_CTA_ROUTE)
+  };
+}
+
+function normalizeCampaignRequest(request: MakeMarketingCampaignRequest): Required<MakeMarketingCampaignRequest> & { date: Date } {
+  const normalized = normalizeRequest(request);
+  return {
+    ...normalized,
+    appId: cleanText(request.appId, "daily-paper"),
+    productName: cleanText(request.productName, "Daily Paper"),
+    positioning: cleanText(request.positioning, "A personalized AI daily paper for readers who want useful news without the scroll."),
+    strategy: request.strategy ?? "minimal-cost",
+    platforms: request.platforms?.length ? request.platforms.filter(isKnownPlatform) : DEFAULT_MARKETING_PLATFORMS,
+    dailyVideoCount: Math.max(1, Math.min(Number(request.dailyVideoCount ?? 1), 3))
   };
 }
 
@@ -551,4 +756,65 @@ function extractOutputText(response: OpenAIResponse): string {
   const text = response.output_text ?? response.output?.flatMap((item) => item.content ?? []).map((content) => content.text).filter(Boolean).join("");
   if (!text) throw new Error("OpenAI response did not include text output.");
   return text;
+}
+
+function buildSocialPosts(
+  platform: MarketingPlatform,
+  contentKit: MarketingAgentResult,
+  sampleUrl: string,
+  signupUrl: string
+): MakeMarketingCampaignResult["publishingQueue"]["socialPosts"] {
+  if (platform === "blog") {
+    return [
+      {
+        platform,
+        format: "blog-link",
+        copy: `${contentKit.blogDraft.excerpt} Read the draft and try a sample Daily Paper: ${sampleUrl}`,
+        hashtags: ["#DailyPaper", "#AINewsletter", "#NewsBriefing"],
+        targetUrl: sampleUrl,
+        status: "draft"
+      }
+    ];
+  }
+
+  if (platform === "linkedin") {
+    return [
+      {
+        platform,
+        format: "blog-link",
+        copy: `${contentKit.blogDraft.title}\n\n${contentKit.blogDraft.excerpt}\n\nDaily Paper helps readers choose topics and receive a cleaner briefing. Start here: ${signupUrl}`,
+        hashtags: ["#AI", "#News", "#Productivity"],
+        targetUrl: signupUrl,
+        status: "draft"
+      }
+    ];
+  }
+
+  const script = contentKit.videoScripts.find((candidate) => candidate.durationSeconds === 15) ?? contentKit.videoScripts[0];
+  return [
+    {
+      platform,
+      format: "short-video-caption",
+      copy: `${script.caption} ${signupUrl}`,
+      hashtags: script.hashtags,
+      targetUrl: signupUrl,
+      status: "draft"
+    }
+  ];
+}
+
+function estimateMonthlyMakeOperations(platformCount: number, videoScriptCount: number): number {
+  const dailyRuns = 30;
+  const baseModulesPerRun = 4;
+  const routerWorkPerRun = Math.max(1, platformCount);
+  const videoBriefRowsPerRun = Math.max(1, videoScriptCount);
+  return dailyRuns * (baseModulesPerRun + routerWorkPerRun + videoBriefRowsPerRun);
+}
+
+function isKnownPlatform(platform: MarketingPlatform): platform is MarketingPlatform {
+  return DEFAULT_MARKETING_PLATFORMS.includes(platform) || platform === "linkedin";
+}
+
+function isVideoPlatform(platform: MarketingPlatform): platform is Exclude<MarketingPlatform, "blog" | "linkedin"> {
+  return platform === "instagram-reels" || platform === "facebook-reels" || platform === "youtube-shorts";
 }

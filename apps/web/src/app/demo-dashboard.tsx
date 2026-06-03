@@ -1969,6 +1969,49 @@ type MarketingAgentResult = {
   };
 };
 
+type MakeCampaignResult = {
+  date: string;
+  app: {
+    productName: string;
+    baseUrl: string;
+    positioning: string;
+  };
+  strategy: "minimal-cost" | "growth";
+  makeScenario: {
+    name: string;
+    trigger: string;
+    cadence: string;
+    monthlyOperationEstimate: number;
+    minimumPlanFit: "free-tier-friendly" | "paid-plan-likely";
+    steps: Array<{
+      order: number;
+      module: string;
+      action: string;
+      estimatedOperationsPerRun: number;
+      notes: string;
+    }>;
+    setupChecklist: string[];
+  };
+  publishingQueue: {
+    socialPosts: Array<{
+      platform: string;
+      format: string;
+      copy: string;
+      targetUrl: string;
+      status: "draft";
+    }>;
+    videoBriefs: Array<{
+      platform: string;
+      durationSeconds: number;
+      title: string;
+      productionMode: "script-only";
+      estimatedExternalVideoCostUsd: 0;
+    }>;
+  };
+  costGuardrails: string[];
+  requiredUserInputs: string[];
+};
+
 const adminIssues: AdminNewsletterIssue[] = [
   {
     id: "newsletter-openai-smoke-user-2026-06-02",
@@ -2054,8 +2097,11 @@ function MarketingAgentPanel(): React.JSX.Element {
   const [topic, setTopic] = React.useState(defaultMarketingTopic);
   const [audience, setAudience] = React.useState(defaultMarketingAudience);
   const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [makeStatus, setMakeStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = React.useState("");
+  const [makeMessage, setMakeMessage] = React.useState("");
   const [result, setResult] = React.useState<MarketingAgentResult | null>(null);
+  const [makeResult, setMakeResult] = React.useState<MakeCampaignResult | null>(null);
 
   const generate = async (): Promise<void> => {
     if (!adminToken.trim()) {
@@ -2109,6 +2155,58 @@ function MarketingAgentPanel(): React.JSX.Element {
     }
   };
 
+  const generateMakeCampaign = async (): Promise<void> => {
+    if (!adminToken.trim()) {
+      setMakeStatus("error");
+      setMakeMessage("Enter the admin token before generating a Make.com campaign kit.");
+      return;
+    }
+
+    if (!topic.trim()) {
+      setMakeStatus("error");
+      setMakeMessage("Enter a topic for the Make.com campaign kit.");
+      return;
+    }
+
+    setMakeStatus("loading");
+    setMakeMessage("");
+    setMakeResult(null);
+
+    try {
+      const response = await fetch("/api/marketing/make-campaign", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminToken.trim()}`
+        },
+        body: JSON.stringify({
+          appId: "daily-paper",
+          productName: "Daily Paper",
+          positioning: "A personalized AI daily paper for readers who want useful news without the scroll.",
+          strategy: "minimal-cost",
+          platforms: ["blog", "instagram-reels", "youtube-shorts", "facebook-reels"],
+          dailyVideoCount: 1,
+          topic,
+          audience,
+          sampleRoute: "/samples/ai-daily-paper",
+          ctaRoute: "/signup"
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("make_campaign_failed");
+      }
+
+      const payload = (await response.json()) as MakeCampaignResult;
+      setMakeResult(payload);
+      setMakeStatus("success");
+      setMakeMessage("Make.com campaign kit generated. Use it to build the first low-cost Daily Paper scenario.");
+    } catch {
+      setMakeStatus("error");
+      setMakeMessage("We could not generate the Make.com campaign kit. Check the admin token and try again.");
+    }
+  };
+
   return (
     <AdminSection title="AI Marketing Agent">
       <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
@@ -2143,24 +2241,45 @@ function MarketingAgentPanel(): React.JSX.Element {
           />
         </FieldLabel>
 
-        <button
-          type="button"
-          data-testid="generate-marketing-kit"
-          onClick={() => void generate()}
-          disabled={status === "loading"}
-          style={{
-            ...buttonBase,
-            width: "fit-content",
-            background: DESIGN_TOKENS.colors.brandPrimary,
-            color: "#07111F"
-          }}
-        >
-          {status === "loading" ? "Generating..." : "Generate Blog and Video Kit"}
-        </button>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button
+            type="button"
+            data-testid="generate-marketing-kit"
+            onClick={() => void generate()}
+            disabled={status === "loading"}
+            style={{
+              ...buttonBase,
+              width: "fit-content",
+              background: DESIGN_TOKENS.colors.brandPrimary,
+              color: "#07111F"
+            }}
+          >
+            {status === "loading" ? "Generating..." : "Generate Blog and Video Kit"}
+          </button>
+          <button
+            type="button"
+            data-testid="generate-make-campaign-kit"
+            onClick={() => void generateMakeCampaign()}
+            disabled={makeStatus === "loading"}
+            style={{
+              ...buttonBase,
+              width: "fit-content",
+              borderColor: "rgba(244,114,182,0.54)",
+              background: "rgba(244,114,182,0.14)"
+            }}
+          >
+            {makeStatus === "loading" ? "Preparing..." : "Generate Make.com Campaign Kit"}
+          </button>
+        </div>
 
         {message ? (
           <p role={status === "error" ? "alert" : "status"} style={{ color: status === "error" ? DESIGN_TOKENS.colors.error : DESIGN_TOKENS.colors.success }}>
             {message}
+          </p>
+        ) : null}
+        {makeMessage ? (
+          <p role={makeStatus === "error" ? "alert" : "status"} style={{ color: makeStatus === "error" ? DESIGN_TOKENS.colors.error : DESIGN_TOKENS.colors.success }}>
+            {makeMessage}
           </p>
         ) : null}
 
@@ -2200,6 +2319,47 @@ function MarketingAgentPanel(): React.JSX.Element {
               </span>
               <ul style={{ margin: "6px 0 0", paddingLeft: 20 }}>
                 {result.publishingPlan.reviewChecklist.slice(0, 5).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ) : null}
+
+        {makeResult ? (
+          <section data-testid="make-campaign-result" style={{ display: "grid", gap: 14 }}>
+            <div style={readinessStyle}>
+              <span style={{ color: DESIGN_TOKENS.colors.accentHighlight, fontWeight: 900 }}>
+                Make.com scenario - {makeResult.makeScenario.minimumPlanFit}
+              </span>
+              <strong>{makeResult.makeScenario.name}</strong>
+              <span>{makeResult.makeScenario.cadence}</span>
+              <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
+                Estimated monthly operations: {makeResult.makeScenario.monthlyOperationEstimate}
+              </span>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+              <div style={readinessStyle}>
+                <strong>Scenario Steps</strong>
+                <ol style={{ margin: "6px 0 0", paddingLeft: 20 }}>
+                  {makeResult.makeScenario.steps.slice(0, 5).map((step) => (
+                    <li key={step.order}>{step.module}: {step.action}</li>
+                  ))}
+                </ol>
+              </div>
+              <div style={readinessStyle}>
+                <strong>Draft Queue</strong>
+                <span>{makeResult.publishingQueue.socialPosts.length} social drafts</span>
+                <span>{makeResult.publishingQueue.videoBriefs.length} script-only video briefs</span>
+                <span>External video cost: $0 in this starter flow</span>
+              </div>
+            </div>
+
+            <div style={readinessStyle}>
+              <strong>Cost Guardrails</strong>
+              <ul style={{ margin: "6px 0 0", paddingLeft: 20 }}>
+                {makeResult.costGuardrails.slice(0, 4).map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
