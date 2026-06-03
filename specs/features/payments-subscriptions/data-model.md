@@ -1,13 +1,32 @@
-# Data Model - Payments Subscriptions (Phase 2 Placeholder)
+# Data Model - Payments Subscriptions
 
-## Entities (Reserved for Phase 2)
-- SubscriptionPlan (reserved): id, tier, billingInterval, price, currency, enabled
-- UserSubscription (reserved): userId, planId, status, startedAt, canceledAt?
-- BillingEvent (reserved): id, userId, providerRef, eventType, occurredAt
+## Entities
+
+- SubscriptionPlan: id, tier, name, billingInterval, priceCents, currency, trialDays, enabled
+- UserSubscription: userId, planId, status, startedAt, trialEndsAt, currentPeriodEndsAt?, canceledAt?
+- BillingEvent: id, userId, providerRef?, eventType, occurredAt
+
+## Status Values
+
+- trialing
+- active
+- past_due
+- expired
+- canceled
+
+## Launch Plans
+
+- `daily-paper-plus-monthly`: $4.99/month, 15-day trial
+- `daily-paper-plus-annual`: $49/year, 15-day trial
 
 ## Relationships
+
 - UserSubscription.userId -> Firebase Auth uid
+- UserSubscription.planId -> SubscriptionPlan.id
 
 ## Validation
-- No active persistence or business logic in Phase 1.
-- Reserved schemas are documentation-only placeholders.
+
+- Trial duration is 15 days.
+- Trialing and active users are entitled to newsletter generation/delivery.
+- Expired, past_due, and canceled users are not entitled to paid newsletter delivery.
+- Card data is never stored in the application.

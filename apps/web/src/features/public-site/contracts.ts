@@ -23,7 +23,9 @@ export const PRIMARY_CTA: PublicRouteAction = {
 
 export const PUBLIC_NAV_ACTIONS: PublicRouteAction[] = [
   PRIMARY_CTA,
-  { id: "login", label: "Login", route: "/login" }
+  { id: "login", label: "Login", route: "/login" },
+  { id: "blog", label: "Blog", route: "/blog" },
+  { id: "samples", label: "Samples", route: "/samples" }
 ];
 
 export const HOW_IT_WORKS_STEPS = [
@@ -36,7 +38,7 @@ export const SAMPLE_DIGEST_PREVIEW: LandingSampleDigest = {
   title: "Morning Brief: Markets, Climate, and Policy",
   snippet: "A sample of how Daily Paper summarizes key headlines with source links and timestamps.",
   sourceName: "Illustrative sample",
-  canonicalUrl: "/blog",
+  canonicalUrl: "/samples",
   publishedAt: "2026-05-26T08:00:00.000Z",
   label: "Illustrative sample digest"
 };

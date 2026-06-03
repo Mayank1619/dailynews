@@ -133,6 +133,22 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
           >
             Login
           </a>
+          <a
+            href="/samples"
+            style={{
+              width: "fit-content",
+              padding: "12px 20px",
+              borderRadius: 999,
+              background: "rgba(7,9,18,0.7)",
+              color: DESIGN_TOKENS.colors.brandPrimary,
+              border: "1px solid rgba(34,211,238,0.34)",
+              textDecoration: "none",
+              fontWeight: 700,
+              letterSpacing: 0
+            }}
+          >
+            View Samples
+          </a>
         </div>
       </section>
 
@@ -181,6 +197,9 @@ export function UnderstandDailyPaperImmediatelyPage(): React.JSX.Element {
         </p>
         <h3 style={{ font: DESIGN_TOKENS.typography.h3, margin: "8px 0" }}>{SAMPLE_DIGEST_PREVIEW.title}</h3>
         <p style={{ margin: 0, color: DESIGN_TOKENS.colors.textSecondary }}>{SAMPLE_DIGEST_PREVIEW.snippet}</p>
+        <a href="/samples" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 900, display: "inline-block", marginTop: 12 }}>
+          Browse sample newsletters
+        </a>
       </section>
 
       <footer

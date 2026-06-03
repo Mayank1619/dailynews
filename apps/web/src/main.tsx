@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import BlogPage from "./app/blog/page";
 import {
   AdminPage,
+  BillingPage,
   NewsletterPage,
   OnboardingPage,
   PreferencesPage,
@@ -11,6 +12,7 @@ import {
 } from "./app/demo-dashboard";
 import LoginPage from "./app/login/page";
 import Page from "./app/page";
+import SamplesPage from "./app/samples/page";
 import SignupPage from "./app/signup/page";
 
 function RouteView(): JSX.Element {
@@ -33,6 +35,15 @@ function RouteView(): JSX.Element {
     return <BlogPage slug={slug} />;
   }
 
+  if (path === "/samples") {
+    return <SamplesPage />;
+  }
+
+  if (path.startsWith("/samples/")) {
+    const slug = decodeURIComponent(path.replace("/samples/", ""));
+    return <SamplesPage slug={slug} />;
+  }
+
   if (path === "/onboarding") {
     return <OnboardingPage />;
   }
@@ -47,6 +58,10 @@ function RouteView(): JSX.Element {
 
   if (path === "/dashboard/newsletter") {
     return <NewsletterPage />;
+  }
+
+  if (path === "/billing") {
+    return <BillingPage />;
   }
 
   if (path === "/admin") {

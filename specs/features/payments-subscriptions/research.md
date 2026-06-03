@@ -1,16 +1,21 @@
-# Research - Payments / Subscriptions (Phase 2 Placeholder)
+# Research: Payments / Subscriptions
 
-## Decision 1: Keep stack aligned to Daily Paper baseline
-- Decision: Use Next.js + Node.js + Firestore + Firebase tooling for this feature.
-- Rationale: Maintains consistency with constitution default stack and lowers integration friction.
-- Alternatives considered: Introducing a parallel backend stack (rejected: higher complexity without clear value).
+## Decision
 
-## Decision 2: Use Firebase Auth as identity baseline
-- Decision: Use Firebase Auth for authentication/session identity and Firebase Admin verification for protected APIs and worker-side eligibility checks.
-- Rationale: Aligns with product direction, supports claims-based RBAC, and gives consistent UID ownership checks across web, API, and scheduled jobs.
-- Alternatives considered: Custom JWT issuer (rejected: unnecessary operational risk), third-party auth provider split (rejected: inconsistent claims and session handling).
+Use a 15-day trial followed by Daily Paper Plus at $4.99/month or $49/year.
 
-## Decision 3: Keep monetization implementation deferred to Phase 2
-- Decision: Produce only placeholder architecture notes and non-executable contracts; do not implement payment flows in Phase 1.
-- Rationale: Constitution and feature spec explicitly defer monetization.
-- Alternatives considered: Partial checkout prototype in Phase 1 (rejected: violates scope and trust/consent rollout sequencing).
+## Payment Provider
+
+Stripe is the recommended provider for first implementation because hosted checkout reduces PCI scope and supports recurring billing, payment links, customer portal, and webhooks.
+
+## Pricing Notes
+
+- $4.99/month keeps a reasonable margin after AI generation, email sending, and payment processing.
+- $49/year reduces fixed monthly payment-fee drag and improves cash flow.
+- Prices below $3/month are not recommended because fixed payment processing fees become too large relative to revenue.
+
+## Delivery Cost Notes
+
+- Keep newsletter prompts compact and source summaries short.
+- Use `gpt-4.1-mini` or a lower-cost configured model for routine generation.
+- Use Brevo free tier for early transactional sending until volume exceeds 300 emails/day.

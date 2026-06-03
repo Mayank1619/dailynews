@@ -1,6 +1,7 @@
 import React from "react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { DESIGN_TOKENS } from "../features/design-system/tokens";
+import { PlanStatusDisplay, type BillingInterval } from "../features/payments-subscriptions/payments-subscriptions";
 import { getFirebaseAuthErrorMessage, getFirebaseClientAuth } from "../lib/firebaseAuthClient";
 
 type PreferenceState = {
@@ -14,6 +15,8 @@ type PreferenceState = {
 };
 
 const STORAGE_KEY = "daily-paper-demo-preferences";
+const BILLING_KEY = "daily-paper-demo-billing";
+const TRIAL_DAYS = 15;
 const TOPIC_GROUPS = [
   {
     name: "News",
@@ -61,6 +64,13 @@ type AuthState = {
   user: User | null;
   loading: boolean;
   error: string;
+};
+
+type BillingState = {
+  status: "trialing" | "active" | "expired" | "past_due" | "canceled";
+  startedAt: string;
+  trialEndsAt: string;
+  selectedInterval: BillingInterval;
 };
 
 const shellStyle: React.CSSProperties = {
@@ -113,6 +123,50 @@ function savePreferences(preferences: PreferenceState, userId?: string): void {
   window.localStorage.setItem(getPreferenceStorageKey(userId), JSON.stringify(preferences));
 }
 
+function getBillingStorageKey(userId?: string): string {
+  return userId ? `${BILLING_KEY}:${userId}` : BILLING_KEY;
+}
+
+function addDays(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+function createDefaultBillingState(): BillingState {
+  const startedAt = new Date();
+  return {
+    status: "trialing",
+    startedAt: startedAt.toISOString(),
+    trialEndsAt: addDays(startedAt, TRIAL_DAYS).toISOString(),
+    selectedInterval: "monthly"
+  };
+}
+
+function readBillingState(userId?: string): BillingState {
+  if (typeof window === "undefined") return createDefaultBillingState();
+
+  const key = getBillingStorageKey(userId);
+  const raw = window.localStorage.getItem(key);
+  if (!raw) {
+    const created = createDefaultBillingState();
+    window.localStorage.setItem(key, JSON.stringify(created));
+    return created;
+  }
+
+  try {
+    const parsed = { ...createDefaultBillingState(), ...(JSON.parse(raw) as Partial<BillingState>) };
+    if (parsed.status === "trialing" && new Date(parsed.trialEndsAt).getTime() <= Date.now()) {
+      return { ...parsed, status: "expired" };
+    }
+    return parsed;
+  } catch {
+    return createDefaultBillingState();
+  }
+}
+
+function saveBillingState(billing: BillingState, userId?: string): void {
+  window.localStorage.setItem(getBillingStorageKey(userId), JSON.stringify(billing));
+}
+
 function usePreferences(userId?: string): [PreferenceState, (next: PreferenceState) => void] {
   const [preferences, setPreferences] = React.useState<PreferenceState>(() => readPreferences(userId));
 
@@ -126,6 +180,27 @@ function usePreferences(userId?: string): [PreferenceState, (next: PreferenceSta
   }, [userId]);
 
   return [preferences, persist];
+}
+
+function useBillingState(userId?: string): [BillingState, (next: BillingState) => void] {
+  const [billing, setBilling] = React.useState<BillingState>(() => readBillingState(userId));
+
+  React.useEffect(() => {
+    setBilling(readBillingState(userId));
+  }, [userId]);
+
+  const persist = React.useCallback((next: BillingState) => {
+    setBilling(next);
+    saveBillingState(next, userId);
+  }, [userId]);
+
+  return [billing, persist];
+}
+
+function getTrialDaysRemaining(billing: BillingState): number {
+  if (billing.status !== "trialing") return 0;
+  const remainingMs = new Date(billing.trialEndsAt).getTime() - Date.now();
+  return Math.max(0, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
 }
 
 function useAuthState(): AuthState {
@@ -202,6 +277,9 @@ function AppNav({ user }: { user?: User | null }): React.JSX.Element {
         </a>
         <a href="/dashboard/newsletter" style={navLinkStyle}>
           Newsletter
+        </a>
+        <a href="/billing" style={navLinkStyle}>
+          Billing
         </a>
         <a href="/onboarding" style={navLinkStyle}>
           Onboarding
@@ -725,6 +803,7 @@ export function NewsletterPage(): React.JSX.Element {
 export function SettingsPage(): React.JSX.Element {
   const auth = useAuthState();
   const [preferences] = usePreferences(auth.user?.uid);
+  const [billing] = useBillingState(auth.user?.uid);
 
   const guard = AuthRequired({ auth });
   if (guard) return guard;
@@ -754,6 +833,10 @@ export function SettingsPage(): React.JSX.Element {
             Time<br />
             <strong>{preferences.deliveryTime}</strong>
           </div>
+          <div style={metricStyle}>
+            Plan<br />
+            <strong>{billing.status === "trialing" ? `${getTrialDaysRemaining(billing)} trial days` : billing.status}</strong>
+          </div>
         </section>
         {preferences.topics.length === 0 ? (
           <p style={{ color: DESIGN_TOKENS.colors.warning }}>
@@ -770,7 +853,48 @@ export function SettingsPage(): React.JSX.Element {
           <a href="/onboarding" style={secondaryLinkStyle}>
             Restart Onboarding
           </a>
+          <a href="/billing" style={secondaryLinkStyle}>
+            Billing
+          </a>
         </div>
+      </section>
+      <PoweredByNetfroot />
+    </main>
+  );
+}
+
+export function BillingPage(): React.JSX.Element {
+  const auth = useAuthState();
+  const userId = auth.user?.uid;
+  const [billing, persistBilling] = useBillingState(userId);
+  const [message, setMessage] = React.useState("");
+
+  const guard = AuthRequired({ auth });
+  if (guard) return guard;
+
+  const selectInterval = (selectedInterval: BillingInterval): void => {
+    persistBilling({ ...billing, selectedInterval });
+    setMessage("");
+  };
+
+  const startCheckout = (): void => {
+    setMessage("Checkout needs a Stripe payment link before live billing can start. Your trial remains active.");
+  };
+
+  return (
+    <main style={shellStyle}>
+      <section style={panelStyle}>
+        <AppNav user={auth.user} />
+        <BackToSettings />
+        <PlanStatusDisplay
+          userId={userId ?? "signed-in-user"}
+          status={billing.status}
+          trialDaysRemaining={getTrialDaysRemaining(billing)}
+          selectedInterval={billing.selectedInterval}
+          onSelectInterval={selectInterval}
+          onStartCheckout={startCheckout}
+        />
+        {message ? <p style={{ color: DESIGN_TOKENS.colors.warning }}>{message}</p> : null}
       </section>
       <PoweredByNetfroot />
     </main>

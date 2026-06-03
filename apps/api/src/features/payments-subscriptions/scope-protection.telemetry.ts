@@ -1,24 +1,17 @@
 /**
- * Payments / Subscriptions - Phase 2 Placeholder Telemetry
+ * Payments / Subscriptions Telemetry
  *
- * Phase 1 telemetry is limited to governance and scope-check signals only.
- * No payment lifecycle, billing, or entitlement-change events are tracked in Phase 1.
+ * Tracks subscription lifecycle events without card, invoice, or secret data.
  */
 
 export type PaymentsSubscriptionsTelemetryEvent = {
   feature: "payments-subscriptions";
-  /**
-   * Only governance signals are permitted in Phase 1:
-   *   - "phase1.scope_check_passed"
-   *   - "phase1.scope_check_failed"
-   *   - "phase1.free_tier_confirmed"
-   *   - "phase1.reserved_endpoint_blocked"
-   */
   eventName:
-    | "phase1.scope_check_passed"
-    | "phase1.scope_check_failed"
-    | "phase1.free_tier_confirmed"
-    | "phase1.reserved_endpoint_blocked";
+    | "subscription.trial_started"
+    | "subscription.status_viewed"
+    | "subscription.checkout_started"
+    | "subscription.entitlement_checked"
+    | "subscription.provider_not_configured";
   status: "success" | "error";
   occurredAt: string;
   metadata: Record<string, string | number | boolean>;

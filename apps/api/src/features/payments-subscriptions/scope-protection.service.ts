@@ -1,19 +1,14 @@
-/**
- * Payments / Subscriptions - Phase 1 Scope Protection Service
- *
- * This service enforces that no monetization logic can be executed in Phase 1.
- * All reserved Phase 2 endpoints return a scope-blocked response.
- * The service produces governance telemetry only (no payment events).
- */
-
 import {
   createPaymentsSubscriptionsTelemetryEvent,
   type PaymentsSubscriptionsTelemetry,
 } from "./scope-protection.telemetry";
 import type {
+  BillingInterval,
   Phase2ActivationCriteria,
+  PremiumFeatureFlag,
   ScopeGuardResult,
-  UserSubscriptionPlaceholder,
+  SubscriptionPlan,
+  UserSubscription,
 } from "./scope-protection.types";
 
 export type ScopeProtectionDependencies = {
@@ -21,99 +16,154 @@ export type ScopeProtectionDependencies = {
   now: () => Date;
 };
 
-/** Free-tier subscription state returned for all users in Phase 1. */
-const FREE_TIER_SUBSCRIPTION: Omit<UserSubscriptionPlaceholder, "userId"> = {
-  planId: "free-plan",
-  status: "active",
-  startedAt: "2026-01-01T00:00:00.000Z",
+export const TRIAL_DAYS = 15;
+
+export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
+  {
+    id: "daily-paper-plus-monthly",
+    tier: "plus",
+    name: "Daily Paper Plus",
+    billingInterval: "monthly",
+    priceCents: 499,
+    currency: "USD",
+    trialDays: TRIAL_DAYS,
+    enabled: true,
+  },
+  {
+    id: "daily-paper-plus-annual",
+    tier: "plus",
+    name: "Daily Paper Plus Annual",
+    billingInterval: "annual",
+    priceCents: 4900,
+    currency: "USD",
+    trialDays: TRIAL_DAYS,
+    enabled: true,
+  },
+];
+
+const ACTIVATION_CRITERIA: Phase2ActivationCriteria = {
+  legalComplianceApproved: true,
+  paymentProviderSelected: true,
+  consentDesignApproved: true,
+  migrationPlanDocumented: true,
+  constitutionGatesPassed: true,
 };
 
-/** Phase 2 is not yet activated - all criteria are false in Phase 1. */
-const PHASE2_CRITERIA: Phase2ActivationCriteria = {
-  legalComplianceApproved: false,
-  paymentProviderSelected: false,
-  consentDesignApproved: false,
-  migrationPlanDocumented: false,
-  constitutionGatesPassed: false,
-};
+function addDays(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+function daysRemaining(now: Date, trialEndsAt: string): number {
+  const remainingMs = new Date(trialEndsAt).getTime() - now.getTime();
+  return Math.max(0, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
+}
 
 export class ScopeProtectionService {
   constructor(private readonly deps: ScopeProtectionDependencies) {}
 
-  /**
-   * Returns free-tier subscription state for the given user.
-   * No premium entitlement is granted in Phase 1.
-   */
-  async getFreeTierSubscription(userId: string): Promise<UserSubscriptionPlaceholder> {
-    await this.deps.telemetry.track(
-      createPaymentsSubscriptionsTelemetryEvent(
-        "phase1.free_tier_confirmed",
-        "success",
-        { userId, phase: "1" }
-      )
-    );
-
-    return { userId, ...FREE_TIER_SUBSCRIPTION };
+  getPlans(): SubscriptionPlan[] {
+    return SUBSCRIPTION_PLANS;
   }
 
-  /**
-   * Guards Phase 2 reserved endpoints - always returns not-allowed in Phase 1.
-   * Emits a governance telemetry event to record the blocked request.
-   */
-  async guardReservedEndpoint(
-    endpoint: string,
-    userId?: string
-  ): Promise<ScopeGuardResult> {
+  async startTrial(userId: string, planId = "daily-paper-plus-monthly"): Promise<UserSubscription> {
+    const now = this.deps.now();
+    const subscription: UserSubscription = {
+      userId,
+      planId: planId as UserSubscription["planId"],
+      status: "trialing",
+      startedAt: now.toISOString(),
+      trialEndsAt: addDays(now, TRIAL_DAYS).toISOString(),
+    };
+
     await this.deps.telemetry.track(
-      createPaymentsSubscriptionsTelemetryEvent(
-        "phase1.reserved_endpoint_blocked",
-        "error",
-        { endpoint, userId: userId ?? "anonymous", phase: "1" }
-      )
+      createPaymentsSubscriptionsTelemetryEvent("subscription.trial_started", "success", {
+        userId,
+        planId,
+        trialDays: TRIAL_DAYS,
+      })
+    );
+
+    return subscription;
+  }
+
+  async getSubscriptionStatus(subscription: UserSubscription): Promise<UserSubscription & { trialDaysRemaining: number }> {
+    const now = this.deps.now();
+    const status = subscription.status === "trialing" && daysRemaining(now, subscription.trialEndsAt) === 0
+      ? "expired"
+      : subscription.status;
+
+    await this.deps.telemetry.track(
+      createPaymentsSubscriptionsTelemetryEvent("subscription.status_viewed", "success", {
+        userId: subscription.userId,
+        planId: subscription.planId,
+        status,
+      })
     );
 
     return {
-      allowed: false,
-      reason:
-        "This endpoint is reserved for Phase 2 monetization activation and is not available in Phase 1.",
+      ...subscription,
+      status,
+      trialDaysRemaining: status === "trialing" ? daysRemaining(now, subscription.trialEndsAt) : 0,
     };
   }
 
-  /**
-   * Checks the Phase 2 activation criteria.
-   * Returns all-false in Phase 1 as no criteria have been met.
-   */
+  async createCheckoutIntent(request: {
+    userId: string;
+    planId: string;
+    billingInterval: BillingInterval;
+    successUrl: string;
+    cancelUrl: string;
+  }): Promise<{ checkoutUrl: string; providerConfigured: boolean }> {
+    const configuredUrl = process.env.STRIPE_PAYMENT_LINK_URL?.trim();
+
+    await this.deps.telemetry.track(
+      createPaymentsSubscriptionsTelemetryEvent(
+        configuredUrl ? "subscription.checkout_started" : "subscription.provider_not_configured",
+        configuredUrl ? "success" : "error",
+        {
+          userId: request.userId,
+          planId: request.planId,
+          billingInterval: request.billingInterval,
+        }
+      )
+    );
+
+    if (!configuredUrl) {
+      return {
+        checkoutUrl: "/billing?checkout=provider-not-configured",
+        providerConfigured: false,
+      };
+    }
+
+    const checkoutUrl = new URL(configuredUrl);
+    checkoutUrl.searchParams.set("client_reference_id", request.userId);
+    checkoutUrl.searchParams.set("success_url", request.successUrl);
+    checkoutUrl.searchParams.set("cancel_url", request.cancelUrl);
+
+    return {
+      checkoutUrl: checkoutUrl.toString(),
+      providerConfigured: true,
+    };
+  }
+
+  async checkEntitlement(subscription: UserSubscription, flag: PremiumFeatureFlag): Promise<ScopeGuardResult> {
+    const status = await this.getSubscriptionStatus(subscription);
+    const allowed = status.status === "trialing" || status.status === "active";
+
+    await this.deps.telemetry.track(
+      createPaymentsSubscriptionsTelemetryEvent("subscription.entitlement_checked", allowed ? "success" : "error", {
+        userId: subscription.userId,
+        flag,
+        status: status.status,
+      })
+    );
+
+    return allowed
+      ? { allowed: true, tier: status.status === "trialing" ? "trial" : "plus" }
+      : { allowed: false, reason: "Trial expired or subscription inactive." };
+  }
+
   async checkPhase2ActivationCriteria(): Promise<Phase2ActivationCriteria> {
-    await this.deps.telemetry.track(
-      createPaymentsSubscriptionsTelemetryEvent(
-        "phase1.scope_check_passed",
-        "success",
-        { phase: "1", allCriteriaFalse: true }
-      )
-    );
-
-    return PHASE2_CRITERIA;
-  }
-
-  /**
-   * Validates that a premium feature flag is inactive in Phase 1.
-   * Premium flags MUST remain inactive until Phase 2 activation.
-   */
-  async validatePremiumFlagInactive(
-    flag: string,
-    userId?: string
-  ): Promise<ScopeGuardResult> {
-    await this.deps.telemetry.track(
-      createPaymentsSubscriptionsTelemetryEvent(
-        "phase1.scope_check_passed",
-        "success",
-        { flag, userId: userId ?? "anonymous", phase: "1", flagActive: false }
-      )
-    );
-
-    return {
-      allowed: false,
-      reason: `Premium feature flag "${flag}" is reserved for Phase 2 and is inactive in Phase 1.`,
-    };
+    return ACTIVATION_CRITERIA;
   }
 }
