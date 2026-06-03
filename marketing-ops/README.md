@@ -29,6 +29,23 @@ Content-Type: application/json
 
 Start with Daily Paper, then duplicate the scenario for Astroya after account connections are stable.
 
+## Local Draft Generation
+
+When `NEWSLETTER_ADMIN_TOKEN` is available in the shell, generate local draft payloads with:
+
+```bash
+node marketing-ops/scripts/generate-local-drafts.mjs
+```
+
+Generate one app only:
+
+```bash
+node marketing-ops/scripts/generate-local-drafts.mjs daily-paper
+node marketing-ops/scripts/generate-local-drafts.mjs astroya
+```
+
+The generated JSON files are stored in `marketing-ops/draft-queue/` and ignored by git.
+
 ## External Accounts
 
 Separate accounts should be created for each app:

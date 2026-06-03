@@ -33,41 +33,11 @@ Create one daily draft package per app for YouTube Shorts, Instagram Reels, and 
 
 ## Daily Paper Payload
 
-```json
-{
-  "appId": "daily-paper",
-  "productName": "Daily Paper",
-  "positioning": "A personalized AI daily paper for readers who want useful news without the scroll.",
-  "strategy": "minimal-cost",
-  "platforms": ["youtube-shorts", "instagram-reels", "facebook-reels"],
-  "dailyVideoCount": 1,
-  "topic": "why a personalized daily news briefing helps people make better everyday decisions",
-  "audience": "young professionals and students who want useful news without scrolling",
-  "newsletterThemes": ["source-linked AI summaries", "topic preferences", "15-day free trial", "daily or weekly delivery"],
-  "baseUrl": "https://dailynews-theta-ten.vercel.app",
-  "sampleRoute": "/samples/ai-daily-paper",
-  "ctaRoute": "/signup"
-}
-```
+Use `marketing-ops/apps/daily-paper/make-payload.json`.
 
 ## Astroya Payload
 
-```json
-{
-  "appId": "astroya",
-  "productName": "Astroya SoulPath",
-  "positioning": "A calm astrology and palmistry guidance experience for reflective self-discovery.",
-  "strategy": "minimal-cost",
-  "platforms": ["youtube-shorts", "instagram-reels", "facebook-reels"],
-  "dailyVideoCount": 1,
-  "topic": "why personalized astrology and palmistry guidance helps people reflect with more clarity",
-  "audience": "spiritually curious adults who want a calm personal guidance flow",
-  "newsletterThemes": ["Vedic astrology", "Western astrology", "palmistry", "AI-powered consultation"],
-  "baseUrl": "https://www.astroya.ca",
-  "sampleRoute": "/how-it-works",
-  "ctaRoute": "/signup"
-}
-```
+Use `marketing-ops/apps/astroya/make-payload.json`.
 
 ## Cost Guardrails
 
