@@ -46,7 +46,22 @@ Suggested future tiers:
 
 ## Automated SEO Engine
 
-### Make.com Starter Framework
+### Vercel Cron Starter Framework
+
+Added on 2026-06-03:
+
+- `GET /api/marketing/automation-run` is the primary no-cost scheduled marketing endpoint.
+- `POST /api/marketing/automation-run` lets the admin run the same batch manually from the Growth tab.
+- The scheduled route is protected by `CRON_SECRET`; Vercel sends it as an `Authorization: Bearer ...` header.
+- The manual route is protected by `NEWSLETTER_ADMIN_TOKEN`.
+- `vercel.json` schedules the route once daily at `0 10 * * *`.
+- The automation creates draft-only campaign kits for Daily Paper and Astroya SoulPath.
+- Output includes a $0 starter cost model, Vercel Cron/GitHub Actions scheduler recommendation, app-specific draft counts, review queue instructions, and never-auto-publish safeguards.
+- `/admin` Growth now includes a "Run Low-Cost Automation Batch" button for a browser-based manual run.
+
+This is now the preferred scalable starter path because it avoids fragile visual scenario editors and keeps the marketing brain inside the application code. Make.com remains optional for routing approved drafts to spreadsheets, Slack/email, or later platform integrations.
+
+### Make.com Optional Framework
 
 Added on 2026-06-03:
 

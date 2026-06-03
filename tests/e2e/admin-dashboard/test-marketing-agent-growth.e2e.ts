@@ -176,3 +176,89 @@ test("admin growth tab generates a Make.com campaign kit", async ({ page }) => {
   expect(authorization).toBe("Bearer test-admin-token");
   expect(strategy).toBe("minimal-cost");
 });
+
+test("admin growth tab runs the low-cost draft automation batch", async ({ page }) => {
+  let authorization = "";
+  let provider = "";
+
+  await page.route("**/api/marketing/automation-run", async (route) => {
+    const request = route.request();
+    authorization = request.headers().authorization ?? "";
+    provider = String((request.postDataJSON() as { provider?: string }).provider ?? "");
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        runId: "marketing-2026-06-03-daily-paper-astroya",
+        date: "2026-06-03",
+        provider: "manual",
+        mode: "draft-only",
+        status: "drafts-ready",
+        scheduler: {
+          recommendedPrimary: "vercel-cron",
+          fallback: "github-actions",
+          cadence: "Once daily at 10:00 UTC for draft generation, then human review before anything goes public.",
+          reason: "The app already runs on Vercel, so the cheapest scalable scheduler is a Vercel Cron GET request into this API."
+        },
+        monthlyCostEstimateUsd: {
+          scheduler: 0,
+          draftStorage: 0,
+          videoRendering: 0,
+          socialPublishing: 0,
+          notes: ["Keep video generation script-only."]
+        },
+        apps: [
+          {
+            appId: "daily-paper",
+            productName: "Daily Paper",
+            draftCount: 8,
+            blogSlug: "daily-news-habit-2026-06-03",
+            targetUrl: "https://dailynews-theta-ten.vercel.app/blog/daily-news-habit-2026-06-03",
+            reviewQueue: {
+              destination: "Daily Paper admin Growth tab and local draft queue",
+              approvalRequired: true,
+              publishPolicy: "never-auto-publish",
+              suggestedOwnerAction: "Review the blog, caption, hashtags, and script brief before copying into any social platform."
+            }
+          },
+          {
+            appId: "astroya",
+            productName: "Astroya SoulPath",
+            draftCount: 8,
+            blogSlug: "astrology-reflection-2026-06-03",
+            targetUrl: "https://www.astroya.ca/blog/astrology-reflection-2026-06-03",
+            reviewQueue: {
+              destination: "Astroya SoulPath admin Growth tab and local draft queue",
+              approvalRequired: true,
+              publishPolicy: "never-auto-publish",
+              suggestedOwnerAction: "Review the blog, caption, hashtags, and script brief before copying into any social platform."
+            }
+          }
+        ],
+        safeguards: [
+          "The automation only creates drafts and script briefs.",
+          "No public post, scheduled post, account creation, or OAuth permission is triggered by this endpoint."
+        ],
+        nextActions: ["Add CRON_SECRET to Vercel."]
+      })
+    });
+  });
+
+  await page.goto("/admin");
+  await page.getByRole("button", { name: "Growth" }).click();
+  await page.getByLabel("Marketing admin token").fill("test-admin-token");
+  await page.getByRole("button", { name: "Run Low-Cost Automation Batch" }).click();
+
+  const automationResult = page.getByTestId("marketing-automation-result");
+  await expect(automationResult).toBeVisible();
+  await expect(page.getByText("marketing-2026-06-03-daily-paper-astroya")).toBeVisible();
+  await expect(automationResult.getByText("Daily Paper")).toBeVisible();
+  await expect(automationResult.getByText("Astroya SoulPath")).toBeVisible();
+  await expect(automationResult.getByText("$0 Starter Cost Model")).toBeVisible();
+  await expect(automationResult.getByText("never-auto-publish").first()).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("test-admin-token");
+
+  expect(authorization).toBe("Bearer test-admin-token");
+  expect(provider).toBe("manual");
+});

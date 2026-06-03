@@ -136,6 +136,54 @@ export type MakeMarketingCampaignResult = {
   requiredUserInputs: string[];
 };
 
+export type MarketingAutomationProvider = "vercel-cron" | "github-actions" | "manual" | "pipedream";
+
+export type MarketingAutomationAppId = "daily-paper" | "astroya";
+
+export type MarketingAutomationRunRequest = {
+  date?: Date | string;
+  appIds?: MarketingAutomationAppId[];
+  provider?: MarketingAutomationProvider;
+  mode?: "draft-only" | "review-and-schedule";
+};
+
+export type MarketingAutomationRunResult = {
+  runId: string;
+  date: string;
+  provider: MarketingAutomationProvider;
+  mode: "draft-only" | "review-and-schedule";
+  status: "drafts-ready";
+  scheduler: {
+    recommendedPrimary: "vercel-cron";
+    fallback: "github-actions";
+    cadence: string;
+    reason: string;
+  };
+  monthlyCostEstimateUsd: {
+    scheduler: 0;
+    draftStorage: 0;
+    videoRendering: 0;
+    socialPublishing: 0;
+    notes: string[];
+  };
+  apps: Array<{
+    appId: MarketingAutomationAppId;
+    productName: string;
+    draftCount: number;
+    blogSlug: string;
+    targetUrl: string;
+    campaign: MakeMarketingCampaignResult;
+    reviewQueue: {
+      destination: string;
+      approvalRequired: true;
+      publishPolicy: "never-auto-publish";
+      suggestedOwnerAction: string;
+    };
+  }>;
+  safeguards: string[];
+  nextActions: string[];
+};
+
 type OpenAIResponse = {
   output_text?: string;
   output?: Array<{ content?: Array<{ text?: string }> }>;
@@ -157,6 +205,34 @@ const DEFAULT_SAMPLE_ROUTE = "/samples/ai-daily-paper";
 const DEFAULT_CTA_ROUTE = "/signup";
 const VIDEO_DURATIONS = [10, 15, 30] as const;
 const DEFAULT_MARKETING_PLATFORMS: MarketingPlatform[] = ["blog", "instagram-reels", "youtube-shorts", "facebook-reels"];
+const MARKETING_AUTOMATION_PROFILES: Record<MarketingAutomationAppId, Required<MarketingAgentRequest> & { appId: MarketingAutomationAppId }> = {
+  "daily-paper": {
+    appId: "daily-paper",
+    date: new Date(),
+    productName: "Daily Paper",
+    positioning: DEFAULT_POSITIONING,
+    topic: "why a personalized daily news briefing helps people make better everyday decisions",
+    audience: "young professionals and students who want useful news without scrolling",
+    newsletterThemes: ["source-linked AI summaries", "topic preferences", "15-day free trial", "daily or weekly delivery"],
+    sourceSummaries: [],
+    baseUrl: DEFAULT_BASE_URL,
+    sampleRoute: DEFAULT_SAMPLE_ROUTE,
+    ctaRoute: DEFAULT_CTA_ROUTE
+  },
+  astroya: {
+    appId: "astroya",
+    date: new Date(),
+    productName: "Astroya SoulPath",
+    positioning: "A calm astrology and palmistry guidance experience for people who want reflective self-discovery without generic horoscope noise.",
+    topic: "why personalized astrology and palmistry guidance helps people reflect with more clarity",
+    audience: "spiritually curious adults who want a calm, personal astrology and palmistry experience",
+    newsletterThemes: ["Vedic and Western astrology", "palmistry-assisted reflection", "birth details", "AI-powered consultation"],
+    sourceSummaries: [],
+    baseUrl: "https://www.astroya.ca",
+    sampleRoute: "/how-it-works",
+    ctaRoute: "/signup"
+  }
+};
 
 export async function generateDailyMarketingContent(request: MarketingAgentRequest = {}): Promise<MarketingAgentResult> {
   const normalized = normalizeRequest(request);
@@ -236,6 +312,81 @@ export async function generateMakeMarketingCampaign(request: MakeMarketingCampai
   });
 
   return buildMakeMarketingCampaign(normalized, contentKit);
+}
+
+export async function generateMarketingAutomationRun(
+  request: MarketingAutomationRunRequest = {}
+): Promise<MarketingAutomationRunResult> {
+  const date = request.date ? new Date(request.date) : new Date();
+  const dateKey = date.toISOString().slice(0, 10);
+  const appIds = normalizeAutomationAppIds(request.appIds);
+  const provider = request.provider ?? "vercel-cron";
+  const mode = request.mode ?? "draft-only";
+  const campaigns = await Promise.all(
+    appIds.map((appId) => {
+      const profile = MARKETING_AUTOMATION_PROFILES[appId];
+      return generateMakeMarketingCampaign({
+        ...profile,
+        date,
+        appId,
+        strategy: "minimal-cost",
+        platforms: DEFAULT_MARKETING_PLATFORMS,
+        dailyVideoCount: 1
+      });
+    })
+  );
+
+  return {
+    runId: `marketing-${dateKey}-${appIds.join("-")}`,
+    date: dateKey,
+    provider,
+    mode,
+    status: "drafts-ready",
+    scheduler: {
+      recommendedPrimary: "vercel-cron",
+      fallback: "github-actions",
+      cadence: "Once daily at 10:00 UTC for draft generation, then human review before anything goes public.",
+      reason: "The app already runs on Vercel, so the cheapest scalable scheduler is a Vercel Cron GET request into this API."
+    },
+    monthlyCostEstimateUsd: {
+      scheduler: 0,
+      draftStorage: 0,
+      videoRendering: 0,
+      socialPublishing: 0,
+      notes: [
+        "Use Vercel Cron or a GitHub Actions scheduled workflow for the trigger.",
+        "Use function logs and admin JSON review first; add Firestore draft persistence after the review columns are final.",
+        "Keep video generation script-only until paid rendering has a measured conversion case.",
+        "Keep social publishing manual or draft-only until account OAuth and approval rules are tested."
+      ]
+    },
+    apps: campaigns.map((campaign, index) => ({
+      appId: appIds[index],
+      productName: campaign.app.productName,
+      draftCount: 1 + campaign.publishingQueue.socialPosts.length + campaign.publishingQueue.videoBriefs.length,
+      blogSlug: campaign.publishingQueue.blogDraft.slug,
+      targetUrl: campaign.publishingQueue.blogDraft.targetUrl,
+      campaign,
+      reviewQueue: {
+        destination: `${campaign.app.productName} admin Growth tab and local draft queue`,
+        approvalRequired: true,
+        publishPolicy: "never-auto-publish",
+        suggestedOwnerAction: "Review the blog, caption, hashtags, and script brief before copying into any social platform."
+      }
+    })),
+    safeguards: [
+      "The automation only creates drafts and script briefs.",
+      "No public post, scheduled post, account creation, or OAuth permission is triggered by this endpoint.",
+      "Astroya content stays framed as reflection and self-discovery, not guaranteed predictions or medical, financial, or legal advice.",
+      "Current-event claims must come from supplied source summaries; otherwise content stays evergreen."
+    ],
+    nextActions: [
+      "Add CRON_SECRET to Vercel so the daily cron endpoint can authenticate securely.",
+      "Use the Admin Growth tab to run and review the same automation manually.",
+      "After one week of drafts, promote the best-performing formats into a Firestore-backed review queue.",
+      "Only connect YouTube, Instagram, and Facebook publishing after the draft approval workflow is stable."
+    ]
+  };
 }
 
 export function buildMakeMarketingCampaign(
@@ -502,6 +653,12 @@ function normalizeCampaignRequest(request: MakeMarketingCampaignRequest): Requir
     platforms: request.platforms?.length ? request.platforms.filter(isKnownPlatform) : DEFAULT_MARKETING_PLATFORMS,
     dailyVideoCount: Math.max(1, Math.min(Number(request.dailyVideoCount ?? 1), 3))
   };
+}
+
+function normalizeAutomationAppIds(appIds?: MarketingAutomationAppId[]): MarketingAutomationAppId[] {
+  const knownAppIds = Object.keys(MARKETING_AUTOMATION_PROFILES) as MarketingAutomationAppId[];
+  const selected = appIds?.filter((appId): appId is MarketingAutomationAppId => knownAppIds.includes(appId)) ?? knownAppIds;
+  return Array.from(new Set(selected.length ? selected : knownAppIds));
 }
 
 function sanitizeAiPayload(

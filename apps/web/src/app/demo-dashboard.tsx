@@ -2012,6 +2012,42 @@ type MakeCampaignResult = {
   requiredUserInputs: string[];
 };
 
+type MarketingAutomationRunResult = {
+  runId: string;
+  date: string;
+  provider: "vercel-cron" | "github-actions" | "manual" | "pipedream";
+  mode: "draft-only" | "review-and-schedule";
+  status: "drafts-ready";
+  scheduler: {
+    recommendedPrimary: "vercel-cron";
+    fallback: "github-actions";
+    cadence: string;
+    reason: string;
+  };
+  monthlyCostEstimateUsd: {
+    scheduler: 0;
+    draftStorage: 0;
+    videoRendering: 0;
+    socialPublishing: 0;
+    notes: string[];
+  };
+  apps: Array<{
+    appId: "daily-paper" | "astroya";
+    productName: string;
+    draftCount: number;
+    blogSlug: string;
+    targetUrl: string;
+    reviewQueue: {
+      destination: string;
+      approvalRequired: true;
+      publishPolicy: "never-auto-publish";
+      suggestedOwnerAction: string;
+    };
+  }>;
+  safeguards: string[];
+  nextActions: string[];
+};
+
 const adminIssues: AdminNewsletterIssue[] = [
   {
     id: "newsletter-openai-smoke-user-2026-06-02",
@@ -2126,10 +2162,13 @@ function MarketingAgentPanel(): React.JSX.Element {
   const [audience, setAudience] = React.useState(defaultMarketingAudience);
   const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const [makeStatus, setMakeStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [automationStatus, setAutomationStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = React.useState("");
   const [makeMessage, setMakeMessage] = React.useState("");
+  const [automationMessage, setAutomationMessage] = React.useState("");
   const [result, setResult] = React.useState<MarketingAgentResult | null>(null);
   const [makeResult, setMakeResult] = React.useState<MakeCampaignResult | null>(null);
+  const [automationResult, setAutomationResult] = React.useState<MarketingAutomationRunResult | null>(null);
   const selectedApp = marketingAppProfiles[selectedAppId];
 
   const selectMarketingApp = (appId: MarketingAppId): void => {
@@ -2139,8 +2178,10 @@ function MarketingAgentPanel(): React.JSX.Element {
     setAudience(profile.audience);
     setResult(null);
     setMakeResult(null);
+    setAutomationResult(null);
     setMessage("");
     setMakeMessage("");
+    setAutomationMessage("");
   };
 
   const generate = async (): Promise<void> => {
@@ -2247,6 +2288,45 @@ function MarketingAgentPanel(): React.JSX.Element {
     }
   };
 
+  const runAutomationBatch = async (): Promise<void> => {
+    if (!adminToken.trim()) {
+      setAutomationStatus("error");
+      setAutomationMessage("Enter the admin token before running the automation batch.");
+      return;
+    }
+
+    setAutomationStatus("loading");
+    setAutomationMessage("");
+    setAutomationResult(null);
+
+    try {
+      const response = await fetch("/api/marketing/automation-run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminToken.trim()}`
+        },
+        body: JSON.stringify({
+          appIds: ["daily-paper", "astroya"],
+          provider: "manual",
+          mode: "draft-only"
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("automation_run_failed");
+      }
+
+      const payload = (await response.json()) as MarketingAutomationRunResult;
+      setAutomationResult(payload);
+      setAutomationStatus("success");
+      setAutomationMessage("Draft-only automation batch is ready. Review every item before publishing anywhere.");
+    } catch {
+      setAutomationStatus("error");
+      setAutomationMessage("We could not run the automation batch. Check the admin token and try again.");
+    }
+  };
+
   return (
     <AdminSection title="AI Marketing Agent">
       <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
@@ -2322,6 +2402,20 @@ function MarketingAgentPanel(): React.JSX.Element {
           >
             {makeStatus === "loading" ? "Preparing..." : "Generate Make.com Campaign Kit"}
           </button>
+          <button
+            type="button"
+            data-testid="run-marketing-automation-batch"
+            onClick={() => void runAutomationBatch()}
+            disabled={automationStatus === "loading"}
+            style={{
+              ...buttonBase,
+              width: "fit-content",
+              borderColor: "rgba(34,211,238,0.58)",
+              background: "rgba(34,211,238,0.12)"
+            }}
+          >
+            {automationStatus === "loading" ? "Running..." : "Run Low-Cost Automation Batch"}
+          </button>
         </div>
 
         {message ? (
@@ -2332,6 +2426,11 @@ function MarketingAgentPanel(): React.JSX.Element {
         {makeMessage ? (
           <p role={makeStatus === "error" ? "alert" : "status"} style={{ color: makeStatus === "error" ? DESIGN_TOKENS.colors.error : DESIGN_TOKENS.colors.success }}>
             {makeMessage}
+          </p>
+        ) : null}
+        {automationMessage ? (
+          <p role={automationStatus === "error" ? "alert" : "status"} style={{ color: automationStatus === "error" ? DESIGN_TOKENS.colors.error : DESIGN_TOKENS.colors.success }}>
+            {automationMessage}
           </p>
         ) : null}
 
@@ -2412,6 +2511,44 @@ function MarketingAgentPanel(): React.JSX.Element {
               <strong>Cost Guardrails</strong>
               <ul style={{ margin: "6px 0 0", paddingLeft: 20 }}>
                 {makeResult.costGuardrails.slice(0, 4).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ) : null}
+
+        {automationResult ? (
+          <section data-testid="marketing-automation-result" style={{ display: "grid", gap: 14 }}>
+            <div style={readinessStyle}>
+              <span style={{ color: DESIGN_TOKENS.colors.accentHighlight, fontWeight: 900 }}>
+                {automationResult.provider} - {automationResult.status}
+              </span>
+              <strong>{automationResult.runId}</strong>
+              <span>{automationResult.scheduler.cadence}</span>
+              <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{automationResult.scheduler.reason}</span>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+              {automationResult.apps.map((app) => (
+                <article key={app.appId} style={readinessStyle}>
+                  <span style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 900 }}>{app.productName}</span>
+                  <strong>{app.draftCount} review drafts</strong>
+                  <span>Blog slug: {app.blogSlug}</span>
+                  <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{app.reviewQueue.publishPolicy}</span>
+                  <span>{app.reviewQueue.suggestedOwnerAction}</span>
+                </article>
+              ))}
+            </div>
+
+            <div style={readinessStyle}>
+              <strong>$0 Starter Cost Model</strong>
+              <span>
+                Scheduler ${automationResult.monthlyCostEstimateUsd.scheduler}, draft storage ${automationResult.monthlyCostEstimateUsd.draftStorage},
+                video rendering ${automationResult.monthlyCostEstimateUsd.videoRendering}, social publishing ${automationResult.monthlyCostEstimateUsd.socialPublishing}
+              </span>
+              <ul style={{ margin: "6px 0 0", paddingLeft: 20 }}>
+                {automationResult.safeguards.slice(0, 4).map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>

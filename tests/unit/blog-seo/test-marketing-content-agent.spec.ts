@@ -4,6 +4,7 @@ import {
   buildFallbackMarketingContent,
   buildMakeMarketingCampaign,
   generateDailyMarketingContent,
+  generateMarketingAutomationRun,
   type MarketingAgentRequest
 } from "../../../apps/api/src/features/blog-seo/marketingContentAgent";
 
@@ -185,5 +186,29 @@ describe("marketing content agent", () => {
     expect(campaign.publishingQueue.socialPosts.flatMap((post) => post.hashtags)).toContain("#Astroya");
     expect(campaign.contentKit.blogDraft.bodyMarkdown).toContain("self-discovery");
     expect(campaign.contentKit.blogDraft.bodyMarkdown).not.toContain("Daily Paper is built around");
+  });
+
+  it("creates a provider-neutral draft-only automation run for both apps", async () => {
+    const originalKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const run = await generateMarketingAutomationRun({
+        date: new Date("2026-06-03T10:00:00.000Z"),
+        provider: "vercel-cron",
+        mode: "draft-only",
+        appIds: ["daily-paper", "astroya"]
+      });
+
+      expect(run.runId).toBe("marketing-2026-06-03-daily-paper-astroya");
+      expect(run.scheduler.recommendedPrimary).toBe("vercel-cron");
+      expect(run.monthlyCostEstimateUsd.scheduler).toBe(0);
+      expect(run.apps.map((app) => app.appId)).toEqual(["daily-paper", "astroya"]);
+      expect(run.apps.every((app) => app.reviewQueue.publishPolicy === "never-auto-publish")).toBe(true);
+      expect(run.safeguards.join(" ")).toContain("No public post");
+      expect(run.apps[1].campaign.contentKit.blogDraft.bodyMarkdown).toContain("self-discovery");
+    } finally {
+      process.env.OPENAI_API_KEY = originalKey;
+    }
   });
 });

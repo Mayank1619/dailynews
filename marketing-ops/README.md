@@ -1,6 +1,6 @@
 # Marketing Operations Workspace
 
-This folder keeps the low-cost Make.com marketing framework for Daily Paper and Astroya SoulPath.
+This folder keeps the low-cost marketing framework for Daily Paper and Astroya SoulPath.
 
 ## Current Strategy
 
@@ -9,13 +9,56 @@ This folder keeps the low-cost Make.com marketing framework for Daily Paper and 
 - Generate one reusable script-only video brief per app per day.
 - Cross-post the same approved short concept across platforms before paying for video rendering.
 - Store local drafts in `draft-queue/` during testing. That folder is ignored by git.
+- Use Vercel Cron as the primary scheduler because the app is already hosted on Vercel.
+- Treat Make.com, Pipedream, n8n, or GitHub Actions as optional routing layers, not the core marketing brain.
+
+## Primary No-Cost Automation
+
+The scalable starter flow is:
+
+```text
+Vercel Cron -> /api/marketing/automation-run -> draft-only campaign kits -> admin review
+```
+
+The cron is configured in `vercel.json`:
+
+```json
+{
+  "path": "/api/marketing/automation-run",
+  "schedule": "0 10 * * *"
+}
+```
+
+Set `CRON_SECRET` in Vercel so scheduled requests are authenticated. Vercel sends it as:
+
+```text
+Authorization: Bearer CRON_SECRET
+```
+
+Manual admin runs use:
+
+```text
+POST https://dailynews-theta-ten.vercel.app/api/marketing/automation-run
+Authorization: Bearer NEWSLETTER_ADMIN_TOKEN
+Content-Type: application/json
+```
+
+Example body:
+
+```json
+{
+  "appIds": ["daily-paper", "astroya"],
+  "provider": "manual",
+  "mode": "draft-only"
+}
+```
 
 ## Apps
 
 - Daily Paper: `apps/daily-paper/profile.json`
 - Astroya SoulPath: `apps/astroya/profile.json`
 
-## Make.com First Scenario
+## Make.com Optional Scenario
 
 Use `make/scenario-starter.md`.
 
@@ -28,6 +71,8 @@ Content-Type: application/json
 ```
 
 Start with Daily Paper, then duplicate the scenario for Astroya after account connections are stable.
+
+Make is optional now. It is useful later for approvals and routing, but the app can generate the draft assets without relying on Make's visual editor.
 
 ## Local Draft Generation
 

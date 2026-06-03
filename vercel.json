@@ -1,6 +1,12 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "crons": [
+    {
+      "path": "/api/marketing/automation-run",
+      "schedule": "0 10 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
