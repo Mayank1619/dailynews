@@ -145,6 +145,9 @@ export default function SamplesPage({ slug }: SamplesPageProps): JSX.Element {
       <section style={panelStyle}>
         <nav style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
           <a href="/" style={navLinkStyle}>Home</a>
+          <a href="/about" style={navLinkStyle}>About</a>
+          <a href="/how-it-works" style={navLinkStyle}>How It Works</a>
+          <a href="/pricing" style={navLinkStyle}>Pricing</a>
           <a href="/blog" style={navLinkStyle}>Blog</a>
           <a href="/signup" style={navLinkStyle}>Start Trial</a>
         </nav>

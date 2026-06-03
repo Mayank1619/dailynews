@@ -24,6 +24,9 @@ export const PRIMARY_CTA: PublicRouteAction = {
 export const PUBLIC_NAV_ACTIONS: PublicRouteAction[] = [
   PRIMARY_CTA,
   { id: "login", label: "Login", route: "/login" },
+  { id: "about", label: "About", route: "/about" },
+  { id: "how-it-works", label: "How It Works", route: "/how-it-works" },
+  { id: "pricing", label: "Pricing", route: "/pricing" },
   { id: "blog", label: "Blog", route: "/blog" },
   { id: "samples", label: "Samples", route: "/samples" }
 ];
@@ -44,6 +47,9 @@ export const SAMPLE_DIGEST_PREVIEW: LandingSampleDigest = {
 };
 
 export const FOOTER_TRUST_LINKS: PublicRouteAction[] = [
+  { id: "about", label: "About", route: "/about" },
+  { id: "how-it-works", label: "How It Works", route: "/how-it-works" },
+  { id: "pricing", label: "Pricing", route: "/pricing" },
   { id: "privacy", label: "Privacy", route: "/privacy" },
   { id: "terms", label: "Terms", route: "/terms" },
   { id: "contact", label: "Contact", route: "/contact" }

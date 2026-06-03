@@ -4,6 +4,7 @@ import BlogPage from "./app/blog/page";
 import {
   AdminPage,
   BillingPage,
+  MyPaperPage,
   NewsletterPage,
   OnboardingPage,
   PreferencesPage,
@@ -12,6 +13,7 @@ import {
   UnsubscribeConfirmationPage
 } from "./app/demo-dashboard";
 import LoginPage from "./app/login/page";
+import { InfoPage } from "./app/info-pages";
 import Page from "./app/page";
 import SamplesPage from "./app/samples/page";
 import SignupPage from "./app/signup/page";
@@ -29,6 +31,18 @@ function RouteView(): JSX.Element {
 
   if (path === "/blog") {
     return <BlogPage />;
+  }
+
+  if (path === "/about") {
+    return <InfoPage kind="about" />;
+  }
+
+  if (path === "/how-it-works") {
+    return <InfoPage kind="how-it-works" />;
+  }
+
+  if (path === "/pricing") {
+    return <InfoPage kind="pricing" />;
   }
 
   if (path.startsWith("/blog/")) {
@@ -59,6 +73,10 @@ function RouteView(): JSX.Element {
 
   if (path === "/dashboard/newsletter") {
     return <NewsletterPage />;
+  }
+
+  if (path === "/dashboard/paper") {
+    return <MyPaperPage />;
   }
 
   if (path === "/billing") {

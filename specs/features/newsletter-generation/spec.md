@@ -196,6 +196,32 @@ and its absence never breaks the overall newsletter structure.
 
 ---
 
+### User Story 7 — Read My Personalized Paper In App (Priority: P2)
+
+As a signed-in reader, I want to generate and read my personalized Daily Paper inside the app so I
+can use the product even when I do not want to wait for email delivery.
+
+**Why this priority**: The product promise is a personal newspaper. In-app reading makes that value
+visible immediately after preferences are selected and gives the user a place to refine the output.
+
+**Independent Test**: Can be tested by signing in with saved preferences, opening
+`/dashboard/paper`, generating today's paper, and confirming topic sections, summaries, source
+labels, why-it-matters notes, and refinement settings render.
+
+**Acceptance Scenarios**:
+
+1. **Given** I have saved topic preferences, **When** I open `/dashboard/paper` and generate the
+   paper, **Then** I see a personalized newspaper with sections matching my topics.
+2. **Given** I have no topics selected, **When** I open `/dashboard/paper`, **Then** I see a prompt
+   to choose topics before generating a paper.
+3. **Given** the generated paper feels too high-level, **When** I select improvement controls such
+   as more detailed, more local context, or less high-level summary, **Then** the regenerated paper
+   reflects those preferences in its section copy and refinement summary.
+4. **Given** I generate an in-app paper, **When** I leave and return, **Then** the latest generated
+   paper remains available for the signed-in user.
+
+---
+
 ### Edge Cases
 
 - What happens when a user has saved preferences but no `article_summaries` exist for any of their
@@ -280,6 +306,12 @@ and its absence never breaks the overall newsletter structure.
 - **FR-NL-016**: Topic matching MUST tolerate case and whitespace differences between saved
   preference topics and article summary topic labels so valid stories are not dropped because of
   formatting mismatch.
+- **FR-NL-017**: Authenticated users MUST be able to generate and read their latest personalized
+  paper inside the app at `/dashboard/paper` using their saved topics.
+- **FR-NL-018**: The in-app paper reader MUST provide improvement controls for depth, tone, and
+  requested fixes such as more local context, more business detail, and less high-level summary.
+- **FR-NL-019**: The latest generated in-app paper and refinement settings MUST be scoped to the
+  signed-in user and available when the user returns to the reader page.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -408,6 +440,12 @@ and its absence never breaks the overall newsletter structure.
   - Full pipeline: given seeded `article_summaries` for two topics and a user preference fixture,
     generate a newsletter and verify the stored HTML contains topic headings, story titles, source
     attributions, Summary labels where appropriate, and a footer with both required links.
+  - In-app reader: given a signed-in user with saved topics, generate `/dashboard/paper` and verify
+    topic sections, why-it-matters notes, and latest paper persistence render.
+  - Refinement controls: given an in-app paper, apply more detail, local context, and less
+    high-level feedback, then verify the regenerated paper reflects the requested changes.
+  - Empty state: given no saved topics, verify `/dashboard/paper` prompts the user to choose topics
+    before generation.
 
 - **Regression coverage**:
   - Verify that a preference change after a newsletter has been generated for the day does not

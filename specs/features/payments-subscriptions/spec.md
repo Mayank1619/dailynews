@@ -50,6 +50,18 @@ Acceptance:
 2. Expired, canceled, or past-due subscriptions are not entitled.
 3. Entitlement checks emit privacy-safe telemetry without card or invoice data.
 
+### User Story 4 - Access Plus Reading Features
+
+As a paying or trialing user, I want Plus to include more than email delivery so the subscription
+feels valuable as my personal newspaper habit grows.
+
+Acceptance:
+
+1. Billing copy includes in-app paper reading as a plan feature.
+2. Billing copy includes improvement controls for more depth and better context.
+3. Future entitlement checks can gate premium refinement and saved-history depth without collecting
+   payment data in the app.
+
 ## Requirements
 
 - **FR-PS-001**: The system MUST provide a 15-day free trial for new users.
@@ -60,6 +72,8 @@ Acceptance:
 - **FR-PS-006**: The system MUST support provider-not-configured messaging so the app can be deployed before live Stripe setup.
 - **FR-PS-007**: The system MUST expose subscription entitlement checks for newsletter generation/delivery.
 - **FR-PS-008**: The system MUST record lifecycle telemetry for trial start, status view, checkout start, and entitlement checks.
+- **FR-PS-009**: The Plus plan MUST describe in-app paper reading and improve-my-news refinement as included value.
+- **FR-PS-010**: Premium curation/refinement features MUST be designed so entitlement checks can gate them when live payment provider integration is complete.
 
 ## Security and Privacy
 
@@ -84,3 +98,4 @@ The recommended $4.99/month price is based on:
 - Added `/billing` route and dashboard billing link.
 - Added provider-ready checkout messaging; live checkout waits for `STRIPE_PAYMENT_LINK_URL`.
 - Updated marketing plan in `specs/marketing-ai-growth-plan.md`.
+- Added in-app paper reading and improve-my-news refinement to Plus plan copy.

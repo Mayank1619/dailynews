@@ -14,9 +14,48 @@ type PreferenceState = {
   newsletterEnabled: boolean;
 };
 
+type PaperDepth = "quick" | "balanced" | "deep";
+type PaperTone = "straight" | "analytical" | "practical";
+
+type ReaderFeedbackState = {
+  depth: PaperDepth;
+  tone: PaperTone;
+  improvements: string[];
+  notes: string;
+  updatedAt: string;
+};
+
+type PaperStory = {
+  id: string;
+  title: string;
+  source: string;
+  summary: string;
+  detail: string;
+  whyItMatters: string;
+  canonicalUrl: string;
+  publishedAt: string;
+};
+
+type PaperSection = {
+  topic: string;
+  stories: PaperStory[];
+};
+
+type PersonalizedPaper = {
+  id: string;
+  subject: string;
+  createdAt: string;
+  readingTimeMinutes: number;
+  generationMode: "local-personalized";
+  sections: PaperSection[];
+  refinementSummary: string;
+};
+
 const STORAGE_KEY = "daily-paper-demo-preferences";
 const BILLING_KEY = "daily-paper-demo-billing";
 const PROFILE_KEY = "daily-paper-demo-profile";
+const READER_FEEDBACK_KEY = "daily-paper-reader-feedback";
+const PAPER_HISTORY_KEY = "daily-paper-generated-paper";
 const TRIAL_DAYS = 15;
 const TOPIC_GROUPS = [
   {
@@ -50,6 +89,26 @@ const FREQUENCIES = [
   { value: "weekly", label: "Weekly", description: "A deeper weekly roundup." }
 ] as const;
 const TIMEZONES = ["America/Toronto", "America/New_York", "America/Los_Angeles", "UTC"];
+const READER_DEPTHS = [
+  { value: "quick", label: "Quick scan", description: "Shorter sections for a fast morning read." },
+  { value: "balanced", label: "Balanced", description: "Enough context without becoming a long report." },
+  { value: "deep", label: "More detailed", description: "More context, implications, and why-it-matters notes." }
+] as const;
+const READER_TONES = [
+  { value: "straight", label: "Straight news" },
+  { value: "analytical", label: "More analysis" },
+  { value: "practical", label: "Practical takeaways" }
+] as const;
+const IMPROVEMENT_OPTIONS = [
+  "Less high-level summary",
+  "More local context",
+  "More source links",
+  "More business detail",
+  "More policy background",
+  "More quick bullets",
+  "More global context",
+  "Fewer repeated stories"
+] as const;
 
 const defaultPreferences: PreferenceState = {
   topics: [],
@@ -176,6 +235,58 @@ function saveBillingState(billing: BillingState, userId?: string): void {
   window.localStorage.setItem(getBillingStorageKey(userId), JSON.stringify(billing));
 }
 
+function getReaderFeedbackStorageKey(userId?: string): string {
+  return userId ? `${READER_FEEDBACK_KEY}:${userId}` : READER_FEEDBACK_KEY;
+}
+
+function getPaperStorageKey(userId?: string): string {
+  return userId ? `${PAPER_HISTORY_KEY}:${userId}` : PAPER_HISTORY_KEY;
+}
+
+function createDefaultReaderFeedback(): ReaderFeedbackState {
+  return {
+    depth: "balanced",
+    tone: "straight",
+    improvements: [],
+    notes: "",
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function readReaderFeedback(userId?: string): ReaderFeedbackState {
+  if (typeof window === "undefined") return createDefaultReaderFeedback();
+
+  const raw = window.localStorage.getItem(getReaderFeedbackStorageKey(userId));
+  if (!raw) return createDefaultReaderFeedback();
+
+  try {
+    return { ...createDefaultReaderFeedback(), ...(JSON.parse(raw) as Partial<ReaderFeedbackState>) };
+  } catch {
+    return createDefaultReaderFeedback();
+  }
+}
+
+function saveReaderFeedback(feedback: ReaderFeedbackState, userId?: string): void {
+  window.localStorage.setItem(getReaderFeedbackStorageKey(userId), JSON.stringify(feedback));
+}
+
+function readLatestPaper(userId?: string): PersonalizedPaper | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = window.localStorage.getItem(getPaperStorageKey(userId));
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as PersonalizedPaper;
+  } catch {
+    return null;
+  }
+}
+
+function saveLatestPaper(paper: PersonalizedPaper, userId?: string): void {
+  window.localStorage.setItem(getPaperStorageKey(userId), JSON.stringify(paper));
+}
+
 function getProfileStorageKey(userId?: string): string {
   return userId ? `${PROFILE_KEY}:${userId}` : PROFILE_KEY;
 }
@@ -243,6 +354,21 @@ function useBillingState(userId?: string): [BillingState, (next: BillingState) =
   return [billing, persist];
 }
 
+function useReaderFeedback(userId?: string): [ReaderFeedbackState, (next: ReaderFeedbackState) => void] {
+  const [feedback, setFeedback] = React.useState<ReaderFeedbackState>(() => readReaderFeedback(userId));
+
+  React.useEffect(() => {
+    setFeedback(readReaderFeedback(userId));
+  }, [userId]);
+
+  const persist = React.useCallback((next: ReaderFeedbackState) => {
+    setFeedback(next);
+    saveReaderFeedback(next, userId);
+  }, [userId]);
+
+  return [feedback, persist];
+}
+
 function useAccountProfile(user?: User | null): [AccountProfileState, (next: AccountProfileState) => void] {
   const [profile, setProfile] = React.useState<AccountProfileState>(() => readAccountProfile(user));
 
@@ -284,6 +410,107 @@ function getInitials(nameOrEmail: string): string {
 
 function isE2EAuthSession(): boolean {
   return typeof window !== "undefined" && window.localStorage.getItem("daily-paper-e2e-auth") === "true";
+}
+
+function createPersonalizedPaper(preferences: PreferenceState, feedback: ReaderFeedbackState, userId?: string): PersonalizedPaper {
+  const createdAt = new Date();
+  const topics = preferences.topics.length ? preferences.topics : ["New in AI", "Markets", "World Affairs"];
+  const storyCount = feedback.depth === "deep" ? 3 : feedback.depth === "quick" ? 1 : 2;
+  const sections = topics.slice(0, feedback.depth === "deep" ? 8 : 6).map((topic, topicIndex) => ({
+    topic,
+    stories: Array.from({ length: storyCount }, (_, storyIndex) =>
+      buildPaperStory(topic, topicIndex, storyIndex, preferences, feedback, createdAt)
+    )
+  }));
+  const storyTotal = sections.reduce((count, section) => count + section.stories.length, 0);
+
+  return {
+    id: `paper-${userId ?? "reader"}-${createdAt.toISOString().slice(0, 10)}`,
+    subject: `${preferences.frequency === "weekly" ? "Weekly" : "Daily"} Paper for ${createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+    createdAt: createdAt.toISOString(),
+    readingTimeMinutes: Math.max(3, Math.ceil(storyTotal * (feedback.depth === "deep" ? 1.25 : 0.8))),
+    generationMode: "local-personalized",
+    sections,
+    refinementSummary: summarizeReaderFeedback(feedback)
+  };
+}
+
+function buildPaperStory(
+  topic: string,
+  topicIndex: number,
+  storyIndex: number,
+  preferences: PreferenceState,
+  feedback: ReaderFeedbackState,
+  createdAt: Date
+): PaperStory {
+  const angle = getTopicAngle(topic, storyIndex);
+  const locality = feedback.improvements.includes("More local context")
+    ? ` with a ${preferences.province || preferences.country} lens`
+    : "";
+  const detail = feedback.depth === "deep"
+    ? `This deeper brief adds background, likely second-order effects, and the open questions a regular newspaper reader would want before moving on.`
+    : feedback.depth === "quick"
+      ? "This quick brief keeps the story compact so you can scan the paper fast."
+      : "This balanced brief gives the core context and the practical implication without overloading the page.";
+  const tone = feedback.tone === "analytical"
+    ? "The analysis angle focuses on trade-offs, incentives, and what could change next."
+    : feedback.tone === "practical"
+      ? "The practical angle highlights what a reader can watch, save, or act on."
+      : "The straight-news angle keeps the wording neutral and source-first.";
+  const improvement = feedback.improvements.includes("Less high-level summary")
+    ? "The summary avoids generic framing and names the specific signal to watch."
+    : "The summary is written for fast understanding.";
+
+  return {
+    id: `${slug(topic)}-${storyIndex + 1}`,
+    title: `${topic}: ${angle}`,
+    source: storyIndex % 2 === 0 ? "Daily Paper Source Desk" : "Curated Wire Brief",
+    summary: `${topic} coverage${locality} is organized around ${angle.toLowerCase()}. ${improvement}`,
+    detail: `${detail} ${tone}`,
+    whyItMatters: getWhyItMatters(topic, preferences, feedback),
+    canonicalUrl: "/samples",
+    publishedAt: new Date(createdAt.getTime() - (topicIndex * 2 + storyIndex) * 60 * 60 * 1000).toISOString()
+  };
+}
+
+function getTopicAngle(topic: string, storyIndex: number): string {
+  const lower = topic.toLowerCase();
+  const fallback = ["what changed today", "what readers should watch", "what it means this week"];
+
+  if (lower.includes("ai")) return ["new tools and model updates", "where adoption is showing up", "risks and practical uses"][storyIndex] ?? fallback[storyIndex] ?? fallback[0];
+  if (lower.includes("market") || lower.includes("finance") || lower.includes("business")) return ["major movers and pressure points", "earnings and rate signals", "winners, losers, and what drove them"][storyIndex] ?? fallback[0];
+  if (lower.includes("politic") || lower.includes("policy") || lower.includes("election")) return ["policy decisions and public reaction", "campaign signals and voter issues", "what changes for households"][storyIndex] ?? fallback[0];
+  if (lower.includes("sport") || lower.includes("football") || lower.includes("cricket") || lower.includes("hockey")) return ["fixtures, form, and injury notes", "matchups that could swing the table", "what fans should watch"][storyIndex] ?? fallback[0];
+  if (lower.includes("local") || lower.includes("canada")) return ["regional decisions and community impact", "housing, services, and affordability", "what changes near you"][storyIndex] ?? fallback[0];
+  if (lower.includes("horoscope")) return ["your lighter daily reading ritual", "mood, timing, and reflection", "culture notes beside the stars"][storyIndex] ?? fallback[0];
+  if (lower.includes("technology")) return ["product launches and platform shifts", "security and consumer impact", "what builders are watching"][storyIndex] ?? fallback[0];
+
+  return fallback[storyIndex] ?? fallback[0];
+}
+
+function getWhyItMatters(topic: string, preferences: PreferenceState, feedback: ReaderFeedbackState): string {
+  const region = preferences.province || preferences.country;
+  if (feedback.improvements.includes("More business detail")) {
+    return `It may affect budgets, markets, pricing, or company strategy for readers watching ${topic}.`;
+  }
+  if (feedback.improvements.includes("More policy background")) {
+    return `It gives policy context so the ${topic} story is easier to follow beyond the headline.`;
+  }
+  if (feedback.improvements.includes("More local context")) {
+    return `It connects the larger ${topic} story back to ${region}.`;
+  }
+  return `It helps you decide whether this ${topic} story deserves a deeper read.`;
+}
+
+function summarizeReaderFeedback(feedback: ReaderFeedbackState): string {
+  const depth = READER_DEPTHS.find((item) => item.value === feedback.depth)?.label ?? "Balanced";
+  const tone = READER_TONES.find((item) => item.value === feedback.tone)?.label ?? "Straight news";
+  const improvements = feedback.improvements.length ? feedback.improvements.join(", ") : "default curation";
+  return `${depth} depth, ${tone.toLowerCase()}, ${improvements}.`;
+}
+
+function slug(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
 function getDevE2EUser(): User | null {
@@ -426,6 +653,9 @@ function AppNav({ user }: { user?: User | null }): React.JSX.Element {
         <a href="/settings" style={navLinkStyle}>
           Dashboard
         </a>
+        <a href="/dashboard/paper" style={navLinkStyle}>
+          My Paper
+        </a>
         <a href="/dashboard/preferences" style={navLinkStyle}>
           Preferences
         </a>
@@ -479,6 +709,7 @@ function AppNav({ user }: { user?: User | null }): React.JSX.Element {
               {user.email ?? "Signed in"}
             </p>
             <a role="menuitem" href="/profile" style={menuLinkStyle}>My Profile</a>
+            <a role="menuitem" href="/dashboard/paper" style={menuLinkStyle}>Read My Paper</a>
             <a role="menuitem" href="/billing" style={menuLinkStyle}>My Plan</a>
             <a role="menuitem" href="/dashboard/preferences" style={menuLinkStyle}>Preferences</a>
             <a role="menuitem" href="/dashboard/newsletter" style={menuLinkStyle}>Newsletter Delivery</a>
@@ -952,6 +1183,226 @@ export function PreferencesPage(): React.JSX.Element {
   );
 }
 
+export function MyPaperPage(): React.JSX.Element {
+  const auth = useAuthState();
+  const userId = auth.user?.uid;
+  const [preferences] = usePreferences(userId);
+  const [billing] = useBillingState(userId);
+  const [feedback, persistFeedback] = useReaderFeedback(userId);
+  const [draftFeedback, setDraftFeedback] = React.useState<ReaderFeedbackState>(feedback);
+  const [paper, setPaper] = React.useState<PersonalizedPaper | null>(() => readLatestPaper(userId));
+  const [message, setMessage] = React.useState("");
+
+  React.useEffect(() => setDraftFeedback(feedback), [feedback]);
+  React.useEffect(() => setPaper(readLatestPaper(userId)), [userId]);
+
+  const guard = AuthRequired({ auth });
+  if (guard) return guard;
+
+  const generate = (nextFeedback = draftFeedback): void => {
+    if (!preferences.topics.length) {
+      setMessage("Choose at least one topic before creating your paper.");
+      return;
+    }
+
+    const normalizedFeedback = { ...nextFeedback, updatedAt: new Date().toISOString() };
+    persistFeedback(normalizedFeedback);
+    const nextPaper = createPersonalizedPaper(preferences, normalizedFeedback, userId);
+    saveLatestPaper(nextPaper, userId);
+    setPaper(nextPaper);
+    setMessage("Your paper is ready to read.");
+  };
+
+  const toggleImprovement = (improvement: string): void => {
+    setDraftFeedback((current) => ({
+      ...current,
+      improvements: current.improvements.includes(improvement)
+        ? current.improvements.filter((item) => item !== improvement)
+        : [...current.improvements, improvement]
+    }));
+    setMessage("");
+  };
+
+  return (
+    <main style={shellStyle}>
+      <section style={{ ...panelStyle, width: "min(1100px, 100%)" }}>
+        <AppNav user={auth.user} />
+        <BackToSettings />
+        <p style={eyebrowTextStyle}>Personal newspaper</p>
+        <h1 style={{ font: DESIGN_TOKENS.typography.h1, margin: "0 0 10px" }}>Read Your Daily Paper</h1>
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 760 }}>
+          Create a personal newspaper from your saved topics, then tune the depth and style when the output feels too broad or not useful enough.
+        </p>
+
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: 14, margin: "20px 0", alignItems: "start" }}>
+          <div style={metricStyle}>
+            Plan<br />
+            <strong>{getPlanLabel(billing)}</strong>
+          </div>
+          <div style={metricStyle}>
+            Topics<br />
+            <strong>{preferences.topics.length ? preferences.topics.length : "None selected"}</strong>
+          </div>
+          <div style={metricStyle}>
+            Reading Style<br />
+            <strong>{READER_DEPTHS.find((item) => item.value === feedback.depth)?.label ?? "Balanced"}</strong>
+          </div>
+        </section>
+
+        {preferences.topics.length === 0 ? (
+          <section style={emptyStateStyle}>
+            <h2 style={{ font: DESIGN_TOKENS.typography.h2, marginTop: 0 }}>Choose topics to build your paper</h2>
+            <p style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
+              Your personal newspaper starts with topics. Pick business, politics, sports, AI, local news, horoscopes, or anything else you want included.
+            </p>
+            <a href="/dashboard/preferences" style={ctaLinkStyle}>Choose Topics</a>
+          </section>
+        ) : (
+          <div style={{ display: "grid", gap: 18 }}>
+            <section style={readerControlStyle}>
+              <div>
+                <h2 style={{ font: DESIGN_TOKENS.typography.h2, margin: 0 }}>Create Today&apos;s Paper</h2>
+                <p style={{ color: DESIGN_TOKENS.colors.textSecondary, marginBottom: 0 }}>
+                  Uses your saved topics: {preferences.topics.slice(0, 8).join(", ")}.
+                </p>
+              </div>
+              <button
+                type="button"
+                data-testid="generate-my-paper"
+                onClick={() => generate()}
+                style={{ ...buttonBase, background: DESIGN_TOKENS.colors.brandPrimary, color: "#07111F", width: "fit-content" }}
+              >
+                Generate Today&apos;s Paper
+              </button>
+            </section>
+
+            <section style={readerControlStyle}>
+              <h2 style={{ font: DESIGN_TOKENS.typography.h2, margin: 0 }}>Improve My News</h2>
+              <fieldset style={fieldsetBoxStyle}>
+                <legend>Depth</legend>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 10 }}>
+                  {READER_DEPTHS.map((depth) => (
+                    <label key={depth.value} style={radioCardStyle(draftFeedback.depth === depth.value)}>
+                      <input
+                        type="radio"
+                        name="reader-depth"
+                        value={depth.value}
+                        checked={draftFeedback.depth === depth.value}
+                        onChange={() => setDraftFeedback({ ...draftFeedback, depth: depth.value })}
+                      />
+                      <strong>{depth.label}</strong>
+                      <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{depth.description}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <FieldLabel label="Tone">
+                <select
+                  value={draftFeedback.tone}
+                  onChange={(event) => setDraftFeedback({ ...draftFeedback, tone: event.target.value as PaperTone })}
+                  style={inputStyle}
+                >
+                  {READER_TONES.map((tone) => (
+                    <option key={tone.value} value={tone.value}>{tone.label}</option>
+                  ))}
+                </select>
+              </FieldLabel>
+
+              <fieldset style={fieldsetBoxStyle}>
+                <legend>What should improve?</legend>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  {IMPROVEMENT_OPTIONS.map((improvement) => (
+                    <button
+                      key={improvement}
+                      type="button"
+                      aria-pressed={draftFeedback.improvements.includes(improvement)}
+                      onClick={() => toggleImprovement(improvement)}
+                      style={{
+                        ...buttonBase,
+                        background: draftFeedback.improvements.includes(improvement) ? "rgba(244,114,182,0.28)" : "rgba(7,9,18,0.74)",
+                        borderColor: draftFeedback.improvements.includes(improvement) ? "rgba(244,114,182,0.76)" : "rgba(167,179,200,0.24)"
+                      }}
+                    >
+                      {improvement}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              <FieldLabel label="Additional instruction">
+                <textarea
+                  value={draftFeedback.notes}
+                  placeholder="Example: I want business stories to include numbers and market impact."
+                  onChange={(event) => setDraftFeedback({ ...draftFeedback, notes: event.target.value })}
+                  style={{ ...inputStyle, minHeight: 92, resize: "vertical" }}
+                />
+              </FieldLabel>
+
+              <button
+                type="button"
+                data-testid="apply-paper-feedback"
+                onClick={() => generate(draftFeedback)}
+                style={{ ...buttonBase, background: DESIGN_TOKENS.colors.accentHighlight, color: "#07111F", width: "fit-content" }}
+              >
+                Apply and Regenerate
+              </button>
+            </section>
+
+            {message ? <p role="status" style={{ color: DESIGN_TOKENS.colors.success }}>{message}</p> : null}
+
+            {paper ? <PaperReader paper={paper} /> : (
+              <section style={emptyStateStyle}>
+                <h2 style={{ font: DESIGN_TOKENS.typography.h2, marginTop: 0 }}>No in-app paper generated yet</h2>
+                <p style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
+                  Generate today&apos;s edition to read it here. Email delivery can still stay active separately.
+                </p>
+              </section>
+            )}
+          </div>
+        )}
+      </section>
+      <PoweredByNetfroot />
+    </main>
+  );
+}
+
+function PaperReader({ paper }: { paper: PersonalizedPaper }): React.JSX.Element {
+  return (
+    <article data-testid="my-paper-reader" style={paperStyle}>
+      <header style={{ borderBottom: "1px solid rgba(167,179,200,0.18)", paddingBottom: 16, marginBottom: 18 }}>
+        <p style={eyebrowTextStyle}>Generated in app</p>
+        <h2 style={{ font: DESIGN_TOKENS.typography.h1, margin: "0 0 6px" }}>{paper.subject}</h2>
+        <p style={{ color: "#475569", margin: 0 }}>
+          {new Date(paper.createdAt).toLocaleString()} · {paper.readingTimeMinutes} min read · {paper.refinementSummary}
+        </p>
+      </header>
+      <div style={{ display: "grid", gap: 20 }}>
+        {paper.sections.map((section) => (
+          <section key={section.topic} style={{ display: "grid", gap: 12 }}>
+            <h3 style={{ font: DESIGN_TOKENS.typography.h2, margin: 0, color: "#0E7490" }}>{section.topic}</h3>
+            {section.stories.map((story) => (
+              <article key={story.id} style={storyCardStyle}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <h4 style={{ font: DESIGN_TOKENS.typography.h3, margin: 0 }}>{story.title}</h4>
+                  <span style={{ color: DESIGN_TOKENS.colors.accentHighlight, fontWeight: 900 }}>Summary</span>
+                </div>
+                <p style={{ color: "#475569", margin: 0 }}>
+                  {story.source} · {new Date(story.publishedAt).toLocaleDateString("en-US")}
+                </p>
+                <p style={{ margin: 0 }}>{story.summary}</p>
+                <p style={{ margin: 0, color: "#475569" }}>{story.detail}</p>
+                <p style={{ margin: 0 }}><strong>Why it matters:</strong> {story.whyItMatters}</p>
+                <a href={story.canonicalUrl} style={{ color: "#0E7490", fontWeight: 900 }}>View related samples</a>
+              </article>
+            ))}
+          </section>
+        ))}
+      </div>
+    </article>
+  );
+}
+
 export function NewsletterPage(): React.JSX.Element {
   const auth = useAuthState();
   const [preferences, persist] = usePreferences(auth.user?.uid);
@@ -1064,6 +1515,9 @@ export function SettingsPage(): React.JSX.Element {
           </p>
         ) : null}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <a data-testid="read-my-paper" href="/dashboard/paper" style={ctaLinkStyle}>
+            Read My Paper
+          </a>
           <a data-testid="email-preferences" href="/dashboard/preferences" style={ctaLinkStyle}>
             Choose Topics
           </a>
@@ -1884,6 +2338,64 @@ const metricStyle: React.CSSProperties = {
   borderRadius: 12,
   border: "1px solid rgba(34,211,238,0.22)",
   background: "rgba(7,9,18,0.72)"
+};
+
+const eyebrowTextStyle: React.CSSProperties = {
+  margin: 0,
+  color: DESIGN_TOKENS.colors.accentHighlight,
+  fontWeight: 900
+};
+
+const emptyStateStyle: React.CSSProperties = {
+  padding: 18,
+  borderRadius: 14,
+  border: "1px solid rgba(244,114,182,0.24)",
+  background: "rgba(7,9,18,0.58)"
+};
+
+const readerControlStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 14,
+  padding: 18,
+  borderRadius: 14,
+  border: "1px solid rgba(34,211,238,0.22)",
+  background: "rgba(7,9,18,0.58)"
+};
+
+const fieldsetBoxStyle: React.CSSProperties = {
+  border: "1px solid rgba(34,211,238,0.24)",
+  borderRadius: 12,
+  padding: 12
+};
+
+function radioCardStyle(selected: boolean): React.CSSProperties {
+  return {
+    display: "grid",
+    gap: 4,
+    padding: 12,
+    borderRadius: 12,
+    cursor: "pointer",
+    border: `1px solid ${selected ? "rgba(34,211,238,0.88)" : "rgba(167,179,200,0.22)"}`,
+    background: selected ? "rgba(34,211,238,0.14)" : "rgba(17,24,39,0.68)"
+  };
+}
+
+const paperStyle: React.CSSProperties = {
+  padding: 20,
+  borderRadius: 14,
+  border: "1px solid rgba(34,211,238,0.3)",
+  background: "rgba(248,250,252,0.96)",
+  color: "#0F172A",
+  boxShadow: "0 24px 60px rgba(0,0,0,0.24)"
+};
+
+const storyCardStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 10,
+  padding: 16,
+  borderRadius: 12,
+  border: "1px solid rgba(15,23,42,0.14)",
+  background: "#FFFFFF"
 };
 
 const adminSectionStyle: React.CSSProperties = {

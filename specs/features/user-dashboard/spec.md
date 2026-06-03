@@ -306,6 +306,8 @@ immediate revocation of session access.
 - **FR-DASH-018**: The profile page MUST provide password change validation for minimum password
   length, confirmation mismatch, successful update, and recent-login-required errors using safe
   user-facing messages.
+- **FR-DASH-019**: Authenticated navigation MUST include a My Paper destination that routes to the
+  in-app personalized paper reader defined by the Newsletter Generation feature.
 
 ### Security & Privacy Requirements *(mandatory)*
 

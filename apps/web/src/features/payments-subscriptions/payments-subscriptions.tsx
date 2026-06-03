@@ -28,6 +28,8 @@ export type PlanStatusDisplayProps = {
 
 const included = [
   "Personalized daily or weekly AI newsletter",
+  "Read your personal paper inside the app",
+  "Improve-my-news controls for more depth and better context",
   "Detailed topic preferences",
   "Source-linked summaries",
   "Newsletter history and preference controls",

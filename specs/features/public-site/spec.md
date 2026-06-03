@@ -80,6 +80,8 @@ As a visitor, I want supporting content such as how Daily Paper works, a sample 
 - **FR-012**: The system MUST keep the landing page responsive with a mobile-first layout that preserves readability, hierarchy, and action clarity across supported viewports.
 - **FR-013**: The system MUST provide landing-page metadata for title, description, and social preview so the public entry point is shareable and discoverable.
 - **FR-014**: The system MUST keep the landing experience lightweight enough that visitors can reach the primary message and CTA quickly without relying on heavy client-side behavior.
+- **FR-015**: The system MUST provide public `/about`, `/how-it-works`, and `/pricing` pages that explain the personal newspaper concept, the preference-to-paper flow, and subscription value.
+- **FR-016**: Public information pages MUST include clear routes back to signup and samples so visitors can continue evaluation without dead ends.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -113,7 +115,7 @@ As a visitor, I want supporting content such as how Daily Paper works, a sample 
 ## Test Plan
 
 - **Unit coverage**: Validate basic landing-page rendering, presence of branding and main sections, and route targets for signup, login, blog, and footer links.
-- **End-to-end coverage**: Validate that the landing page loads successfully at `/` and that the primary CTA routes correctly to `/signup`.
+- **End-to-end coverage**: Validate that the landing page loads successfully at `/` and that the primary CTA routes correctly to `/signup`; validate `/about`, `/how-it-works`, and `/pricing` render their core explanatory copy and CTAs.
 - **Responsive review**: Validate that the hero message, CTA, and navigation remain readable and actionable across mobile-first layouts.
 - **Content integrity review**: Validate that the sample digest preview is clearly labeled as a sample and that the public copy remains neutral and trustworthy.
 - **SEO review**: Validate that the landing page exposes title, description, and social preview metadata, plus a crawlable path to `/blog`.
@@ -141,3 +143,4 @@ As a visitor, I want supporting content such as how Daily Paper works, a sample 
 - Confirmed the landing page uses the active dark neon design-system baseline with cyan/violet CTA gradients, glass-style sections, and a dark full-page background.
 - Confirmed the primary CTA label is `Get Your Daily Paper` in both the header navigation and hero action.
 - Confirmed `/signup`, `/login`, and `/blog` remain public navigation targets in the Vite SPA router, with Vercel SPA rewrites configured separately in `vercel.json`.
+- Added public `/about`, `/how-it-works`, and `/pricing` routes to explain Daily Paper as a personalized digital newspaper.
