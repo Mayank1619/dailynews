@@ -46,6 +46,16 @@ Suggested future tiers:
 
 ## Automated SEO Engine
 
+### Implemented Marketing Agent
+
+Completed on 2026-06-02:
+
+- `POST /api/marketing/daily-content` creates a daily SEO blog draft and 10-second, 15-second, and 30-second short-video scripts.
+- The endpoint is protected by the existing `NEWSLETTER_ADMIN_TOKEN` bearer-token guard.
+- The agent uses `OPENAI_MARKETING_MODEL` or `gpt-4.1-mini` when `OPENAI_API_KEY` is available, with deterministic fallback content if AI generation is unavailable.
+- Output includes captions, hashtags, review checklist, channel recommendations, signup/sample routes, and automation notes.
+- This is a draft-generation flow, not direct public publishing. A persistent blog store and admin review/publish action are still required before fully automatic daily publishing.
+
 ### Blog Cadence
 
 Publish **3 posts/week**:
@@ -224,7 +234,7 @@ Week 1:
 
 Week 2:
 
-- Add automated blog draft generation endpoint.
+- Add automated blog draft generation endpoint. Completed first protected draft-generation endpoint on 2026-06-02.
 - Start topic-based blog calendar.
 - Add signup-source tracking.
 
