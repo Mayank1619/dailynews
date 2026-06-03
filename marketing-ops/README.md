@@ -104,6 +104,30 @@ node marketing-ops/scripts/generate-local-drafts.mjs astroya
 
 The generated JSON files are stored in `marketing-ops/draft-queue/` and ignored by git.
 
+## Free Video Rendering
+
+Generate vertical MP4 marketing videos locally with:
+
+```bash
+npm run marketing:render-videos
+```
+
+Generate one app only:
+
+```bash
+npm run marketing:render-videos -- daily-paper
+npm run marketing:render-videos -- astroya
+```
+
+The renderer creates:
+
+- `marketing-ops/generated-videos/{app}-{date}-15s.mp4`
+- `marketing-ops/generated-videos/{app}-{date}-15s-cover.png`
+- `marketing-ops/generated-videos/{app}-{date}-15s-caption.txt`
+- `marketing-ops/generated-videos/{app}-{date}-15s.json`
+
+The renderer uses local templates, Playwright screenshots, and a bundled ffmpeg binary. It does not use paid video generation.
+
 ## External Accounts
 
 Separate accounts should be created for each app:

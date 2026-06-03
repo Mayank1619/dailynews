@@ -182,6 +182,14 @@ Each sample should include:
 
 Publish **4 short videos/week**, 20-40 seconds each.
 
+Implemented on 2026-06-03:
+
+- `npm run marketing:render-videos` renders free 9:16 MP4 videos for Daily Paper and Astroya.
+- The renderer uses Playwright screenshots, local HTML/CSS templates, and a bundled ffmpeg binary.
+- Output is written to `marketing-ops/generated-videos/` as MP4, cover PNG, caption TXT, and metadata JSON files.
+- `.github/workflows/render-marketing-videos.yml` can render the same videos daily and upload them as GitHub Actions artifacts.
+- No paid video generation provider is required for the starter version.
+
 ### Repeatable Video Formats
 
 1. Problem hook:
