@@ -18,6 +18,9 @@ jobs:
       SOCIAL_AUTO_POST: ${{ secrets.SOCIAL_AUTO_POST }}
       MAKE_SOCIAL_WEBHOOK_URL: ${{ secrets.MAKE_SOCIAL_WEBHOOK_URL }}
       MAKE_SOCIAL_WEBHOOK_TOKEN: ${{ secrets.MAKE_SOCIAL_WEBHOOK_TOKEN }}
+      N8N_SOCIAL_WEBHOOK_URL: ${{ secrets.N8N_SOCIAL_WEBHOOK_URL }}
+      N8N_SOCIAL_WEBHOOK_TOKEN: ${{ secrets.N8N_SOCIAL_WEBHOOK_TOKEN }}
+      N8N_SOCIAL_WEBHOOK_HEADER: ${{ secrets.N8N_SOCIAL_WEBHOOK_HEADER }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

@@ -11,7 +11,8 @@ This folder keeps the low-cost marketing framework for Daily Paper and Astroya S
 - Cross-post the same short concept across platforms before paying for video rendering.
 - Store local drafts in `draft-queue/` during testing. That folder is ignored by git.
 - Use Vercel Cron as the primary scheduler because the app is already hosted on Vercel.
-- Treat Make.com, Pipedream, n8n, or GitHub Actions as optional routing layers, not the core marketing brain.
+- Prefer n8n as the repeatable social routing layer because workflows can be imported/exported as JSON.
+- Treat Make.com, Pipedream, or GitHub Actions as optional routing layers, not the core marketing brain.
 
 ## Primary No-Cost Automation
 
@@ -149,6 +150,17 @@ The publisher reads the latest generated MP4 metadata and creates ignored local 
 ```text
 marketing-ops/publish-queue/
 ```
+
+For n8n posting, import `n8n/social-video-webhook.workflow.json`, activate the production webhook, and add these GitHub repository secrets:
+
+```text
+N8N_SOCIAL_WEBHOOK_URL
+N8N_SOCIAL_WEBHOOK_TOKEN
+N8N_SOCIAL_WEBHOOK_HEADER=X-DailyNews-Token
+SOCIAL_AUTO_POST=true
+```
+
+`N8N_SOCIAL_WEBHOOK_TOKEN` is optional while testing. When set, it is sent using `N8N_SOCIAL_WEBHOOK_HEADER`, which defaults to `X-DailyNews-Token`.
 
 For Make.com posting, create a Custom Webhook scenario and add these GitHub repository secrets:
 

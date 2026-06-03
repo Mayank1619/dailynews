@@ -8,7 +8,7 @@ const generatedRoot = resolve(opsRoot, "generated-videos");
 const publishQueueRoot = resolve(opsRoot, "publish-queue");
 const requestedApps = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
 const selectedApps = requestedApps.length ? requestedApps : ["daily-paper", "astroya"];
-const publishMode = process.env.SOCIAL_PUBLISH_MODE ?? (process.env.MAKE_SOCIAL_WEBHOOK_URL ? "make-webhook" : "dry-run");
+const publishMode = process.env.SOCIAL_PUBLISH_MODE ?? detectPublishMode();
 const autoPostEnabled = process.env.SOCIAL_AUTO_POST === "true";
 
 await mkdir(publishQueueRoot, { recursive: true });
@@ -56,9 +56,9 @@ for (const appId of selectedApps) {
   await writeFile(queuePath, `${JSON.stringify(post, null, 2)}\n`, "utf8");
   run.posts.push({ appId, queuePath, title: post.title, platforms });
 
-  if (publishMode === "make-webhook" && autoPostEnabled) {
-    await sendToMake(post);
-    console.log(`Sent ${appId} social video to Make webhook`);
+  if (publishMode !== "dry-run" && autoPostEnabled) {
+    await sendToAutomation(post);
+    console.log(`Sent ${appId} social video to ${publishMode}`);
   } else {
     console.log(`Prepared ${appId} social publish bundle at ${queuePath}`);
   }
@@ -99,6 +99,32 @@ async function readAsset(filePath, mimeType) {
   };
 }
 
+function detectPublishMode() {
+  if (process.env.N8N_SOCIAL_WEBHOOK_URL) {
+    return "n8n-webhook";
+  }
+
+  if (process.env.MAKE_SOCIAL_WEBHOOK_URL) {
+    return "make-webhook";
+  }
+
+  return "dry-run";
+}
+
+async function sendToAutomation(post) {
+  if (publishMode === "n8n-webhook") {
+    await sendToN8n(post);
+    return;
+  }
+
+  if (publishMode === "make-webhook") {
+    await sendToMake(post);
+    return;
+  }
+
+  throw new Error(`Unsupported SOCIAL_PUBLISH_MODE: ${publishMode}`);
+}
+
 async function sendToMake(post) {
   const webhookUrl = process.env.MAKE_SOCIAL_WEBHOOK_URL;
   if (!webhookUrl) {
@@ -119,5 +145,28 @@ async function sendToMake(post) {
   if (!response.ok) {
     const body = await response.text();
     throw new Error(`Make webhook failed with ${response.status}: ${body}`);
+  }
+}
+
+async function sendToN8n(post) {
+  const webhookUrl = process.env.N8N_SOCIAL_WEBHOOK_URL;
+  if (!webhookUrl) {
+    throw new Error("N8N_SOCIAL_WEBHOOK_URL is required when SOCIAL_PUBLISH_MODE=n8n-webhook and SOCIAL_AUTO_POST=true.");
+  }
+
+  const headers = { "Content-Type": "application/json" };
+  if (process.env.N8N_SOCIAL_WEBHOOK_TOKEN) {
+    headers[process.env.N8N_SOCIAL_WEBHOOK_HEADER ?? "X-DailyNews-Token"] = process.env.N8N_SOCIAL_WEBHOOK_TOKEN;
+  }
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(post)
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`n8n webhook failed with ${response.status}: ${body}`);
   }
 }

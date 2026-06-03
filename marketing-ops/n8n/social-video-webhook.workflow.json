@@ -1,0 +1,87 @@
+{
+  "name": "Daily Paper Social Video Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "daily-paper-social-video",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0f93615f-5a23-4e5a-9c1e-b4fdf29d7f9a",
+      "name": "Receive Social Video Bundle",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        0
+      ],
+      "webhookId": "daily-paper-social-video"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst video = body.files?.video ?? {};\nconst cover = body.files?.cover ?? {};\n\nreturn [\n  {\n    json: {\n      ok: true,\n      receivedAt: new Date().toISOString(),\n      appId: body.appId,\n      productName: body.productName,\n      platforms: body.platforms ?? [],\n      title: body.title,\n      caption: body.caption,\n      description: body.description,\n      hashtags: body.hashtags ?? [],\n      targetUrl: body.targetUrl,\n      videoFileName: video.fileName,\n      videoMimeType: video.mimeType,\n      videoSizeBytes: video.sizeBytes,\n      videoBase64: video.base64,\n      coverFileName: cover.fileName,\n      coverMimeType: cover.mimeType,\n      coverSizeBytes: cover.sizeBytes,\n      coverBase64: cover.base64\n    }\n  }\n];"
+      },
+      "id": "6fb83316-623d-4e56-bdfb-f193ef5f1cc3",
+      "name": "Normalize Social Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, appId: $json.appId, title: $json.title, platforms: $json.platforms, videoSizeBytes: $json.videoSizeBytes } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "2dad78dc-7ef8-47d4-8c6a-4a8e8bb1899d",
+      "name": "Respond Accepted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        20,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Social Video Bundle": {
+      "main": [
+        [
+          {
+            "node": "Normalize Social Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Social Payload": {
+      "main": [
+        [
+          {
+            "node": "Respond Accepted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6c781b83-5ccd-42f4-8c5e-948e1a5670cc",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "daily-paper-social-video-webhook",
+  "tags": []
+}
