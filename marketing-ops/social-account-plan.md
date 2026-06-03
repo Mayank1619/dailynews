@@ -12,6 +12,10 @@
 ## Astroya SoulPath
 
 - YouTube channel: `Astroya SoulPath`
+- YouTube status: created
+- YouTube channel ID: `UCvyD42R6KpG-wobER_JH3HQ`
+- YouTube Studio: `https://studio.youtube.com/channel/UCvyD42R6KpG-wobER_JH3HQ`
+- YouTube public URL: `https://www.youtube.com/channel/UCvyD42R6KpG-wobER_JH3HQ`
 - Handle candidates: `@AstroyaSoulPath`, `@AstroyaApp`, `@MySoulPathGuide`
 - Instagram candidates: `@astroya.soulpath`, `@astroya.app`, `@mysoulpathguide`
 - Facebook page: `Astroya SoulPath`

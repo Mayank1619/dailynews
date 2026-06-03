@@ -27,6 +27,14 @@
     "instagram": "astroya.soulpath",
     "facebookPage": "Astroya SoulPath"
   },
+  "socialAccounts": {
+    "youtube": {
+      "status": "created",
+      "channelId": "UCvyD42R6KpG-wobER_JH3HQ",
+      "studioUrl": "https://studio.youtube.com/channel/UCvyD42R6KpG-wobER_JH3HQ",
+      "publicUrl": "https://www.youtube.com/channel/UCvyD42R6KpG-wobER_JH3HQ"
+    }
+  },
   "postingMode": "auto-publish-when-secrets-present",
   "dailyVideoCount": 1,
   "contentSafety": [

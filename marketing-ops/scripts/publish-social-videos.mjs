@@ -41,6 +41,7 @@ for (const appId of selectedApps) {
     hashtags: metadata.hashtags,
     targetUrl: metadata.targetUrl,
     suggestedHandles: profile.preferredHandles ?? {},
+    socialAccounts: profile.socialAccounts ?? {},
     files: {
       video,
       cover,
