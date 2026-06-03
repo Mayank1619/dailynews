@@ -957,6 +957,36 @@ type AdminNewsletterIssue = {
   preview: string;
 };
 
+type MarketingVideoScript = {
+  durationSeconds: number;
+  title: string;
+  hook: string;
+  caption: string;
+  hashtags: string[];
+};
+
+type MarketingAgentResult = {
+  date: string;
+  blogDraft: {
+    title: string;
+    metaDescription: string;
+    excerpt: string;
+    canonicalPath: string;
+    ctaRoute: string;
+    sampleRoute: string;
+  };
+  videoScripts: MarketingVideoScript[];
+  publishingPlan: {
+    recommendedPublishWindow: string;
+    reviewChecklist: string[];
+    channels: string[];
+  };
+  generation: {
+    mode: "ai" | "deterministic-fallback";
+    modelName: string;
+  };
+};
+
 const adminIssues: AdminNewsletterIssue[] = [
   {
     id: "newsletter-openai-smoke-user-2026-06-02",
@@ -1008,6 +1038,9 @@ const growthPlan = [
   "Track signup conversion by source once analytics is connected."
 ] as const;
 
+const defaultMarketingTopic = "why a personalized daily news briefing helps people make better everyday decisions";
+const defaultMarketingAudience = "young professionals and students who want useful news without scrolling";
+
 function statusColor(status: AdminNewsletterIssue["status"] | string): string {
   if (status === "sent" || status === "active") return DESIGN_TOKENS.colors.success;
   if (status === "blocked" || status === "paused") return DESIGN_TOKENS.colors.warning;
@@ -1031,6 +1064,168 @@ function AdminSection({
       </div>
       {children}
     </section>
+  );
+}
+
+function MarketingAgentPanel(): React.JSX.Element {
+  const [adminToken, setAdminToken] = React.useState("");
+  const [topic, setTopic] = React.useState(defaultMarketingTopic);
+  const [audience, setAudience] = React.useState(defaultMarketingAudience);
+  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = React.useState("");
+  const [result, setResult] = React.useState<MarketingAgentResult | null>(null);
+
+  const generate = async (): Promise<void> => {
+    if (!adminToken.trim()) {
+      setStatus("error");
+      setMessage("Enter the admin token before generating marketing content.");
+      return;
+    }
+
+    if (!topic.trim()) {
+      setStatus("error");
+      setMessage("Enter a topic for tonight's content kit.");
+      return;
+    }
+
+    setStatus("loading");
+    setMessage("");
+    setResult(null);
+
+    try {
+      const response = await fetch("/api/marketing/daily-content", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminToken.trim()}`
+        },
+        body: JSON.stringify({
+          topic,
+          audience,
+          newsletterThemes: [
+            "source-linked AI summaries",
+            "topic preferences",
+            "15-day free trial",
+            "daily or weekly delivery"
+          ],
+          sampleRoute: "/samples/ai-daily-paper",
+          ctaRoute: "/signup"
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("generation_failed");
+      }
+
+      const payload = (await response.json()) as MarketingAgentResult;
+      setResult(payload);
+      setStatus("success");
+      setMessage("Marketing kit generated. Review the draft before publishing or posting.");
+    } catch {
+      setStatus("error");
+      setMessage("We could not generate the marketing kit. Check the admin token and try again.");
+    }
+  };
+
+  return (
+    <AdminSection title="AI Marketing Agent">
+      <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+          <FieldLabel label="Admin token">
+            <input
+              aria-label="Marketing admin token"
+              type="password"
+              value={adminToken}
+              onChange={(event) => setAdminToken(event.target.value)}
+              placeholder="NEWSLETTER_ADMIN_TOKEN"
+              style={inputStyle}
+            />
+          </FieldLabel>
+          <FieldLabel label="Audience">
+            <input
+              aria-label="Marketing audience"
+              value={audience}
+              onChange={(event) => setAudience(event.target.value)}
+              style={inputStyle}
+            />
+          </FieldLabel>
+        </div>
+
+        <FieldLabel label="Topic">
+          <textarea
+            aria-label="Marketing topic"
+            value={topic}
+            onChange={(event) => setTopic(event.target.value)}
+            rows={3}
+            style={{ ...inputStyle, resize: "vertical" }}
+          />
+        </FieldLabel>
+
+        <button
+          type="button"
+          data-testid="generate-marketing-kit"
+          onClick={() => void generate()}
+          disabled={status === "loading"}
+          style={{
+            ...buttonBase,
+            width: "fit-content",
+            background: DESIGN_TOKENS.colors.brandPrimary,
+            color: "#07111F"
+          }}
+        >
+          {status === "loading" ? "Generating..." : "Generate Blog and Video Kit"}
+        </button>
+
+        {message ? (
+          <p role={status === "error" ? "alert" : "status"} style={{ color: status === "error" ? DESIGN_TOKENS.colors.error : DESIGN_TOKENS.colors.success }}>
+            {message}
+          </p>
+        ) : null}
+
+        {result ? (
+          <section data-testid="marketing-kit-result" style={{ display: "grid", gap: 14 }}>
+            <div style={readinessStyle}>
+              <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
+                {result.date} - {result.generation.mode} via {result.generation.modelName}
+              </span>
+              <strong>{result.blogDraft.title}</strong>
+              <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{result.blogDraft.metaDescription}</span>
+              <span>{result.blogDraft.excerpt}</span>
+              <span style={{ color: DESIGN_TOKENS.colors.brandPrimary }}>
+                Draft route: {result.blogDraft.canonicalPath} | CTA: {result.blogDraft.ctaRoute} | Sample: {result.blogDraft.sampleRoute}
+              </span>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+              {result.videoScripts.map((script) => (
+                <article key={script.durationSeconds} style={readinessStyle}>
+                  <span style={{ color: DESIGN_TOKENS.colors.accentHighlight, fontWeight: 900 }}>
+                    {script.durationSeconds}s short
+                  </span>
+                  <strong>{script.title}</strong>
+                  <span>{script.hook}</span>
+                  <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{script.caption}</span>
+                  <span>{script.hashtags.join(" ")}</span>
+                </article>
+              ))}
+            </div>
+
+            <div style={readinessStyle}>
+              <strong>Publish Window</strong>
+              <span>{result.publishingPlan.recommendedPublishWindow}</span>
+              <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
+                Channels: {result.publishingPlan.channels.join(", ")}
+              </span>
+              <ul style={{ margin: "6px 0 0", paddingLeft: 20 }}>
+                {result.publishingPlan.reviewChecklist.slice(0, 5).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ) : null}
+      </div>
+    </AdminSection>
   );
 }
 
@@ -1197,16 +1392,19 @@ export function AdminPage(): React.JSX.Element {
         )}
 
         {activeTab === "growth" && (
-          <AdminSection title="SEO and Marketing Plan">
-            <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
-              {growthPlan.map((item, index) => (
-                <div key={item} style={readinessStyle}>
-                  <span style={{ color: DESIGN_TOKENS.colors.accentHighlight, fontWeight: 900 }}>Step {index + 1}</span>
-                  <strong>{item}</strong>
-                </div>
-              ))}
+          <div style={{ display: "grid", gap: 16 }}>
+            <MarketingAgentPanel />
+            <AdminSection title="SEO and Marketing Plan">
+              <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
+                {growthPlan.map((item, index) => (
+                  <div key={item} style={readinessStyle}>
+                    <span style={{ color: DESIGN_TOKENS.colors.accentHighlight, fontWeight: 900 }}>Step {index + 1}</span>
+                    <strong>{item}</strong>
+                  </div>
+                ))}
+              </div>
+            </AdminSection>
             </div>
-          </AdminSection>
         )}
       </section>
       <PoweredByNetfroot />

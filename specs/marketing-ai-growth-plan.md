@@ -54,6 +54,7 @@ Completed on 2026-06-02:
 - The endpoint is protected by the existing `NEWSLETTER_ADMIN_TOKEN` bearer-token guard.
 - The agent uses `OPENAI_MARKETING_MODEL` or `gpt-4.1-mini` when `OPENAI_API_KEY` is available, with deterministic fallback content if AI generation is unavailable.
 - Output includes captions, hashtags, review checklist, channel recommendations, signup/sample routes, and automation notes.
+- `/admin` now exposes the AI Marketing Agent in the Growth tab so an operator can enter the admin token, choose a topic/audience, generate the kit, and review the output without using a terminal.
 - This is a draft-generation flow, not direct public publishing. A persistent blog store and admin review/publish action are still required before fully automatic daily publishing.
 
 ### Blog Cadence

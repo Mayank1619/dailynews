@@ -152,6 +152,7 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - **E2E**: Validate `/blog` loads for anonymous users and lists only published posts.
 - **E2E**: Validate `/blog/[slug]` loads for published posts and returns not-found for draft or unknown slugs.
 - **E2E**: Validate category/tag and date filters return only matching published posts.
+- **E2E**: Validate the admin Growth panel can request a marketing kit, render the blog/video output, and avoid displaying the admin token.
 
 ## Success Criteria *(mandatory)*
 
@@ -198,5 +199,6 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - Added protected Vercel route `POST /api/marketing/daily-content` for admin-only growth content generation.
 - The workflow accepts `topic`, `audience`, `newsletterThemes`, `sourceSummaries`, `sampleRoute`, and `ctaRoute`.
 - The response includes one SEO blog draft, 10-second/15-second/30-second short-video scripts, captions, hashtags, publish channels, review checklist, and automation notes.
+- Added `/admin` Growth panel UI for entering the admin token, choosing topic/audience, calling the protected endpoint, and reviewing generated output in the browser.
 - OpenAI generation uses compact JSON input and strict JSON output when `OPENAI_API_KEY` is configured; deterministic fallback keeps the flow usable when the AI provider is unavailable.
 - The workflow generates drafts only. Public auto-publishing remains blocked until a persistent blog store and admin publish/review workflow are connected.
