@@ -8,6 +8,7 @@ import {
   NewsletterPage,
   OnboardingPage,
   PreferencesPage,
+  PlusPreviewPage,
   ProfilePage,
   SettingsPage,
   UnsubscribeConfirmationPage
@@ -77,6 +78,10 @@ function RouteView(): JSX.Element {
 
   if (path === "/dashboard/paper") {
     return <MyPaperPage />;
+  }
+
+  if (path === "/dashboard/preview") {
+    return <PlusPreviewPage />;
   }
 
   if (path === "/billing") {

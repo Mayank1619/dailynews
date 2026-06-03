@@ -435,6 +435,28 @@ function createPersonalizedPaper(preferences: PreferenceState, feedback: ReaderF
   };
 }
 
+function createPaidPreviewPaper(): PersonalizedPaper {
+  return createPersonalizedPaper(
+    {
+      topics: ["New in AI", "Markets", "Politics", "Sports Headlines"],
+      frequency: "daily",
+      country: "Canada",
+      province: "Ontario",
+      deliveryTime: "08:00",
+      timezone: "America/Toronto",
+      newsletterEnabled: true
+    },
+    {
+      depth: "deep",
+      tone: "analytical",
+      improvements: ["Less high-level summary", "More business detail", "More local context", "More source links"],
+      notes: "Show the kind of richer paid paper a reader receives after subscription.",
+      updatedAt: new Date().toISOString()
+    },
+    "plus-preview"
+  );
+}
+
 function buildPaperStory(
   topic: string,
   topicIndex: number,
@@ -656,6 +678,9 @@ function AppNav({ user }: { user?: User | null }): React.JSX.Element {
         <a href="/dashboard/paper" style={navLinkStyle}>
           My Paper
         </a>
+        <a href="/dashboard/preview" style={navLinkStyle}>
+          Preview Plus
+        </a>
         <a href="/dashboard/preferences" style={navLinkStyle}>
           Preferences
         </a>
@@ -710,6 +735,7 @@ function AppNav({ user }: { user?: User | null }): React.JSX.Element {
             </p>
             <a role="menuitem" href="/profile" style={menuLinkStyle}>My Profile</a>
             <a role="menuitem" href="/dashboard/paper" style={menuLinkStyle}>Read My Paper</a>
+            <a role="menuitem" href="/dashboard/preview" style={menuLinkStyle}>Preview Plus Paper</a>
             <a role="menuitem" href="/billing" style={menuLinkStyle}>My Plan</a>
             <a role="menuitem" href="/dashboard/preferences" style={menuLinkStyle}>Preferences</a>
             <a role="menuitem" href="/dashboard/newsletter" style={menuLinkStyle}>Newsletter Delivery</a>
@@ -1403,6 +1429,79 @@ function PaperReader({ paper }: { paper: PersonalizedPaper }): React.JSX.Element
   );
 }
 
+function PaidPaperPreviewCard(): React.JSX.Element {
+  const preview = React.useMemo(() => createPaidPreviewPaper(), []);
+  const firstSection = preview.sections[0];
+
+  return (
+    <section data-testid="paid-paper-preview-card" style={readerControlStyle}>
+      <div>
+        <p style={eyebrowTextStyle}>Subscription preview</p>
+        <h2 style={{ font: DESIGN_TOKENS.typography.h2, margin: "4px 0 6px" }}>See exactly what Plus includes</h2>
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, margin: 0 }}>
+          Preview a full Daily Paper Plus issue before paying: sections, source labels, summaries, and why-it-matters notes.
+        </p>
+      </div>
+      <article style={{ ...paperStyle, padding: 16 }}>
+        <p style={{ ...eyebrowTextStyle, color: "#BE185D" }}>Example issue</p>
+        <h3 style={{ font: DESIGN_TOKENS.typography.h2, margin: "4px 0", color: "#0F172A" }}>{preview.subject}</h3>
+        <p style={{ color: "#475569", margin: "0 0 12px" }}>
+          {preview.readingTimeMinutes} min read · {preview.refinementSummary}
+        </p>
+        {firstSection ? (
+          <section style={{ display: "grid", gap: 10 }}>
+            <h4 style={{ font: DESIGN_TOKENS.typography.h3, color: "#0E7490", margin: 0 }}>{firstSection.topic}</h4>
+            {firstSection.stories.slice(0, 2).map((story) => (
+              <div key={story.id} style={{ ...storyCardStyle, padding: 12 }}>
+                <strong>{story.title}</strong>
+                <span style={{ color: "#475569" }}>{story.summary}</span>
+              </div>
+            ))}
+          </section>
+        ) : null}
+      </article>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <a href="/dashboard/preview" style={ctaLinkStyle}>Open Full Preview</a>
+        <a href="/dashboard/preferences" style={secondaryLinkStyle}>Customize My Topics</a>
+      </div>
+    </section>
+  );
+}
+
+export function PlusPreviewPage(): React.JSX.Element {
+  const auth = useAuthState();
+  const guard = AuthRequired({ auth });
+  const preview = React.useMemo(() => createPaidPreviewPaper(), []);
+
+  if (guard) return guard;
+
+  return (
+    <main style={shellStyle}>
+      <section style={{ ...panelStyle, width: "min(1100px, 100%)" }}>
+        <AppNav user={auth.user} />
+        <BackToSettings />
+        <p style={eyebrowTextStyle}>Daily Paper Plus preview</p>
+        <h1 style={{ font: DESIGN_TOKENS.typography.h1, margin: "0 0 10px" }}>Preview the Newspaper You&apos;re Paying For</h1>
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 780 }}>
+          This is a representative Plus issue: a finite newspaper-style read with sections, context, source labels, and notes that explain why each story matters.
+        </p>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: 12, margin: "20px 0" }}>
+          <div style={metricStyle}>Format<br /><strong>In-app + email</strong></div>
+          <div style={metricStyle}>Sections<br /><strong>{preview.sections.length}</strong></div>
+          <div style={metricStyle}>Reading time<br /><strong>{preview.readingTimeMinutes} min</strong></div>
+          <div style={metricStyle}>Trial<br /><strong>15 days free</strong></div>
+        </section>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
+          <a href="/billing" style={ctaLinkStyle}>View Plans</a>
+          <a href="/dashboard/paper" style={secondaryLinkStyle}>Create My Paper</a>
+        </div>
+        <PaperReader paper={preview} />
+      </section>
+      <PoweredByNetfroot />
+    </main>
+  );
+}
+
 export function NewsletterPage(): React.JSX.Element {
   const auth = useAuthState();
   const [preferences, persist] = usePreferences(auth.user?.uid);
@@ -1514,9 +1613,15 @@ export function SettingsPage(): React.JSX.Element {
             No topics are selected yet. Start onboarding or open preferences to choose what your AI paper should cover.
           </p>
         ) : null}
+        <div style={{ margin: "20px 0" }}>
+          <PaidPaperPreviewCard />
+        </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <a data-testid="read-my-paper" href="/dashboard/paper" style={ctaLinkStyle}>
             Read My Paper
+          </a>
+          <a data-testid="preview-plus-paper" href="/dashboard/preview" style={secondaryLinkStyle}>
+            Preview Plus Paper
           </a>
           <a data-testid="email-preferences" href="/dashboard/preferences" style={ctaLinkStyle}>
             Choose Topics
@@ -1801,6 +1906,8 @@ export function BillingPage(): React.JSX.Element {
       <section style={panelStyle}>
         <AppNav user={auth.user} />
         <BackToSettings />
+        <PaidPaperPreviewCard />
+        <div style={{ height: 18 }} />
         <PlanStatusDisplay
           userId={userId ?? "signed-in-user"}
           status={billing.status}

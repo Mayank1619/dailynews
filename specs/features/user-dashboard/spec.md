@@ -308,6 +308,8 @@ immediate revocation of session access.
   user-facing messages.
 - **FR-DASH-019**: Authenticated navigation MUST include a My Paper destination that routes to the
   in-app personalized paper reader defined by the Newsletter Generation feature.
+- **FR-DASH-020**: Authenticated users MUST be able to open a Plus paper preview from dashboard
+  home and billing so they can inspect the paid newsletter format before subscribing.
 
 ### Security & Privacy Requirements *(mandatory)*
 

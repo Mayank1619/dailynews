@@ -39,6 +39,7 @@ Acceptance:
 1. Billing screen shows monthly and annual options.
 2. User can switch interval before checkout.
 3. Checkout is routed to an external provider link once configured.
+4. Billing screen shows a representative Daily Paper Plus preview before plan selection so the user knows what they are paying for.
 
 ### User Story 3 - Enforce Entitlements
 
@@ -74,6 +75,7 @@ Acceptance:
 - **FR-PS-008**: The system MUST record lifecycle telemetry for trial start, status view, checkout start, and entitlement checks.
 - **FR-PS-009**: The Plus plan MUST describe in-app paper reading and improve-my-news refinement as included value.
 - **FR-PS-010**: Premium curation/refinement features MUST be designed so entitlement checks can gate them when live payment provider integration is complete.
+- **FR-PS-011**: The billing page MUST provide a prominent link to a full Plus paper preview before checkout.
 
 ## Security and Privacy
 
@@ -99,3 +101,4 @@ The recommended $4.99/month price is based on:
 - Added provider-ready checkout messaging; live checkout waits for `STRIPE_PAYMENT_LINK_URL`.
 - Updated marketing plan in `specs/marketing-ai-growth-plan.md`.
 - Added in-app paper reading and improve-my-news refinement to Plus plan copy.
+- Added authenticated Plus paper preview entry points on billing and dashboard home.
