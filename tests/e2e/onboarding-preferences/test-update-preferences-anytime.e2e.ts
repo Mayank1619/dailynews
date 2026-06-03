@@ -4,11 +4,11 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { enableE2EAuth } from "../helpers/e2e-auth";
 
 test.describe("Update Preferences Anytime (E2E)", () => {
   test.beforeEach(async ({ page }) => {
-    // Assume user is already logged in with existing preferences
-    // In real scenario, this would be set up by auth setup
+    await enableE2EAuth(page);
     await page.goto("/dashboard/preferences");
   });
 
@@ -50,7 +50,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
 
   test("should update multiple fields", async ({ page }) => {
     // Select different topics
-    const techButton = page.getByRole("button", { name: "Technology" });
+    const techButton = page.getByRole("button", { name: "New in Technology" });
     const scienceButton = page.getByRole("button", { name: "Science" });
 
     // Deselect if selected, select if not
@@ -113,21 +113,19 @@ test.describe("Update Preferences Anytime (E2E)", () => {
   });
 
   test("should validate required fields", async ({ page }) => {
-    const topicButtons = page.locator("button").filter({ has: page.locator("text=/Technology|Business|Science/") });
+    await expect(page.getByRole("button", { name: "New in Technology" })).toHaveAttribute("aria-pressed", "true");
 
-    // Deselect all topics
-    const allTopics = await topicButtons.all();
-    for (const topic of allTopics) {
-      const style = await topic.evaluate((el) => window.getComputedStyle(el).backgroundColor);
-      // If it looks selected, deselect it
-      if (style.includes("rgb(59, 130, 246)")) {
-        // Blue-ish color indicating selection
+    for (const topicName of ["New in Technology", "Markets", "Science"]) {
+      const topic = page.getByRole("button", { name: topicName });
+      if ((await topic.getAttribute("aria-pressed")) === "true") {
         await topic.click();
+        await expect(topic).toHaveAttribute("aria-pressed", "false");
       }
     }
 
     // Try to save
     const saveButton = page.getByRole("button", { name: /Save Changes/i });
+    await expect(saveButton).not.toBeDisabled();
     await saveButton.click();
 
     // Should show error

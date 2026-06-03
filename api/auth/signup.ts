@@ -133,7 +133,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     });
   } catch (error) {
     res.status(401).json({
-      error: error instanceof Error ? error.message : "Firebase authentication failed."
+      error: "We couldn't verify your account session. Please sign in again and retry."
     });
   }
 }

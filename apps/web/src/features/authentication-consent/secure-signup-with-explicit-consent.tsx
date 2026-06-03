@@ -24,6 +24,26 @@ export const AUTH_SIGNUP_COPY = {
   successMessage: "Signup complete. Please verify your email before newsletter delivery."
 } as const;
 
+export function validateSignupForm(form: SecureSignupConsentForm): string {
+  if (!form.email.trim()) {
+    return "Enter your email address.";
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
+    return "Enter a valid email address.";
+  }
+
+  if (form.password.length < 12) {
+    return "Use at least 12 characters for your password.";
+  }
+
+  if (!form.newsletter) {
+    return "Newsletter consent is required to create your Daily Paper.";
+  }
+
+  return "";
+}
+
 export type SocialAuthProviderId = "google" | "facebook";
 
 export type SecureSignupConsentForm = {
@@ -63,9 +83,8 @@ export async function submitSecureSignupWithConsent(
   });
 
   if (!response.ok) {
-    const message = `Signup failed with status ${response.status}`;
     await telemetry?.track("secure_signup_failed", { status: response.status });
-    throw new Error(message);
+    throw Object.assign(new Error("Account setup failed."), { code: "app/signup-api-failed" });
   }
 
   await telemetry?.track("secure_signup_submitted", {
@@ -116,7 +135,7 @@ export async function submitSocialSignupWithConsent(
 
   if (!response.ok) {
     await telemetry?.track("social_signup_failed", { provider: providerId, status: response.status });
-    throw new Error(`Signup failed with status ${response.status}`);
+    throw Object.assign(new Error("Account setup failed."), { code: "app/signup-api-failed" });
   }
 
   await telemetry?.track("social_signup_submitted", {
@@ -209,6 +228,11 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
     setIsSubmitting(true);
     setStatusMessage("");
     try {
+      if (!form.newsletter) {
+        setStatusMessage("Newsletter consent is required to create your Daily Paper.");
+        return;
+      }
+
       await submitSocialSignupWithConsent(providerId, form);
       window.location.assign("/onboarding");
     } catch (error) {
@@ -246,6 +270,7 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
       </aside>
       <form
         style={cardStyle}
+        noValidate
         onSubmit={async (event) => {
           event.preventDefault();
           if (isSubmitting) return;
@@ -253,6 +278,12 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
           setIsSubmitting(true);
           setStatusMessage("");
           try {
+            const validationMessage = validateSignupForm(form);
+            if (validationMessage) {
+              setStatusMessage(validationMessage);
+              return;
+            }
+
             await submitSecureSignupWithConsent(form);
             setStatusMessage(AUTH_SIGNUP_COPY.successMessage);
             window.location.assign("/onboarding");
@@ -320,7 +351,7 @@ export function SecureSignupWithExplicitConsentForm(): React.JSX.Element {
           {isSubmitting ? "Creating account..." : AUTH_SIGNUP_COPY.submitLabel}
         </button>
 
-        {statusMessage ? <p style={statusStyle}>{statusMessage}</p> : null}
+        {statusMessage ? <p role="status" aria-live="polite" style={statusStyle}>{statusMessage}</p> : null}
 
         <p style={{ color: DESIGN_TOKENS.colors.textSecondary, fontWeight: 800, marginBottom: 8 }}>
           {AUTH_SIGNUP_COPY.socialHeading}

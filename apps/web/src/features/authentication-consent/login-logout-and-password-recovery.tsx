@@ -41,6 +41,22 @@ export type AuthTelemetryClient = {
   track: (eventName: string, metadata: Record<string, string | number | boolean>) => void | Promise<void>;
 };
 
+export function validateLoginForm(form: LoginForm): string {
+  if (!form.email.trim()) {
+    return "Enter your email address.";
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
+    return "Enter a valid email address.";
+  }
+
+  if (!form.password) {
+    return "Enter your password.";
+  }
+
+  return "";
+}
+
 export async function submitLogin(form: LoginForm, telemetry?: AuthTelemetryClient): Promise<string> {
   const credentials = await signInWithEmailAndPassword(getFirebaseClientAuth(), form.email, form.password);
   const idToken = await credentials.user.getIdToken();
@@ -84,7 +100,7 @@ export async function submitForgotPassword(email: string, telemetry?: AuthTeleme
     await sendPasswordResetEmail(getFirebaseClientAuth(), email);
   } catch (error) {
     const message = getFirebaseAuthErrorMessage(error);
-    if (message.startsWith("Firebase authentication is not configured yet.")) {
+    if (message.startsWith("Account access is not fully configured")) {
       throw new Error(message);
     }
 
@@ -200,6 +216,13 @@ export function LoginForm(props: { telemetry?: AuthTelemetryClient }): React.JSX
     setStatus("loading");
     setErrorMessage("");
     try {
+      const validationMessage = validateLoginForm({ email: formState.email, password: formState.password });
+      if (validationMessage) {
+        setStatus("error");
+        setErrorMessage(validationMessage);
+        return;
+      }
+
       await submitLogin({ email: formState.email, password: formState.password }, props.telemetry);
       setStatus("success");
       window.location.assign("/settings");
@@ -263,7 +286,7 @@ export function LoginForm(props: { telemetry?: AuthTelemetryClient }): React.JSX
           {AUTH_LOGIN_COPY.forgotPasswordLink}
         </button>
         {status === "success" && <p style={successStyle}>{AUTH_LOGIN_COPY.successMessage}</p>}
-        {status === "error" && <p style={errorStyle}>{errorMessage}</p>}
+        {status === "error" && <p role="alert" style={errorStyle}>{errorMessage}</p>}
       </form>
       <p style={{ textAlign: "center", color: DESIGN_TOKENS.colors.textSecondary }}>
         New here?{" "}
@@ -315,6 +338,16 @@ export function ForgotPasswordForm(props: ForgotPasswordFormProps): React.JSX.El
     setLoading(true);
     setErrorMessage("");
     try {
+      if (!email.trim()) {
+        setErrorMessage("Enter your email address.");
+        return;
+      }
+
+      if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+        setErrorMessage("Enter a valid email address.");
+        return;
+      }
+
       await submitForgotPassword(email, props.telemetry);
       setSubmitted(true);
     } catch (error) {
@@ -348,7 +381,7 @@ export function ForgotPasswordForm(props: ForgotPasswordFormProps): React.JSX.El
           <button type="submit" style={submitStyle} disabled={loading}>
             {loading ? "Sending…" : AUTH_FORGOT_PASSWORD_COPY.submitLabel}
           </button>
-          {errorMessage ? <p style={errorStyle}>{errorMessage}</p> : null}
+          {errorMessage ? <p role="alert" style={errorStyle}>{errorMessage}</p> : null}
         </form>
       )}
       {props.onBack && (

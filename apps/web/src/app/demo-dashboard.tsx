@@ -203,10 +203,50 @@ function getTrialDaysRemaining(billing: BillingState): number {
   return Math.max(0, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
 }
 
+function getDevE2EUser(): User | null {
+  const viteEnv = (typeof import.meta !== "undefined" ? import.meta.env : undefined) as
+    | { DEV?: boolean }
+    | undefined;
+
+  if (!viteEnv?.DEV || typeof window === "undefined") {
+    return null;
+  }
+
+  if (window.localStorage.getItem("daily-paper-e2e-auth") !== "true") {
+    return null;
+  }
+
+  return {
+    uid: "e2e-user",
+    email: "e2e-reader@dailypaper.test",
+    emailVerified: true,
+    displayName: "E2E Reader",
+    isAnonymous: false,
+    providerData: [],
+    metadata: {},
+    phoneNumber: null,
+    photoURL: null,
+    providerId: "password",
+    tenantId: null,
+    delete: async () => undefined,
+    getIdToken: async () => "e2e-token",
+    getIdTokenResult: async () => ({}) as Awaited<ReturnType<User["getIdTokenResult"]>>,
+    reload: async () => undefined,
+    toJSON: () => ({ uid: "e2e-user", email: "e2e-reader@dailypaper.test" }),
+    refreshToken: "e2e-refresh-token"
+  } as User;
+}
+
 function useAuthState(): AuthState {
   const [state, setState] = React.useState<AuthState>({ user: null, loading: true, error: "" });
 
   React.useEffect(() => {
+    const devUser = getDevE2EUser();
+    if (devUser) {
+      setState({ user: devUser, loading: false, error: "" });
+      return undefined;
+    }
+
     try {
       const unsubscribe = onAuthStateChanged(getFirebaseClientAuth(), (user) => {
         setState({ user, loading: false, error: "" });

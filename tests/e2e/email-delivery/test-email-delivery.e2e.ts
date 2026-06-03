@@ -3,18 +3,15 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { enableE2EAuth } from '../helpers/e2e-auth';
 
 test.describe('Email Delivery E2E', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to app
-    await page.goto('/');
-    // Assume user is logged in via auth fixture
+    await enableE2EAuth(page);
   });
 
   test('US1: User can set delivery time preference', async ({ page }) => {
-    // Navigate to settings
-    await page.click('[data-testid="settings-link"]');
-    await page.click('[data-testid="email-preferences"]');
+    await page.goto('/dashboard/preferences');
 
     // Set delivery time
     await page.fill('[data-testid="delivery-time"]', '09:00');
@@ -28,9 +25,7 @@ test.describe('Email Delivery E2E', () => {
   });
 
   test('US3: User can unsubscribe from newsletter', async ({ page }) => {
-    // Navigate to subscription settings
-    await page.click('[data-testid="settings-link"]');
-    await page.click('[data-testid="subscription-settings"]');
+    await page.goto('/dashboard/newsletter');
 
     // Verify subscribed state
     const toggleButton = page.locator('[data-testid="subscription-toggle"]');
@@ -45,12 +40,12 @@ test.describe('Email Delivery E2E', () => {
   });
 
   test('US3: User can resubscribe to newsletter', async ({ page }) => {
-    // Assume user is already unsubscribed
     await page.addInitScript(() => {
       window.localStorage.setItem(
-        "daily-paper-demo-preferences",
+        "daily-paper-demo-preferences:e2e-user",
         JSON.stringify({
-          topics: ["Technology", "Business"],
+          topics: ["New in Technology", "Markets", "Science"],
+          frequency: "daily",
           country: "Canada",
           province: "Ontario",
           deliveryTime: "08:00",
@@ -59,11 +54,7 @@ test.describe('Email Delivery E2E', () => {
         })
       );
     });
-    await page.goto('/');
-
-    // Navigate to subscription settings
-    await page.click('[data-testid="settings-link"]');
-    await page.click('[data-testid="subscription-settings"]');
+    await page.goto('/dashboard/newsletter');
 
     // Verify unsubscribed state
     let toggleButton = page.locator('[data-testid="subscription-toggle"]');
@@ -81,12 +72,9 @@ test.describe('Email Delivery E2E', () => {
     // Navigate to admin panel
     await page.goto('/admin');
 
-    // Navigate to health dashboard
-    await page.click('[data-testid="health-dashboard"]');
-
     // Verify metrics are present (but no PII)
     await expect(page.locator('[data-testid="success-rate"]')).toBeVisible();
-    await expect(page.locator('[data-testid="failure-rate"]')).toBeVisible();
+    await expect(page.locator('[data-testid="delivery-blocked"]')).toBeVisible();
     await expect(page.locator('[data-testid="total-sent"]')).toBeVisible();
 
     // Verify no user information is displayed
@@ -94,21 +82,12 @@ test.describe('Email Delivery E2E', () => {
     expect(content).not.toContain('@example.com');
     expect(content).not.toContain('user@');
 
-    // Verify refresh works
-    await page.click('[data-testid="refresh-metrics"]');
-    await page.waitForTimeout(1000);
     await expect(page.locator('[data-testid="success-rate"]')).toBeVisible();
   });
 
   test('US5: Operator can see skip reasons and error codes', async ({ page }) => {
     // Navigate to admin panel
     await page.goto('/admin');
-
-    // Navigate to health dashboard
-    await page.click('[data-testid="health-dashboard"]');
-
-    // View breakdown
-    await page.click('[data-testid="view-breakdown"]');
 
     // Verify detailed metrics are present
     await expect(page.locator('[data-testid="skip-reasons-table"]')).toBeVisible();

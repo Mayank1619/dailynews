@@ -4,9 +4,11 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { enableE2EAuth } from "../helpers/e2e-auth";
 
 test.describe("Pause or Resume Delivery (E2E)", () => {
   test.beforeEach(async ({ page }) => {
+    await enableE2EAuth(page);
     // Navigate to preferences page with delivery control
     await page.goto("/dashboard/newsletter");
   });
@@ -61,6 +63,8 @@ test.describe("Pause or Resume Delivery (E2E)", () => {
   });
 
   test("should preserve preferences when pausing", async ({ page }) => {
+    await expect(page.getByText(/Topics: New in Technology/)).toBeVisible();
+
     // Get initial preference data displayed
     const initialTopics = await page.textContent("p:has-text('Topics')");;
     const initialRegion = await page.textContent("p:has-text('Region')");
@@ -93,8 +97,7 @@ test.describe("Pause or Resume Delivery (E2E)", () => {
 
   test("should show helpful tip about preferences preservation", async ({ page }) => {
     // Search for tip or info message
-    const infoMessage = page.locator("div").filter({ hasText: /preferences are always saved/i });
-    await expect(infoMessage).toBeVisible();
+    await expect(page.getByText(/Your preferences are always saved/i)).toBeVisible();
   });
 
   test("should track toggle without page navigation", async ({ page }) => {
@@ -152,10 +155,10 @@ test.describe("Pause or Resume Delivery (E2E)", () => {
     expect(isFocused).toBe(true);
 
     // Space should toggle
+    const previousState = await toggleInput.isChecked();
     await page.keyboard.press("Space");
 
-    const newState = await toggleInput.isChecked();
-    // State should have changed
+    expect(await toggleInput.isChecked()).toBe(!previousState);
   });
 
   test("should show visual toggle switch", async ({ page }) => {
