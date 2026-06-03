@@ -25,8 +25,9 @@
 3. Create a Facebook page for each app, owned by the correct Meta profile/business manager.
 4. Connect Instagram and Facebook pages inside Meta.
 5. Connect YouTube, Instagram, and Facebook to Make.com.
-6. Keep posting mode as draft/review for the first week.
+6. Add the Make webhook URL as `MAKE_SOCIAL_WEBHOOK_URL`.
+7. Set `SOCIAL_AUTO_POST=true` only after the test webhook receives one Daily Paper and one Astroya bundle correctly.
 
-## Confirmation Needed
+## Posting Guardrail
 
-Creating accounts, accepting platform terms, connecting Make.com permissions, and posting content are external state-changing actions. They should be confirmed immediately before the final browser click.
+The code can auto-send video bundles to Make, but Make should stay disconnected from public posting until the correct app-specific accounts are connected. Once the routing is verified, `SOCIAL_AUTO_POST=true` turns on scheduled social publishing.

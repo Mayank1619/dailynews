@@ -5,9 +5,10 @@ This folder keeps the low-cost marketing framework for Daily Paper and Astroya S
 ## Current Strategy
 
 - Keep each app as a separate brand profile, social account set, and draft queue.
-- Start with review-only drafts for YouTube, Instagram, and Facebook.
+- Auto-publish owned website blog posts.
+- Auto-publish social videos only when the social webhook and explicit posting secret are configured.
 - Generate one reusable script-only video brief per app per day.
-- Cross-post the same approved short concept across platforms before paying for video rendering.
+- Cross-post the same short concept across platforms before paying for video rendering.
 - Store local drafts in `draft-queue/` during testing. That folder is ignored by git.
 - Use Vercel Cron as the primary scheduler because the app is already hosted on Vercel.
 - Treat Make.com, Pipedream, n8n, or GitHub Actions as optional routing layers, not the core marketing brain.
@@ -127,6 +128,49 @@ The renderer creates:
 - `marketing-ops/generated-videos/{app}-{date}-15s.json`
 
 The renderer uses local templates, Playwright screenshots, and a bundled ffmpeg binary. It does not use paid video generation.
+
+## Social Video Publishing
+
+Prepare upload-ready social bundles with:
+
+```bash
+npm run marketing:publish-social-videos
+```
+
+Prepare one app only:
+
+```bash
+npm run marketing:publish-social-videos -- daily-paper
+npm run marketing:publish-social-videos -- astroya
+```
+
+The publisher reads the latest generated MP4 metadata and creates ignored local bundles in:
+
+```text
+marketing-ops/publish-queue/
+```
+
+For Make.com posting, create a Custom Webhook scenario and add these GitHub repository secrets:
+
+```text
+MAKE_SOCIAL_WEBHOOK_URL
+MAKE_SOCIAL_WEBHOOK_TOKEN
+SOCIAL_AUTO_POST=true
+```
+
+`MAKE_SOCIAL_WEBHOOK_TOKEN` is optional unless the Make scenario checks an authorization header.
+
+The scheduled GitHub workflow is `.github/workflows/publish-social-videos.yml`. It renders videos, creates social bundles, and sends them to Make only when `SOCIAL_AUTO_POST=true` and `MAKE_SOCIAL_WEBHOOK_URL` are present. Without those secrets it still produces GitHub artifacts for manual inspection.
+
+Expected Make routing:
+
+```text
+Custom webhook -> decode video base64 -> YouTube Shorts
+               -> decode video base64 -> Instagram Reels
+               -> decode video base64 -> Facebook Reels/Page video
+```
+
+Use separate Make connections for Daily Paper and Astroya so each app posts to its own channels/pages.
 
 ## External Accounts
 

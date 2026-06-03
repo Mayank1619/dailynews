@@ -27,6 +27,6 @@
     "instagram": "dailypaper.ai",
     "facebookPage": "Daily Paper AI"
   },
-  "postingMode": "review-only",
+  "postingMode": "auto-publish-when-secrets-present",
   "dailyVideoCount": 1
 }

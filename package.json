@@ -11,6 +11,7 @@
     "firebase:emulators:auth": "npx firebase-tools@14.18.0 emulators:start --project demo-daily-paper --only auth",
     "marketing:publish-blog": "node marketing-ops/scripts/publish-daily-paper-blog.mjs",
     "marketing:render-videos": "node marketing-ops/scripts/render-video.mjs",
+    "marketing:publish-social-videos": "node marketing-ops/scripts/publish-social-videos.mjs",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "vitest run tests/unit --passWithNoTests",
     "test:integration": "vitest run tests/integration apps/web/tests/a11y --passWithNoTests",

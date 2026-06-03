@@ -11,8 +11,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: codex/dark-theme-firebase-vercel-auth
 
       - name: Set up Node
         uses: actions/setup-node@v4
