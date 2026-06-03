@@ -215,6 +215,76 @@ test("admin growth tab runs the low-cost draft automation batch", async ({ page 
             draftCount: 8,
             blogSlug: "daily-news-habit-2026-06-03",
             targetUrl: "https://dailynews-theta-ten.vercel.app/blog/daily-news-habit-2026-06-03",
+            campaign: {
+              date: "2026-06-03",
+              app: {
+                productName: "Daily Paper",
+                baseUrl: "https://dailynews-theta-ten.vercel.app",
+                positioning: "A personalized AI daily paper."
+              },
+              strategy: "minimal-cost",
+              contentKit: {
+                date: "2026-06-03",
+                blogDraft: {
+                  title: "How a Daily News Habit Helps You Make Better Decisions",
+                  metaDescription: "See how a short, personalized Daily Paper briefing can turn news overload into clearer everyday decisions.",
+                  excerpt: "A short daily briefing can help readers stay informed without losing the morning to endless feeds.",
+                  canonicalPath: "/blog/daily-news-habit-2026-06-03",
+                  ctaRoute: "/signup",
+                  sampleRoute: "/samples/ai-daily-paper"
+                },
+                videoScripts: [],
+                publishingPlan: {
+                  recommendedPublishWindow: "Post at 8 AM.",
+                  reviewChecklist: [],
+                  channels: []
+                },
+                generation: {
+                  mode: "deterministic-fallback",
+                  modelName: "gpt-4.1-mini"
+                }
+              },
+              makeScenario: {
+                name: "Daily Paper daily organic marketing factory",
+                trigger: "Scheduler",
+                cadence: "Daily draft generation",
+                monthlyOperationEstimate: 270,
+                minimumPlanFit: "free-tier-friendly",
+                steps: [],
+                setupChecklist: []
+              },
+              publishingQueue: {
+                blogDraft: {
+                  title: "How a Daily News Habit Helps You Make Better Decisions",
+                  slug: "daily-news-habit-2026-06-03",
+                  targetUrl: "https://dailynews-theta-ten.vercel.app/blog/daily-news-habit-2026-06-03",
+                  status: "draft",
+                  destination: "Daily Paper blog admin queue"
+                },
+                socialPosts: [
+                  {
+                    platform: "instagram-reels",
+                    format: "short-video-caption",
+                    copy: "Choose your topics. Get one clean paper.",
+                    hashtags: ["#DailyPaper", "#AINews"],
+                    targetUrl: "https://dailynews-theta-ten.vercel.app/signup",
+                    status: "draft"
+                  }
+                ],
+                videoBriefs: [
+                  {
+                    platform: "instagram-reels",
+                    durationSeconds: 15,
+                    title: "News without the scroll",
+                    hook: "Your morning news should take minutes, not hours.",
+                    productionMode: "script-only",
+                    estimatedExternalVideoCostUsd: 0
+                  }
+                ]
+              },
+              costGuardrails: [],
+              requiredUserInputs: []
+            },
             reviewQueue: {
               destination: "Daily Paper admin Growth tab and local draft queue",
               approvalRequired: true,
@@ -228,6 +298,76 @@ test("admin growth tab runs the low-cost draft automation batch", async ({ page 
             draftCount: 8,
             blogSlug: "astrology-reflection-2026-06-03",
             targetUrl: "https://www.astroya.ca/blog/astrology-reflection-2026-06-03",
+            campaign: {
+              date: "2026-06-03",
+              app: {
+                productName: "Astroya SoulPath",
+                baseUrl: "https://www.astroya.ca",
+                positioning: "A calm astrology and palmistry guidance experience."
+              },
+              strategy: "minimal-cost",
+              contentKit: {
+                date: "2026-06-03",
+                blogDraft: {
+                  title: "How Astroya SoulPath Turns Curiosity Into Reflection",
+                  metaDescription: "See how Astroya creates a calm astrology and palmistry experience for self-discovery.",
+                  excerpt: "Astroya gives curious visitors a calmer way to explore astrology and palmistry.",
+                  canonicalPath: "/blog/astrology-reflection-2026-06-03",
+                  ctaRoute: "/signup",
+                  sampleRoute: "/how-it-works"
+                },
+                videoScripts: [],
+                publishingPlan: {
+                  recommendedPublishWindow: "Post at 8 AM.",
+                  reviewChecklist: [],
+                  channels: []
+                },
+                generation: {
+                  mode: "deterministic-fallback",
+                  modelName: "gpt-4.1-mini"
+                }
+              },
+              makeScenario: {
+                name: "Astroya SoulPath daily organic marketing factory",
+                trigger: "Scheduler",
+                cadence: "Daily draft generation",
+                monthlyOperationEstimate: 270,
+                minimumPlanFit: "free-tier-friendly",
+                steps: [],
+                setupChecklist: []
+              },
+              publishingQueue: {
+                blogDraft: {
+                  title: "How Astroya SoulPath Turns Curiosity Into Reflection",
+                  slug: "astrology-reflection-2026-06-03",
+                  targetUrl: "https://www.astroya.ca/blog/astrology-reflection-2026-06-03",
+                  status: "draft",
+                  destination: "Astroya blog admin queue"
+                },
+                socialPosts: [
+                  {
+                    platform: "instagram-reels",
+                    format: "short-video-caption",
+                    copy: "A calmer way to reflect with astrology and palmistry.",
+                    hashtags: ["#Astroya", "#Astrology"],
+                    targetUrl: "https://www.astroya.ca/signup",
+                    status: "draft"
+                  }
+                ],
+                videoBriefs: [
+                  {
+                    platform: "instagram-reels",
+                    durationSeconds: 15,
+                    title: "A calmer reflection ritual",
+                    hook: "Your chart can be a prompt for reflection.",
+                    productionMode: "script-only",
+                    estimatedExternalVideoCostUsd: 0
+                  }
+                ]
+              },
+              costGuardrails: [],
+              requiredUserInputs: []
+            },
             reviewQueue: {
               destination: "Astroya SoulPath admin Growth tab and local draft queue",
               approvalRequired: true,
@@ -253,10 +393,14 @@ test("admin growth tab runs the low-cost draft automation batch", async ({ page 
   const automationResult = page.getByTestId("marketing-automation-result");
   await expect(automationResult).toBeVisible();
   await expect(page.getByText("marketing-2026-06-03-daily-paper-astroya")).toBeVisible();
-  await expect(automationResult.getByText("Daily Paper")).toBeVisible();
-  await expect(automationResult.getByText("Astroya SoulPath")).toBeVisible();
+  await expect(automationResult.getByText("Daily Paper", { exact: true })).toBeVisible();
+  await expect(automationResult.getByText("Astroya SoulPath", { exact: true }).first()).toBeVisible();
   await expect(automationResult.getByText("$0 Starter Cost Model")).toBeVisible();
   await expect(automationResult.getByText("never-auto-publish").first()).toBeVisible();
+  await expect(page.getByTestId("automation-content-preview-daily-paper")).toContainText("How a Daily News Habit Helps You Make Better Decisions");
+  await expect(page.getByTestId("automation-content-preview-daily-paper")).toContainText("Choose your topics. Get one clean paper.");
+  await expect(page.getByTestId("automation-content-preview-astroya")).toContainText("How Astroya SoulPath Turns Curiosity Into Reflection");
+  await expect(page.getByTestId("automation-content-preview-astroya")).toContainText("A calmer way to reflect with astrology and palmistry.");
   await expect(page.locator("body")).not.toContainText("test-admin-token");
 
   expect(authorization).toBe("Bearer test-admin-token");

@@ -1977,6 +1977,7 @@ type MakeCampaignResult = {
     positioning: string;
   };
   strategy: "minimal-cost" | "growth";
+  contentKit?: MarketingAgentResult;
   makeScenario: {
     name: string;
     trigger: string;
@@ -1997,6 +1998,7 @@ type MakeCampaignResult = {
       platform: string;
       format: string;
       copy: string;
+      hashtags?: string[];
       targetUrl: string;
       status: "draft";
     }>;
@@ -2004,6 +2006,7 @@ type MakeCampaignResult = {
       platform: string;
       durationSeconds: number;
       title: string;
+      hook?: string;
       productionMode: "script-only";
       estimatedExternalVideoCostUsd: 0;
     }>;
@@ -2037,6 +2040,7 @@ type MarketingAutomationRunResult = {
     draftCount: number;
     blogSlug: string;
     targetUrl: string;
+    campaign: MakeCampaignResult;
     reviewQueue: {
       destination: string;
       approvalRequired: true;
@@ -2537,6 +2541,45 @@ function MarketingAgentPanel(): React.JSX.Element {
                   <span>Blog slug: {app.blogSlug}</span>
                   <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{app.reviewQueue.publishPolicy}</span>
                   <span>{app.reviewQueue.suggestedOwnerAction}</span>
+                </article>
+              ))}
+            </div>
+
+            <div style={{ display: "grid", gap: 14 }}>
+              {automationResult.apps.map((app) => (
+                <article key={`${app.appId}-content-preview`} data-testid={`automation-content-preview-${app.appId}`} style={readinessStyle}>
+                  <span style={{ color: DESIGN_TOKENS.colors.accentHighlight, fontWeight: 900 }}>{app.productName} Draft Content</span>
+                  <strong>{app.campaign.contentKit?.blogDraft.title ?? app.blogSlug}</strong>
+                  <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>
+                    {app.campaign.contentKit?.blogDraft.metaDescription ?? app.targetUrl}
+                  </span>
+                  {app.campaign.contentKit?.blogDraft.excerpt ? <span>{app.campaign.contentKit.blogDraft.excerpt}</span> : null}
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10, marginTop: 8 }}>
+                    <div style={{ display: "grid", gap: 8 }}>
+                      <strong>Social Captions</strong>
+                      {app.campaign.publishingQueue.socialPosts.slice(0, 4).map((post, index) => (
+                        <div key={`${app.appId}-${post.platform}-${index}`} style={{ display: "grid", gap: 4 }}>
+                          <span style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>{post.platform}</span>
+                          <span>{post.copy}</span>
+                          {post.hashtags?.length ? <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{post.hashtags.join(" ")}</span> : null}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ display: "grid", gap: 8 }}>
+                      <strong>Video Briefs</strong>
+                      {app.campaign.publishingQueue.videoBriefs.slice(0, 4).map((brief, index) => (
+                        <div key={`${app.appId}-${brief.platform}-${brief.durationSeconds}-${index}`} style={{ display: "grid", gap: 4 }}>
+                          <span style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+                            {brief.durationSeconds}s {brief.platform}
+                          </span>
+                          <span>{brief.title}</span>
+                          {brief.hook ? <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{brief.hook}</span> : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </article>
               ))}
             </div>
