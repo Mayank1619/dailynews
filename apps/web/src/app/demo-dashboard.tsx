@@ -2019,8 +2019,8 @@ type MarketingAutomationRunResult = {
   runId: string;
   date: string;
   provider: "vercel-cron" | "github-actions" | "manual" | "pipedream";
-  mode: "draft-only" | "review-and-schedule";
-  status: "drafts-ready";
+  mode: "draft-only" | "auto-publish-owned-sites";
+  status: "drafts-ready" | "published-to-owned-sites";
   scheduler: {
     recommendedPrimary: "vercel-cron";
     fallback: "github-actions";
@@ -2041,10 +2041,10 @@ type MarketingAutomationRunResult = {
     blogSlug: string;
     targetUrl: string;
     campaign: MakeCampaignResult;
-    reviewQueue: {
+    publishing: {
       destination: string;
-      approvalRequired: true;
-      publishPolicy: "never-auto-publish";
+      approvalRequired: boolean;
+      publishPolicy: "draft-only" | "auto-publish-owned-sites";
       suggestedOwnerAction: string;
     };
   }>;
@@ -2313,7 +2313,7 @@ function MarketingAgentPanel(): React.JSX.Element {
         body: JSON.stringify({
           appIds: ["daily-paper", "astroya"],
           provider: "manual",
-          mode: "draft-only"
+          mode: "auto-publish-owned-sites"
         })
       });
 
@@ -2324,7 +2324,7 @@ function MarketingAgentPanel(): React.JSX.Element {
       const payload = (await response.json()) as MarketingAutomationRunResult;
       setAutomationResult(payload);
       setAutomationStatus("success");
-      setAutomationMessage("Draft-only automation batch is ready. Review every item before publishing anywhere.");
+      setAutomationMessage("Automation batch is ready. Daily Paper blog can auto-publish; social posting will start after accounts are connected.");
     } catch {
       setAutomationStatus("error");
       setAutomationMessage("We could not run the automation batch. Check the admin token and try again.");
@@ -2418,7 +2418,7 @@ function MarketingAgentPanel(): React.JSX.Element {
               background: "rgba(34,211,238,0.12)"
             }}
           >
-            {automationStatus === "loading" ? "Running..." : "Run Low-Cost Automation Batch"}
+            {automationStatus === "loading" ? "Running..." : "Run Auto-Publish Batch"}
           </button>
         </div>
 
@@ -2537,10 +2537,10 @@ function MarketingAgentPanel(): React.JSX.Element {
               {automationResult.apps.map((app) => (
                 <article key={app.appId} style={readinessStyle}>
                   <span style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 900 }}>{app.productName}</span>
-                  <strong>{app.draftCount} review drafts</strong>
+                  <strong>{app.draftCount} generated assets</strong>
                   <span>Blog slug: {app.blogSlug}</span>
-                  <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{app.reviewQueue.publishPolicy}</span>
-                  <span>{app.reviewQueue.suggestedOwnerAction}</span>
+                  <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{app.publishing.publishPolicy}</span>
+                  <span>{app.publishing.suggestedOwnerAction}</span>
                 </article>
               ))}
             </div>

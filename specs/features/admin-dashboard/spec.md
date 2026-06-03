@@ -138,7 +138,7 @@ As an administrator, I want lightweight operational analytics and consent-filter
 - **FR-ADMIN-GRW-001**: The system MUST provide admins with a Growth module that can request a protected marketing content kit from `/api/marketing/daily-content`.
 - **FR-ADMIN-GRW-002**: The Growth module MUST require an admin token before generation and MUST NOT display the token after submission.
 - **FR-ADMIN-GRW-003**: The Growth module MUST render the generated SEO blog draft, video scripts, channel recommendations, and review checklist for admin review.
-- **FR-ADMIN-GRW-004**: The Growth module MUST treat generated marketing content as draft-only until a persistent blog store and explicit publish workflow are connected.
+- **FR-ADMIN-GRW-004**: The Growth module MUST allow owned-site blog content to auto-publish through the configured GitHub Actions/Vercel deploy workflow, while keeping external social publishing disabled until platform accounts and OAuth/API permissions are connected.
 
 ### Security & Privacy Requirements *(mandatory)*
 

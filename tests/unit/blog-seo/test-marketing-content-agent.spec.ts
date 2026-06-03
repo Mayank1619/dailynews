@@ -188,7 +188,7 @@ describe("marketing content agent", () => {
     expect(campaign.contentKit.blogDraft.bodyMarkdown).not.toContain("Daily Paper is built around");
   });
 
-  it("creates a provider-neutral draft-only automation run for both apps", async () => {
+  it("creates a provider-neutral owned-site auto-publish run for both apps", async () => {
     const originalKey = process.env.OPENAI_API_KEY;
     delete process.env.OPENAI_API_KEY;
 
@@ -196,16 +196,18 @@ describe("marketing content agent", () => {
       const run = await generateMarketingAutomationRun({
         date: new Date("2026-06-03T10:00:00.000Z"),
         provider: "vercel-cron",
-        mode: "draft-only",
+        mode: "auto-publish-owned-sites",
         appIds: ["daily-paper", "astroya"]
       });
 
       expect(run.runId).toBe("marketing-2026-06-03-daily-paper-astroya");
       expect(run.scheduler.recommendedPrimary).toBe("vercel-cron");
       expect(run.monthlyCostEstimateUsd.scheduler).toBe(0);
+      expect(run.status).toBe("published-to-owned-sites");
       expect(run.apps.map((app) => app.appId)).toEqual(["daily-paper", "astroya"]);
-      expect(run.apps.every((app) => app.reviewQueue.publishPolicy === "never-auto-publish")).toBe(true);
-      expect(run.safeguards.join(" ")).toContain("No public post");
+      expect(run.apps.every((app) => app.publishing.publishPolicy === "auto-publish-owned-sites")).toBe(true);
+      expect(run.apps[0].publishing.destination).toBe("Daily Paper public blog");
+      expect(run.safeguards.join(" ")).toContain("Owned-site blog content can be published automatically");
       expect(run.apps[1].campaign.contentKit.blogDraft.bodyMarkdown).toContain("self-discovery");
     } finally {
       process.env.OPENAI_API_KEY = originalKey;

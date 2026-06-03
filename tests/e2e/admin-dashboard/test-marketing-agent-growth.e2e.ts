@@ -177,7 +177,7 @@ test("admin growth tab generates a Make.com campaign kit", async ({ page }) => {
   expect(strategy).toBe("minimal-cost");
 });
 
-test("admin growth tab runs the low-cost draft automation batch", async ({ page }) => {
+test("admin growth tab runs the owned-site auto-publish batch", async ({ page }) => {
   let authorization = "";
   let provider = "";
 
@@ -193,13 +193,13 @@ test("admin growth tab runs the low-cost draft automation batch", async ({ page 
         runId: "marketing-2026-06-03-daily-paper-astroya",
         date: "2026-06-03",
         provider: "manual",
-        mode: "draft-only",
-        status: "drafts-ready",
+        mode: "auto-publish-owned-sites",
+        status: "published-to-owned-sites",
         scheduler: {
           recommendedPrimary: "vercel-cron",
           fallback: "github-actions",
-          cadence: "Once daily at 10:00 UTC for draft generation, then human review before anything goes public.",
-          reason: "The app already runs on Vercel, so the cheapest scalable scheduler is a Vercel Cron GET request into this API."
+          cadence: "Once daily at 10:00 UTC for owned-site publishing, with social captions prepared for connected platforms.",
+          reason: "The app already runs on Vercel, so the cheapest scalable path is Vercel Cron plus a GitHub Action that commits generated blog content."
         },
         monthlyCostEstimateUsd: {
           scheduler: 0,
@@ -285,11 +285,11 @@ test("admin growth tab runs the low-cost draft automation batch", async ({ page 
               costGuardrails: [],
               requiredUserInputs: []
             },
-            reviewQueue: {
-              destination: "Daily Paper admin Growth tab and local draft queue",
-              approvalRequired: true,
-              publishPolicy: "never-auto-publish",
-              suggestedOwnerAction: "Review the blog, caption, hashtags, and script brief before copying into any social platform."
+            publishing: {
+              destination: "Daily Paper public blog",
+              approvalRequired: false,
+              publishPolicy: "auto-publish-owned-sites",
+              suggestedOwnerAction: "Monitor the published blog post and use the generated captions for social once accounts are connected."
             }
           },
           {
@@ -368,17 +368,17 @@ test("admin growth tab runs the low-cost draft automation batch", async ({ page 
               costGuardrails: [],
               requiredUserInputs: []
             },
-            reviewQueue: {
-              destination: "Astroya SoulPath admin Growth tab and local draft queue",
-              approvalRequired: true,
-              publishPolicy: "never-auto-publish",
-              suggestedOwnerAction: "Review the blog, caption, hashtags, and script brief before copying into any social platform."
+            publishing: {
+              destination: "Astroya export queue until its site repo/API is connected",
+              approvalRequired: false,
+              publishPolicy: "auto-publish-owned-sites",
+              suggestedOwnerAction: "Connect the Astroya site repo/API to let this content publish there automatically."
             }
           }
         ],
         safeguards: [
-          "The automation only creates drafts and script briefs.",
-          "No public post, scheduled post, account creation, or OAuth permission is triggered by this endpoint."
+          "Owned-site blog content can be published automatically when the scheduled GitHub Action is enabled.",
+          "No YouTube, Instagram, Facebook, account creation, or OAuth action is triggered until those integrations are connected."
         ],
         nextActions: ["Add CRON_SECRET to Vercel."]
       })
@@ -388,7 +388,7 @@ test("admin growth tab runs the low-cost draft automation batch", async ({ page 
   await page.goto("/admin");
   await page.getByRole("button", { name: "Growth" }).click();
   await page.getByLabel("Marketing admin token").fill("test-admin-token");
-  await page.getByRole("button", { name: "Run Low-Cost Automation Batch" }).click();
+  await page.getByRole("button", { name: "Run Auto-Publish Batch" }).click();
 
   const automationResult = page.getByTestId("marketing-automation-result");
   await expect(automationResult).toBeVisible();
@@ -396,7 +396,7 @@ test("admin growth tab runs the low-cost draft automation batch", async ({ page 
   await expect(automationResult.getByText("Daily Paper", { exact: true })).toBeVisible();
   await expect(automationResult.getByText("Astroya SoulPath", { exact: true }).first()).toBeVisible();
   await expect(automationResult.getByText("$0 Starter Cost Model")).toBeVisible();
-  await expect(automationResult.getByText("never-auto-publish").first()).toBeVisible();
+  await expect(automationResult.getByText("auto-publish-owned-sites").first()).toBeVisible();
   await expect(page.getByTestId("automation-content-preview-daily-paper")).toContainText("How a Daily News Habit Helps You Make Better Decisions");
   await expect(page.getByTestId("automation-content-preview-daily-paper")).toContainText("Choose your topics. Get one clean paper.");
   await expect(page.getByTestId("automation-content-preview-astroya")).toContainText("How Astroya SoulPath Turns Curiosity Into Reflection");

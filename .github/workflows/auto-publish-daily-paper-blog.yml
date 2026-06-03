@@ -1,0 +1,41 @@
+name: Auto Publish Daily Paper Blog
+
+on:
+  schedule:
+    - cron: "20 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish-blog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: codex/dark-theme-firebase-vercel-auth
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate and publish Daily Paper blog post
+        run: npm run marketing:publish-blog
+        env:
+          NEWSLETTER_ADMIN_TOKEN: ${{ secrets.NEWSLETTER_ADMIN_TOKEN }}
+          MARKETING_AUTOMATION_ENDPOINT: https://dailynews-theta-ten.vercel.app/api/marketing/automation-run
+
+      - name: Commit generated post
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/app/blog/generated-posts.ts
+          git diff --cached --quiet || git commit -m "Auto publish Daily Paper blog"
+          git push

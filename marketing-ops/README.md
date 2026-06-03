@@ -17,7 +17,7 @@ This folder keeps the low-cost marketing framework for Daily Paper and Astroya S
 The scalable starter flow is:
 
 ```text
-Vercel Cron -> /api/marketing/automation-run -> draft-only campaign kits -> admin review
+Vercel Cron -> /api/marketing/automation-run -> GitHub Action -> generated blog post commit -> Vercel redeploy
 ```
 
 The cron is configured in `vercel.json`:
@@ -49,9 +49,22 @@ Example body:
 {
   "appIds": ["daily-paper", "astroya"],
   "provider": "manual",
-  "mode": "draft-only"
+  "mode": "auto-publish-owned-sites"
 }
 ```
+
+Daily Paper blog autopublishing is handled by `.github/workflows/auto-publish-daily-paper-blog.yml`.
+The workflow runs `npm run marketing:publish-blog`, updates `apps/web/src/app/blog/generated-posts.ts`, commits the generated post, and lets Vercel deploy the new public blog page.
+
+Optional GitHub secret for AI-backed generation through the production endpoint:
+
+```text
+NEWSLETTER_ADMIN_TOKEN
+```
+
+If the secret is absent, the workflow still publishes a deterministic Daily Paper blog post so the SEO engine keeps moving at $0 cost.
+
+Social platforms are not posted yet because YouTube, Instagram, and Facebook accounts/OAuth connections still need to be connected.
 
 ## Apps
 

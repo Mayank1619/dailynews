@@ -144,15 +144,15 @@ export type MarketingAutomationRunRequest = {
   date?: Date | string;
   appIds?: MarketingAutomationAppId[];
   provider?: MarketingAutomationProvider;
-  mode?: "draft-only" | "review-and-schedule";
+  mode?: "draft-only" | "auto-publish-owned-sites";
 };
 
 export type MarketingAutomationRunResult = {
   runId: string;
   date: string;
   provider: MarketingAutomationProvider;
-  mode: "draft-only" | "review-and-schedule";
-  status: "drafts-ready";
+  mode: "draft-only" | "auto-publish-owned-sites";
+  status: "drafts-ready" | "published-to-owned-sites";
   scheduler: {
     recommendedPrimary: "vercel-cron";
     fallback: "github-actions";
@@ -173,10 +173,10 @@ export type MarketingAutomationRunResult = {
     blogSlug: string;
     targetUrl: string;
     campaign: MakeMarketingCampaignResult;
-    reviewQueue: {
+    publishing: {
       destination: string;
-      approvalRequired: true;
-      publishPolicy: "never-auto-publish";
+      approvalRequired: boolean;
+      publishPolicy: "draft-only" | "auto-publish-owned-sites";
       suggestedOwnerAction: string;
     };
   }>;
@@ -321,7 +321,7 @@ export async function generateMarketingAutomationRun(
   const dateKey = date.toISOString().slice(0, 10);
   const appIds = normalizeAutomationAppIds(request.appIds);
   const provider = request.provider ?? "vercel-cron";
-  const mode = request.mode ?? "draft-only";
+  const mode = request.mode ?? "auto-publish-owned-sites";
   const campaigns = await Promise.all(
     appIds.map((appId) => {
       const profile = MARKETING_AUTOMATION_PROFILES[appId];
@@ -341,12 +341,12 @@ export async function generateMarketingAutomationRun(
     date: dateKey,
     provider,
     mode,
-    status: "drafts-ready",
+    status: mode === "auto-publish-owned-sites" ? "published-to-owned-sites" : "drafts-ready",
     scheduler: {
       recommendedPrimary: "vercel-cron",
       fallback: "github-actions",
-      cadence: "Once daily at 10:00 UTC for draft generation, then human review before anything goes public.",
-      reason: "The app already runs on Vercel, so the cheapest scalable scheduler is a Vercel Cron GET request into this API."
+      cadence: "Once daily at 10:00 UTC for owned-site publishing, with social captions prepared for connected platforms.",
+      reason: "The app already runs on Vercel, so the cheapest scalable path is Vercel Cron plus a GitHub Action that commits generated blog content."
     },
     monthlyCostEstimateUsd: {
       scheduler: 0,
@@ -354,10 +354,10 @@ export async function generateMarketingAutomationRun(
       videoRendering: 0,
       socialPublishing: 0,
       notes: [
-        "Use Vercel Cron or a GitHub Actions scheduled workflow for the trigger.",
-        "Use function logs and admin JSON review first; add Firestore draft persistence after the review columns are final.",
+        "Use Vercel Cron for generation visibility and GitHub Actions for static blog publication.",
+        "Commit generated Daily Paper blog posts into the repo so Vercel redeploys them as public SEO pages.",
         "Keep video generation script-only until paid rendering has a measured conversion case.",
-        "Keep social publishing manual or draft-only until account OAuth and approval rules are tested."
+        "Keep social publishing disabled until account OAuth and platform API permissions are connected."
       ]
     },
     apps: campaigns.map((campaign, index) => ({
@@ -367,24 +367,27 @@ export async function generateMarketingAutomationRun(
       blogSlug: campaign.publishingQueue.blogDraft.slug,
       targetUrl: campaign.publishingQueue.blogDraft.targetUrl,
       campaign,
-      reviewQueue: {
-        destination: `${campaign.app.productName} admin Growth tab and local draft queue`,
-        approvalRequired: true,
-        publishPolicy: "never-auto-publish",
-        suggestedOwnerAction: "Review the blog, caption, hashtags, and script brief before copying into any social platform."
+      publishing: {
+        destination: appIds[index] === "daily-paper" ? "Daily Paper public blog" : "Astroya export queue until its site repo/API is connected",
+        approvalRequired: mode !== "auto-publish-owned-sites",
+        publishPolicy: mode === "auto-publish-owned-sites" ? "auto-publish-owned-sites" : "draft-only",
+        suggestedOwnerAction:
+          appIds[index] === "daily-paper"
+            ? "Monitor the published blog post and use the generated captions for social once accounts are connected."
+            : "Connect the Astroya site repo/API to let this content publish there automatically."
       }
     })),
     safeguards: [
-      "The automation only creates drafts and script briefs.",
-      "No public post, scheduled post, account creation, or OAuth permission is triggered by this endpoint.",
+      "Owned-site blog content can be published automatically when the scheduled GitHub Action is enabled.",
+      "No YouTube, Instagram, Facebook, account creation, or OAuth action is triggered until those integrations are connected.",
       "Astroya content stays framed as reflection and self-discovery, not guaranteed predictions or medical, financial, or legal advice.",
       "Current-event claims must come from supplied source summaries; otherwise content stays evergreen."
     ],
     nextActions: [
-      "Add CRON_SECRET to Vercel so the daily cron endpoint can authenticate securely.",
-      "Use the Admin Growth tab to run and review the same automation manually.",
-      "After one week of drafts, promote the best-performing formats into a Firestore-backed review queue.",
-      "Only connect YouTube, Instagram, and Facebook publishing after the draft approval workflow is stable."
+      "Add NEWSLETTER_ADMIN_TOKEN as a GitHub Actions secret so the daily blog publishing workflow can call production.",
+      "Use the Admin Growth tab to run and inspect the same automation manually.",
+      "Connect the Astroya repo/API so its generated blog posts can be committed or published automatically.",
+      "Connect YouTube, Instagram, and Facebook APIs when ready for social autoposting."
     ]
   };
 }

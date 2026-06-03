@@ -55,11 +55,12 @@ Added on 2026-06-03:
 - The scheduled route is protected by `CRON_SECRET`; Vercel sends it as an `Authorization: Bearer ...` header.
 - The manual route is protected by `NEWSLETTER_ADMIN_TOKEN`.
 - `vercel.json` schedules the route once daily at `0 10 * * *`.
-- The automation creates draft-only campaign kits for Daily Paper and Astroya SoulPath.
-- Output includes a $0 starter cost model, Vercel Cron/GitHub Actions scheduler recommendation, app-specific draft counts, review queue instructions, and never-auto-publish safeguards.
-- `/admin` Growth now includes a "Run Low-Cost Automation Batch" button for a browser-based manual run.
+- The automation creates owned-site autopublish campaign kits for Daily Paper and Astroya SoulPath.
+- Output includes a $0 starter cost model, Vercel Cron/GitHub Actions scheduler recommendation, app-specific generated asset counts, publishing instructions, and social-platform connection safeguards.
+- `/admin` Growth now includes a "Run Auto-Publish Batch" button for a browser-based manual run.
+- `.github/workflows/auto-publish-daily-paper-blog.yml` commits generated Daily Paper blog posts into `apps/web/src/app/blog/generated-posts.ts`, triggering Vercel to publish the public blog page.
 
-This is now the preferred scalable starter path because it avoids fragile visual scenario editors and keeps the marketing brain inside the application code. Make.com remains optional for routing approved drafts to spreadsheets, Slack/email, or later platform integrations.
+This is now the preferred scalable starter path because it avoids fragile visual scenario editors and keeps the marketing brain inside the application code. Make.com remains optional for routing generated assets to spreadsheets, Slack/email, or later platform integrations.
 
 ### Make.com Optional Framework
 

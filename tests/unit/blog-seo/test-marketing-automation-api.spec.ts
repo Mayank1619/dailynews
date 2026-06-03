@@ -40,6 +40,8 @@ describe("marketing automation API", () => {
 
       expect(response.statusCode).toBe(200);
       expect((response.body as { provider: string }).provider).toBe("vercel-cron");
+      expect((response.body as { mode: string; status: string }).mode).toBe("auto-publish-owned-sites");
+      expect((response.body as { mode: string; status: string }).status).toBe("published-to-owned-sites");
       expect((response.body as { apps: Array<{ appId: string }> }).apps.map((app) => app.appId)).toEqual(["daily-paper", "astroya"]);
     } finally {
       process.env.CRON_SECRET = originalCronSecret;
@@ -65,7 +67,7 @@ describe("marketing automation API", () => {
           body: {
             appIds: ["daily-paper"],
             provider: "manual",
-            mode: "draft-only"
+            mode: "auto-publish-owned-sites"
           }
         } satisfies VercelRequest,
         response as unknown as VercelResponse
@@ -73,6 +75,7 @@ describe("marketing automation API", () => {
 
       expect(response.statusCode).toBe(200);
       expect((response.body as { provider: string }).provider).toBe("manual");
+      expect((response.body as { mode: string }).mode).toBe("auto-publish-owned-sites");
       expect((response.body as { apps: Array<{ appId: string }> }).apps).toHaveLength(1);
     } finally {
       process.env.NEWSLETTER_ADMIN_TOKEN = originalAdminToken;

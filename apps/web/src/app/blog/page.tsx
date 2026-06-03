@@ -4,8 +4,9 @@ import { BrowsePublishedBlogContentPage } from "../../features/blog-seo/browse-p
 import { DiscoverContentByTopicAndDatePage } from "../../features/blog-seo/discover-content-by-topic-and-date";
 import { ReadBlogPostBySlugPage } from "../../features/blog-seo/read-a-blog-post-by-slug";
 import type { BlogIndexEntry, BlogPost } from "../../../../api/src/features/blog-seo/schema";
+import { GENERATED_BLOG_POSTS } from "./generated-posts";
 
-const entries: BlogIndexEntry[] = [
+const fixtureEntries: BlogIndexEntry[] = [
   {
     postId: "daily-ai-news-briefing",
     slug: "daily-ai-news-briefing",
@@ -29,7 +30,7 @@ const entries: BlogIndexEntry[] = [
   }
 ];
 
-const posts: BlogPost[] = entries.map((entry) => ({
+const fixturePosts: BlogPost[] = fixtureEntries.map((entry) => ({
   id: entry.postId,
   slug: entry.slug,
   title: titleFromSlug(entry.slug),
@@ -42,6 +43,14 @@ const posts: BlogPost[] = entries.map((entry) => ({
   publishedAt: entry.publishedAt,
   updatedAt: entry.publishedAt,
   canonicalUrl: `https://dailypaper.news/blog/${entry.slug}`
+}));
+const posts: BlogPost[] = mergeBlogPosts(GENERATED_BLOG_POSTS, fixturePosts);
+const entries: BlogIndexEntry[] = posts.map((post) => ({
+  postId: post.id,
+  slug: post.slug,
+  publishedAt: post.publishedAt,
+  category: post.category,
+  tags: post.tags
 }));
 
 type BlogPageProps = Readonly<{
@@ -105,6 +114,17 @@ function titleFromSlug(slug: string): string {
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function mergeBlogPosts(primary: BlogPost[], fallback: BlogPost[]): BlogPost[] {
+  const seen = new Set<string>();
+  return [...primary, ...fallback]
+    .filter((post) => {
+      if (post.status !== "published" || seen.has(post.slug)) return false;
+      seen.add(post.slug);
+      return true;
+    })
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
 const shellStyle: React.CSSProperties = {
@@ -182,5 +202,6 @@ const blogStyles = `
     padding: 16px;
     border-radius: 12px;
     background: rgba(7, 9, 18, 0.58);
+    white-space: pre-wrap;
   }
 `;

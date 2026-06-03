@@ -46,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     const result = await generateMarketingAutomationRun({
       ...body,
       provider: body.provider ?? (isCronRun ? "vercel-cron" : "manual"),
-      mode: body.mode ?? "draft-only",
+      mode: body.mode ?? "auto-publish-owned-sites",
       date: body.date ? new Date(body.date) : new Date()
     });
 
