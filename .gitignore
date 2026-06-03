@@ -24,3 +24,4 @@ node_modules
 .vercel
 marketing-ops/generated-videos/
 marketing-ops/publish-queue/
+marketing-ops/campaign-assets/

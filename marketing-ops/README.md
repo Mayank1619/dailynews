@@ -130,6 +130,40 @@ The renderer creates:
 
 The renderer uses local templates, Playwright screenshots, and a bundled ffmpeg binary. It does not use paid video generation.
 
+## Campaign Assets
+
+Generate daily Facebook organic copy, YouTube/Instagram captions, SEO snippets, and Facebook ad drafts with:
+
+```bash
+npm run marketing:campaign-assets
+```
+
+Generate one app only:
+
+```bash
+npm run marketing:campaign-assets -- daily-paper
+npm run marketing:campaign-assets -- astroya
+```
+
+The generated campaign packs are stored locally in:
+
+```text
+marketing-ops/campaign-assets/
+```
+
+Each pack includes:
+
+- video file paths
+- Facebook Reel post copy
+- Facebook text-link post copy
+- YouTube Shorts title and description
+- Instagram Reel caption
+- Facebook ad draft copy
+- SEO title and description snippets
+- posting checklist
+
+Paid Facebook ads should stay in `draft-needs-budget` status until a budget, geography, and campaign objective are chosen.
+
 ## Social Video Publishing
 
 Prepare upload-ready social bundles with:
