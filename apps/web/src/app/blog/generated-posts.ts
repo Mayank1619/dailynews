@@ -17,7 +17,7 @@ export const GENERATED_BLOG_POSTS = [
     "category": "Productivity and news habits",
     "status": "published",
     "publishedAt": "2026-06-03T10:00:00.000Z",
-    "updatedAt": "2026-06-03T17:39:39.683Z",
+    "updatedAt": "2026-06-03T21:05:58.306Z",
     "canonicalUrl": "https://dailynews-theta-ten.vercel.app/blog/daily-news-habit-2026-06-03"
   }
 ] satisfies BlogPost[];

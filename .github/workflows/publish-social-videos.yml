@@ -14,7 +14,6 @@ jobs:
   publish-social-videos:
     runs-on: ubuntu-latest
     env:
-      SOCIAL_PUBLISH_MODE: make-webhook
       SOCIAL_AUTO_POST: ${{ secrets.SOCIAL_AUTO_POST }}
       MAKE_SOCIAL_WEBHOOK_URL: ${{ secrets.MAKE_SOCIAL_WEBHOOK_URL }}
       MAKE_SOCIAL_WEBHOOK_TOKEN: ${{ secrets.MAKE_SOCIAL_WEBHOOK_TOKEN }}

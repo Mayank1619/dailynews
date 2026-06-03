@@ -174,7 +174,15 @@ SOCIAL_AUTO_POST=true
 
 Make Custom Webhooks currently allow a 5 MB maximum request payload. The current generated videos are intentionally small, usually under 1 MB including video, cover, caption, and metadata, so the JSON webhook route should stay inside the limit.
 
-The scheduled GitHub workflow is `.github/workflows/publish-social-videos.yml`. It renders videos, creates social bundles, and sends them to Make only when `SOCIAL_AUTO_POST=true` and `MAKE_SOCIAL_WEBHOOK_URL` are present. Without those secrets it still produces GitHub artifacts for manual inspection.
+The scheduled GitHub workflow is `.github/workflows/publish-social-videos.yml`. It renders videos, creates social bundles, and sends them to n8n when `SOCIAL_AUTO_POST=true` and `N8N_SOCIAL_WEBHOOK_URL` are present. It falls back to Make when `MAKE_SOCIAL_WEBHOOK_URL` is present. Without those secrets it still produces GitHub artifacts for manual inspection.
+
+Expected n8n routing:
+
+```text
+Webhook -> route by appId -> YouTube Shorts
+                        -> Instagram Reels
+                        -> Facebook Reels/Page video
+```
 
 Expected Make routing:
 
