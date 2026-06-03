@@ -44,10 +44,13 @@ SOCIAL_AUTO_POST=true
 
 Keep `SOCIAL_AUTO_POST=false` until the Make scenario receives a test bundle and routes it to the correct brand accounts.
 
+When API-key authentication is enabled on the Make Custom Webhook, set the same value in `MAKE_SOCIAL_WEBHOOK_TOKEN`. The publisher sends it through Make's native `x-make-apikey` header.
+
 ## Modules
 
 1. Custom Webhook
    - Create a new custom webhook.
+   - Optional but recommended: enable API-key authentication.
    - Copy the webhook URL into `MAKE_SOCIAL_WEBHOOK_URL`.
    - Run `npm run marketing:render-videos` and `npm run marketing:publish-social-videos` once so Make can detect the payload schema.
 

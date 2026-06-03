@@ -158,7 +158,9 @@ MAKE_SOCIAL_WEBHOOK_TOKEN
 SOCIAL_AUTO_POST=true
 ```
 
-`MAKE_SOCIAL_WEBHOOK_TOKEN` is optional unless the Make scenario checks an authorization header.
+`MAKE_SOCIAL_WEBHOOK_TOKEN` is optional. When set, it is sent as Make's native `x-make-apikey` header for Custom Webhook API-key authentication.
+
+Make Custom Webhooks currently allow a 5 MB maximum request payload. The current generated videos are intentionally small, usually under 1 MB including video, cover, caption, and metadata, so the JSON webhook route should stay inside the limit.
 
 The scheduled GitHub workflow is `.github/workflows/publish-social-videos.yml`. It renders videos, creates social bundles, and sends them to Make only when `SOCIAL_AUTO_POST=true` and `MAKE_SOCIAL_WEBHOOK_URL` are present. Without those secrets it still produces GitHub artifacts for manual inspection.
 

@@ -107,7 +107,7 @@ async function sendToMake(post) {
 
   const headers = { "Content-Type": "application/json" };
   if (process.env.MAKE_SOCIAL_WEBHOOK_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.MAKE_SOCIAL_WEBHOOK_TOKEN}`;
+    headers["x-make-apikey"] = process.env.MAKE_SOCIAL_WEBHOOK_TOKEN;
   }
 
   const response = await fetch(webhookUrl, {
