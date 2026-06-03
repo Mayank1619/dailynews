@@ -54,6 +54,10 @@ export function getFirebaseAuthErrorMessage(error: unknown): string {
     return "Too many attempts. Please wait a few minutes before trying again.";
   }
 
+  if (code === "auth/requires-recent-login") {
+    return "For your security, please sign out and sign back in before changing your password.";
+  }
+
   if (code === "auth/network-request-failed") {
     return "We couldn't reach the sign-in service. Check your connection and try again.";
   }

@@ -7,6 +7,7 @@ import {
   NewsletterPage,
   OnboardingPage,
   PreferencesPage,
+  ProfilePage,
   SettingsPage,
   UnsubscribeConfirmationPage
 } from "./app/demo-dashboard";
@@ -62,6 +63,10 @@ function RouteView(): JSX.Element {
 
   if (path === "/billing") {
     return <BillingPage />;
+  }
+
+  if (path === "/profile") {
+    return <ProfilePage />;
   }
 
   if (path === "/admin") {

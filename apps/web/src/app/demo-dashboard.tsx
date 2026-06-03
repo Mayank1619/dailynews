@@ -1,5 +1,5 @@
 import React from "react";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { onAuthStateChanged, signOut, updatePassword, updateProfile, type User } from "firebase/auth";
 import { DESIGN_TOKENS } from "../features/design-system/tokens";
 import { PlanStatusDisplay, type BillingInterval } from "../features/payments-subscriptions/payments-subscriptions";
 import { getFirebaseAuthErrorMessage, getFirebaseClientAuth } from "../lib/firebaseAuthClient";
@@ -16,6 +16,7 @@ type PreferenceState = {
 
 const STORAGE_KEY = "daily-paper-demo-preferences";
 const BILLING_KEY = "daily-paper-demo-billing";
+const PROFILE_KEY = "daily-paper-demo-profile";
 const TRIAL_DAYS = 15;
 const TOPIC_GROUPS = [
   {
@@ -73,6 +74,13 @@ type BillingState = {
   selectedInterval: BillingInterval;
 };
 
+type AccountProfileState = {
+  displayName: string;
+  photoUrl: string;
+  location: string;
+  headline: string;
+};
+
 const shellStyle: React.CSSProperties = {
   minHeight: "100vh",
   padding: "24px 16px 40px",
@@ -86,6 +94,7 @@ const panelStyle: React.CSSProperties = {
   width: "min(920px, 100%)",
   margin: "0 auto",
   padding: 24,
+  boxSizing: "border-box",
   borderRadius: 16,
   border: "1px solid rgba(34,211,238,0.24)",
   background: "rgba(17,24,39,0.82)",
@@ -167,6 +176,43 @@ function saveBillingState(billing: BillingState, userId?: string): void {
   window.localStorage.setItem(getBillingStorageKey(userId), JSON.stringify(billing));
 }
 
+function getProfileStorageKey(userId?: string): string {
+  return userId ? `${PROFILE_KEY}:${userId}` : PROFILE_KEY;
+}
+
+function getDefaultDisplayName(user?: User | null): string {
+  if (user?.displayName) return user.displayName;
+  if (user?.email) return user.email.split("@")[0];
+  return "Daily Paper Reader";
+}
+
+function createDefaultProfile(user?: User | null): AccountProfileState {
+  return {
+    displayName: getDefaultDisplayName(user),
+    photoUrl: user?.photoURL ?? "",
+    location: "",
+    headline: "Curious reader"
+  };
+}
+
+function readAccountProfile(user?: User | null): AccountProfileState {
+  if (typeof window === "undefined") return createDefaultProfile(user);
+
+  const raw = window.localStorage.getItem(getProfileStorageKey(user?.uid));
+  if (!raw) return createDefaultProfile(user);
+
+  try {
+    return { ...createDefaultProfile(user), ...(JSON.parse(raw) as Partial<AccountProfileState>) };
+  } catch {
+    return createDefaultProfile(user);
+  }
+}
+
+function saveAccountProfile(profile: AccountProfileState, userId?: string): void {
+  window.localStorage.setItem(getProfileStorageKey(userId), JSON.stringify(profile));
+  window.dispatchEvent(new Event("daily-paper-profile-updated"));
+}
+
 function usePreferences(userId?: string): [PreferenceState, (next: PreferenceState) => void] {
   const [preferences, setPreferences] = React.useState<PreferenceState>(() => readPreferences(userId));
 
@@ -197,10 +243,47 @@ function useBillingState(userId?: string): [BillingState, (next: BillingState) =
   return [billing, persist];
 }
 
+function useAccountProfile(user?: User | null): [AccountProfileState, (next: AccountProfileState) => void] {
+  const [profile, setProfile] = React.useState<AccountProfileState>(() => readAccountProfile(user));
+
+  React.useEffect(() => {
+    const syncProfile = (): void => setProfile(readAccountProfile(user));
+    syncProfile();
+    window.addEventListener("daily-paper-profile-updated", syncProfile);
+    return () => window.removeEventListener("daily-paper-profile-updated", syncProfile);
+  }, [user?.uid, user?.displayName, user?.photoURL]);
+
+  const persist = React.useCallback((next: AccountProfileState) => {
+    setProfile(next);
+    saveAccountProfile(next, user?.uid);
+  }, [user?.uid]);
+
+  return [profile, persist];
+}
+
 function getTrialDaysRemaining(billing: BillingState): number {
   if (billing.status !== "trialing") return 0;
   const remainingMs = new Date(billing.trialEndsAt).getTime() - Date.now();
   return Math.max(0, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
+}
+
+function getPlanLabel(billing: BillingState): string {
+  if (billing.status === "trialing") return `${getTrialDaysRemaining(billing)} trial days left`;
+  if (billing.status === "active") return `Daily Paper Plus ${billing.selectedInterval}`;
+  if (billing.status === "past_due") return "Payment needs attention";
+  if (billing.status === "canceled") return "Canceled";
+  return "Trial expired";
+}
+
+function getInitials(nameOrEmail: string): string {
+  const words = nameOrEmail.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "DP";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return `${words[0][0]}${words[1][0]}`.toUpperCase();
+}
+
+function isE2EAuthSession(): boolean {
+  return typeof window !== "undefined" && window.localStorage.getItem("daily-paper-e2e-auth") === "true";
 }
 
 function getDevE2EUser(): User | null {
@@ -253,7 +336,7 @@ function useAuthState(): AuthState {
       });
 
       return unsubscribe;
-    } catch (error) {
+    } catch {
       setState({ user: null, loading: false, error: getFirebaseAuthErrorMessage(error) });
       return undefined;
     }
@@ -305,7 +388,38 @@ async function logoutAndReturnHome(): Promise<void> {
   window.location.assign("/login");
 }
 
+function Avatar({ profile, size = 38 }: { profile: AccountProfileState; size?: number }): React.JSX.Element {
+  const label = `${profile.displayName} profile picture`;
+  const baseStyle: React.CSSProperties = {
+    width: size,
+    height: size,
+    borderRadius: "50%",
+    display: "grid",
+    placeItems: "center",
+    flex: "0 0 auto",
+    border: "1px solid rgba(34,211,238,0.58)",
+    background: "linear-gradient(135deg, rgba(34,211,238,0.24), rgba(244,114,182,0.22))",
+    color: DESIGN_TOKENS.colors.textPrimary,
+    fontWeight: 900,
+    overflow: "hidden",
+    boxShadow: "0 0 22px rgba(34,211,238,0.18)"
+  };
+
+  if (profile.photoUrl) {
+    return <img src={profile.photoUrl} alt={label} style={{ ...baseStyle, objectFit: "cover" }} />;
+  }
+
+  return (
+    <span aria-label={label} style={baseStyle}>
+      {getInitials(profile.displayName)}
+    </span>
+  );
+}
+
 function AppNav({ user }: { user?: User | null }): React.JSX.Element {
+  const [profile] = useAccountProfile(user ?? null);
+  const [billing] = useBillingState(user?.uid);
+
   return (
     <header style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
       <nav style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -326,12 +440,53 @@ function AppNav({ user }: { user?: User | null }): React.JSX.Element {
         </a>
       </nav>
       {user ? (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <span style={{ color: DESIGN_TOKENS.colors.textSecondary }}>{user.email ?? "Signed in"}</span>
-          <button type="button" style={smallButtonStyle} onClick={() => void logoutAndReturnHome()}>
-            Sign Out
-          </button>
-        </div>
+        <details style={{ position: "relative" }}>
+          <summary
+            data-testid="profile-menu-summary"
+            style={{
+              ...smallButtonStyle,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              listStyle: "none",
+              minWidth: 220,
+              justifyContent: "space-between"
+            }}
+          >
+            <Avatar profile={profile} />
+            <span style={{ display: "grid", minWidth: 0 }}>
+              <strong style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.displayName}</strong>
+              <span style={{ color: DESIGN_TOKENS.colors.textSecondary, fontSize: 13 }}>{getPlanLabel(billing)}</span>
+            </span>
+          </summary>
+          <div
+            role="menu"
+            aria-label="Profile menu"
+            style={{
+              position: "absolute",
+              right: 0,
+              top: "calc(100% + 8px)",
+              zIndex: 10,
+              width: 260,
+              padding: 12,
+              borderRadius: 14,
+              border: "1px solid rgba(34,211,238,0.28)",
+              background: "rgba(7,9,18,0.96)",
+              boxShadow: "0 24px 70px rgba(0,0,0,0.42)"
+            }}
+          >
+            <p style={{ margin: "0 0 10px", color: DESIGN_TOKENS.colors.textSecondary, overflowWrap: "anywhere" }}>
+              {user.email ?? "Signed in"}
+            </p>
+            <a role="menuitem" href="/profile" style={menuLinkStyle}>My Profile</a>
+            <a role="menuitem" href="/billing" style={menuLinkStyle}>My Plan</a>
+            <a role="menuitem" href="/dashboard/preferences" style={menuLinkStyle}>Preferences</a>
+            <a role="menuitem" href="/dashboard/newsletter" style={menuLinkStyle}>Newsletter Delivery</a>
+            <button type="button" role="menuitem" style={{ ...menuButtonStyle, color: DESIGN_TOKENS.colors.error }} onClick={() => void logoutAndReturnHome()}>
+              Sign Out
+            </button>
+          </div>
+        </details>
       ) : null}
     </header>
   );
@@ -350,6 +505,29 @@ const smallButtonStyle: React.CSSProperties = {
   color: DESIGN_TOKENS.colors.textPrimary,
   padding: "8px 12px",
   cursor: "pointer",
+  fontWeight: 800
+};
+
+const menuLinkStyle: React.CSSProperties = {
+  display: "block",
+  padding: "10px 8px",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  textDecoration: "none",
+  borderRadius: 10,
+  fontWeight: 800
+};
+
+const menuButtonStyle: React.CSSProperties = {
+  display: "block",
+  width: "100%",
+  padding: "10px 8px",
+  border: 0,
+  borderRadius: 10,
+  background: "transparent",
+  textAlign: "left",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  cursor: "pointer",
+  font: DESIGN_TOKENS.typography.body,
   fontWeight: 800
 };
 
@@ -414,6 +592,8 @@ function FieldLabel({
 }
 
 const inputStyle: React.CSSProperties = {
+  width: "100%",
+  boxSizing: "border-box",
   minHeight: 42,
   borderRadius: 10,
   border: "1px solid rgba(34,211,238,0.28)",
@@ -897,6 +1077,247 @@ export function SettingsPage(): React.JSX.Element {
             Billing
           </a>
         </div>
+      </section>
+      <PoweredByNetfroot />
+    </main>
+  );
+}
+
+export function ProfilePage(): React.JSX.Element {
+  const auth = useAuthState();
+  const user = auth.user;
+  const [billing] = useBillingState(user?.uid);
+  const [savedProfile, persistProfile] = useAccountProfile(user);
+  const [draft, setDraft] = React.useState<AccountProfileState>(savedProfile);
+  const [profileMessage, setProfileMessage] = React.useState("");
+  const [profileError, setProfileError] = React.useState("");
+  const [passwords, setPasswords] = React.useState({ next: "", confirm: "" });
+  const [passwordMessage, setPasswordMessage] = React.useState("");
+  const [passwordError, setPasswordError] = React.useState("");
+
+  React.useEffect(() => setDraft(savedProfile), [savedProfile]);
+
+  const guard = AuthRequired({ auth });
+  if (guard) return guard;
+
+  const saveProfile = async (): Promise<void> => {
+    const displayName = draft.displayName.trim();
+    if (!displayName) {
+      setProfileError("Enter the name you want shown on your profile.");
+      setProfileMessage("");
+      return;
+    }
+
+    const nextProfile = {
+      ...draft,
+      displayName,
+      photoUrl: draft.photoUrl.trim(),
+      location: draft.location.trim(),
+      headline: draft.headline.trim()
+    };
+
+    try {
+      if (user && !isE2EAuthSession()) {
+        const providerPhotoUrl = nextProfile.photoUrl.startsWith("data:")
+          ? user.photoURL ?? null
+          : nextProfile.photoUrl || null;
+        await updateProfile(user, {
+          displayName: nextProfile.displayName,
+          photoURL: providerPhotoUrl
+        });
+      }
+      persistProfile(nextProfile);
+      setProfileMessage("Profile updated.");
+      setProfileError("");
+    } catch (error) {
+      persistProfile(nextProfile);
+      setProfileMessage("Profile saved in Daily Paper. The account provider will sync it after your next sign-in.");
+      setProfileError("We could not sync the profile with your sign-in provider right now.");
+    }
+  };
+
+  const readPhotoFile = (file?: File): void => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      setDraft((current) => ({ ...current, photoUrl: result }));
+      setProfileMessage("Photo preview added. Save your profile to keep it here.");
+      setProfileError("");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const changePassword = async (): Promise<void> => {
+    if (passwords.next.length < 12) {
+      setPasswordError("Use at least 12 characters for your new password.");
+      setPasswordMessage("");
+      return;
+    }
+
+    if (passwords.next !== passwords.confirm) {
+      setPasswordError("The password confirmation does not match.");
+      setPasswordMessage("");
+      return;
+    }
+
+    try {
+      if (user && !isE2EAuthSession()) {
+        await updatePassword(user, passwords.next);
+      }
+      setPasswords({ next: "", confirm: "" });
+      setPasswordMessage("Password updated.");
+      setPasswordError("");
+    } catch (error) {
+      setPasswordError(getFirebaseAuthErrorMessage(error));
+      setPasswordMessage("");
+    }
+  };
+
+  return (
+    <main style={shellStyle}>
+      <section style={panelStyle}>
+        <AppNav user={user} />
+        <BackToSettings />
+        <h1 style={{ font: DESIGN_TOKENS.typography.h1, marginTop: 0 }}>Your Profile</h1>
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 720 }}>
+          Manage the identity, photo, password, and plan details connected to your Daily Paper account.
+        </p>
+
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
+            gap: 18,
+            marginTop: 22,
+            alignItems: "start"
+          }}
+        >
+          <aside
+            data-testid="profile-preview"
+            style={{
+              border: "1px solid rgba(34,211,238,0.24)",
+              borderRadius: 14,
+              padding: 18,
+              background: "rgba(7,9,18,0.52)",
+              display: "grid",
+              gap: 12,
+              alignContent: "start"
+            }}
+          >
+            <Avatar profile={draft} size={88} />
+            <div>
+              <h2 style={{ font: DESIGN_TOKENS.typography.h2, margin: 0 }}>{draft.displayName || "Daily Paper Reader"}</h2>
+              <p style={{ margin: "4px 0", color: DESIGN_TOKENS.colors.textSecondary, overflowWrap: "anywhere" }}>{user?.email}</p>
+              <p style={{ margin: "8px 0 0" }}>{draft.headline || "Curious reader"}</p>
+              {draft.location ? <p style={{ margin: "4px 0 0", color: DESIGN_TOKENS.colors.textSecondary }}>{draft.location}</p> : null}
+            </div>
+            <div style={metricStyle}>
+              Plan<br />
+              <strong>{getPlanLabel(billing)}</strong>
+            </div>
+            <a href="/billing" style={secondaryLinkStyle}>
+              View Billing
+            </a>
+          </aside>
+
+          <div style={{ display: "grid", gap: 18 }}>
+            <section style={{ display: "grid", gap: 14 }}>
+              <h2 style={{ font: DESIGN_TOKENS.typography.h2, margin: 0 }}>Profile Details</h2>
+              <FieldLabel label="Display name">
+                <input
+                  value={draft.displayName}
+                  onChange={(event) => {
+                    setDraft({ ...draft, displayName: event.target.value });
+                    setProfileMessage("");
+                    setProfileError("");
+                  }}
+                  style={inputStyle}
+                />
+              </FieldLabel>
+              <FieldLabel label="Headline">
+                <input
+                  value={draft.headline}
+                  placeholder="e.g., Product builder, investor, student"
+                  onChange={(event) => setDraft({ ...draft, headline: event.target.value })}
+                  style={inputStyle}
+                />
+              </FieldLabel>
+              <FieldLabel label="Location">
+                <input
+                  value={draft.location}
+                  placeholder="e.g., Toronto"
+                  onChange={(event) => setDraft({ ...draft, location: event.target.value })}
+                  style={inputStyle}
+                />
+              </FieldLabel>
+              <FieldLabel label="Photo URL">
+                <input
+                  value={draft.photoUrl}
+                  placeholder="https://..."
+                  onChange={(event) => setDraft({ ...draft, photoUrl: event.target.value })}
+                  style={inputStyle}
+                />
+              </FieldLabel>
+              <FieldLabel label="Upload picture">
+                <input
+                  aria-label="Upload picture"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(event) => readPhotoFile(event.target.files?.[0])}
+                  style={inputStyle}
+                />
+              </FieldLabel>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                <button type="button" onClick={() => setDraft(savedProfile)} style={buttonBase}>
+                  Reset Profile
+                </button>
+                <button
+                  type="button"
+                  data-testid="save-profile"
+                  onClick={() => void saveProfile()}
+                  style={{ ...buttonBase, background: DESIGN_TOKENS.colors.brandPrimary, color: "#07111F" }}
+                >
+                  Save Profile
+                </button>
+              </div>
+              {profileMessage ? <p role="status" style={{ color: DESIGN_TOKENS.colors.success }}>{profileMessage}</p> : null}
+              {profileError ? <p role="alert" style={{ color: DESIGN_TOKENS.colors.error }}>{profileError}</p> : null}
+            </section>
+
+            <section style={{ display: "grid", gap: 14 }}>
+              <h2 style={{ font: DESIGN_TOKENS.typography.h2, margin: 0 }}>Password</h2>
+              <FieldLabel label="New password">
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  value={passwords.next}
+                  onChange={(event) => setPasswords({ ...passwords, next: event.target.value })}
+                  style={inputStyle}
+                />
+              </FieldLabel>
+              <FieldLabel label="Confirm new password">
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  value={passwords.confirm}
+                  onChange={(event) => setPasswords({ ...passwords, confirm: event.target.value })}
+                  style={inputStyle}
+                />
+              </FieldLabel>
+              <button
+                type="button"
+                data-testid="change-password"
+                onClick={() => void changePassword()}
+                style={{ ...buttonBase, width: "fit-content", background: DESIGN_TOKENS.colors.accentHighlight, color: "#07111F" }}
+              >
+                Change Password
+              </button>
+              {passwordMessage ? <p role="status" style={{ color: DESIGN_TOKENS.colors.success }}>{passwordMessage}</p> : null}
+              {passwordError ? <p role="alert" style={{ color: DESIGN_TOKENS.colors.error }}>{passwordError}</p> : null}
+            </section>
+          </div>
+        </section>
       </section>
       <PoweredByNetfroot />
     </main>
