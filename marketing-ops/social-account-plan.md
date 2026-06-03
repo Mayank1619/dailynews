@@ -23,6 +23,9 @@
 - Handle candidates: `@AstroyaSoulPath`, `@AstroyaApp`, `@MySoulPathGuide`
 - Instagram candidates: `@astroya.soulpath`, `@astroya.app`, `@mysoulpathguide`
 - Facebook page: `Astroya SoulPath`
+- Facebook status: created
+- Facebook page ID: `61590790372586`
+- Facebook public URL: `https://www.facebook.com/profile.php?id=61590790372586`
 - Bio: `Astrology, palmistry, and reflective AI guidance for calmer self-discovery.`
 - Link: `https://www.astroya.ca/signup`
 

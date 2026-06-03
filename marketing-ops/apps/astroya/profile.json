@@ -33,6 +33,11 @@
       "channelId": "UCvyD42R6KpG-wobER_JH3HQ",
       "studioUrl": "https://studio.youtube.com/channel/UCvyD42R6KpG-wobER_JH3HQ",
       "publicUrl": "https://www.youtube.com/channel/UCvyD42R6KpG-wobER_JH3HQ"
+    },
+    "facebook": {
+      "status": "created",
+      "pageId": "61590790372586",
+      "publicUrl": "https://www.facebook.com/profile.php?id=61590790372586"
     }
   },
   "postingMode": "auto-publish-when-secrets-present",
