@@ -3,11 +3,11 @@
  * End-to-End tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { test, expect } from '@playwright/test';
 import { AttributionService } from '../../../apps/api/src/features/newsletter-generation/read-clearly-attributed-stories-with-an-honest-ai-label.service';
 
-describe('US3: E2E - Attribution and AI Label Verification', () => {
-  it('e2e scenario: inspect newsletter for attribution', () => {
+test.describe('US3: E2E - Attribution and AI Label Verification', () => {
+  test('e2e scenario: inspect newsletter for attribution', () => {
     const service = new AttributionService();
 
     const stories = [
@@ -43,14 +43,14 @@ describe('US3: E2E - Attribution and AI Label Verification', () => {
 
     // Regular story should not be labeled
     const regularStoryResult = results.find(r => r.storyId === 'story-2');
-    expect(regularStoryResult?.hasAILabel).toBe(true); // No summary label needed
+    expect(regularStoryResult?.hasAILabel).toBe(false); // No summary label needed
     expect(regularStoryResult?.aiLabelText).toBeUndefined();
 
     // All should have attribution
     expect(results.every(r => r.hasAttribution)).toBe(true);
   });
 
-  it('e2e scenario: verify attribution text contains source and date', () => {
+  test('e2e scenario: verify attribution text contains source and date', () => {
     const service = new AttributionService();
 
     const story = {
@@ -70,7 +70,7 @@ describe('US3: E2E - Attribution and AI Label Verification', () => {
     expect(enriched.attributionText).toContain('•');
   });
 
-  it('e2e scenario: all stories in newsletter properly attributed', () => {
+  test('e2e scenario: all stories in newsletter properly attributed', () => {
     const service = new AttributionService();
 
     const newsletter = [

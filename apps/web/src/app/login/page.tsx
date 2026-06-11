@@ -4,11 +4,34 @@ import { DESIGN_TOKENS } from "../../features/design-system/tokens";
 
 export default function LoginPage(): JSX.Element {
   return (
-    <main style={{ padding: DESIGN_TOKENS.spacing[3], background: DESIGN_TOKENS.colors.bgPrimary, minHeight: "100vh" }}>
-      <LoginForm />
-      <p style={{ textAlign: "center", marginTop: DESIGN_TOKENS.spacing[1], color: DESIGN_TOKENS.colors.textSecondary }}>
-        New here? <a href="/signup" style={{ color: DESIGN_TOKENS.colors.brandPrimary }}>Create an account</a>
-      </p>
+    <main
+      style={{
+        padding: DESIGN_TOKENS.spacing[3],
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+        alignItems: "center",
+        gap: DESIGN_TOKENS.spacing[3],
+        background:
+          "radial-gradient(circle at 10% 0%, rgba(34,211,238,0.24), transparent 34%), radial-gradient(circle at 90% 8%, rgba(168,85,247,0.22), transparent 34%), #070912",
+        minHeight: "100vh"
+      }}
+    >
+      <section style={{ maxWidth: 560 }}>
+        <p style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800, margin: 0 }}>Daily Paper</p>
+        <h1 style={{ font: DESIGN_TOKENS.typography.h1, margin: "8px 0 12px" }}>Welcome back to your paper.</h1>
+        <p style={{ color: DESIGN_TOKENS.colors.textSecondary, maxWidth: 520 }}>
+          Sign in to adjust topics, change frequency, pause delivery, or tune the prompt that shapes your newsletter.
+        </p>
+        <p style={{ marginTop: DESIGN_TOKENS.spacing[2], color: DESIGN_TOKENS.colors.textSecondary }}>
+          Powered by{" "}
+          <a href="https://www.netfroot.com/" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+            Netfroot
+          </a>
+        </p>
+      </section>
+      <section>
+        <LoginForm />
+      </section>
     </main>
   );
 }

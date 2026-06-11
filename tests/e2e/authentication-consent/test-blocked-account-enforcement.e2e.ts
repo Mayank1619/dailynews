@@ -19,6 +19,8 @@ test("US3 e2e placeholder: blocked user sees BlockedAccountBanner message", asyn
 });
 
 test("US3 e2e placeholder: blocked users not in newsletter recipient list", async ({ page }) => {
+  await page.goto("/");
+
   // Simulate a newsletter recipients endpoint that excludes blocked users
   await page.route("**/api/newsletter/recipients", async (route) => {
     await route.fulfill({

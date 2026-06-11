@@ -1,8 +1,22 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import BlogPage from "./app/blog/page";
+import {
+  AdminPage,
+  BillingPage,
+  MyPaperPage,
+  NewsletterPage,
+  OnboardingPage,
+  PreferencesPage,
+  PlusPreviewPage,
+  ProfilePage,
+  SettingsPage,
+  UnsubscribeConfirmationPage
+} from "./app/demo-dashboard";
 import LoginPage from "./app/login/page";
+import { InfoPage } from "./app/info-pages";
 import Page from "./app/page";
+import SamplesPage from "./app/samples/page";
 import SignupPage from "./app/signup/page";
 
 function RouteView(): JSX.Element {
@@ -18,6 +32,72 @@ function RouteView(): JSX.Element {
 
   if (path === "/blog") {
     return <BlogPage />;
+  }
+
+  if (path === "/about") {
+    return <InfoPage kind="about" />;
+  }
+
+  if (path === "/how-it-works") {
+    return <InfoPage kind="how-it-works" />;
+  }
+
+  if (path === "/pricing") {
+    return <InfoPage kind="pricing" />;
+  }
+
+  if (path.startsWith("/blog/")) {
+    const slug = decodeURIComponent(path.replace("/blog/", ""));
+    return <BlogPage slug={slug} />;
+  }
+
+  if (path === "/samples") {
+    return <SamplesPage />;
+  }
+
+  if (path.startsWith("/samples/")) {
+    const slug = decodeURIComponent(path.replace("/samples/", ""));
+    return <SamplesPage slug={slug} />;
+  }
+
+  if (path === "/onboarding") {
+    return <OnboardingPage />;
+  }
+
+  if (path === "/settings") {
+    return <SettingsPage />;
+  }
+
+  if (path === "/dashboard/preferences") {
+    return <PreferencesPage />;
+  }
+
+  if (path === "/dashboard/newsletter") {
+    return <NewsletterPage />;
+  }
+
+  if (path === "/dashboard/paper") {
+    return <MyPaperPage />;
+  }
+
+  if (path === "/dashboard/preview") {
+    return <PlusPreviewPage />;
+  }
+
+  if (path === "/billing") {
+    return <BillingPage />;
+  }
+
+  if (path === "/profile") {
+    return <ProfilePage />;
+  }
+
+  if (path === "/admin") {
+    return <AdminPage />;
+  }
+
+  if (path === "/api/email/unsubscribe") {
+    return <UnsubscribeConfirmationPage />;
   }
 
   return <Page />;

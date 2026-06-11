@@ -1,186 +1,114 @@
 import { describe, expect, it, vi } from "vitest";
-import { ScopeProtectionService } from "../../../apps/api/src/features/payments-subscriptions/scope-protection.service";
+import {
+  ScopeProtectionService,
+  SUBSCRIPTION_PLANS,
+  TRIAL_DAYS,
+  type ScopeProtectionDependencies
+} from "../../../apps/api/src/features/payments-subscriptions/scope-protection.service";
 import { createPaymentsSubscriptionsTelemetryEvent } from "../../../apps/api/src/features/payments-subscriptions/scope-protection.telemetry";
-import type { ScopeProtectionDependencies } from "../../../apps/api/src/features/payments-subscriptions/scope-protection.service";
 
 function createDependencies(): ScopeProtectionDependencies {
   return {
     telemetry: {
       track: vi.fn(),
     },
-    now: () => new Date("2026-05-26T10:00:00.000Z"),
+    now: () => new Date("2026-06-02T10:00:00.000Z"),
   };
 }
 
-// ---------------------------------------------------------------------------
-// US1: Protect Phase 1 Scope From Accidental Monetization Work
-// ---------------------------------------------------------------------------
-describe("US1 unit: scope protection - Phase 1 guard prevents monetization", () => {
-  it("blocks reserved checkout endpoint and emits governance telemetry", async () => {
-    const deps = createDependencies();
-    const service = new ScopeProtectionService(deps);
-
-    const result = await service.guardReservedEndpoint(
-      "/api/subscriptions/checkout",
-      "user-123"
+describe("payments subscriptions: plans and trial lifecycle", () => {
+  it("defines monthly and annual Daily Paper Plus plans with a 15-day trial", () => {
+    expect(SUBSCRIPTION_PLANS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "daily-paper-plus-monthly", priceCents: 499, trialDays: TRIAL_DAYS }),
+        expect.objectContaining({ id: "daily-paper-plus-annual", priceCents: 4900, trialDays: TRIAL_DAYS }),
+      ])
     );
-
-    expect(result.allowed).toBe(false);
-    expect((result as { allowed: false; reason: string }).reason).toContain("Phase 2");
-    expect(deps.telemetry.track).toHaveBeenCalledOnce();
-
-    const [event] = vi.mocked(deps.telemetry.track).mock.calls[0]!;
-    expect(event.feature).toBe("payments-subscriptions");
-    expect(event.eventName).toBe("phase1.reserved_endpoint_blocked");
-    expect(event.status).toBe("error");
-    expect(event.metadata["endpoint"]).toBe("/api/subscriptions/checkout");
   });
 
-  it("blocks reserved webhook endpoint", async () => {
-    const deps = createDependencies();
-    const service = new ScopeProtectionService(deps);
-
-    const result = await service.guardReservedEndpoint(
-      "/api/subscriptions/webhook"
-    );
-
-    expect(result.allowed).toBe(false);
-  });
-
-  it("blocks reserved subscription-status endpoint", async () => {
-    const deps = createDependencies();
-    const service = new ScopeProtectionService(deps);
-
-    const result = await service.guardReservedEndpoint(
-      "/api/subscriptions/status",
-      "user-456"
-    );
-
-    expect(result.allowed).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// US2: Preserve Future Activation Hooks for Phase 2
-// ---------------------------------------------------------------------------
-describe("US2 unit: scope protection - Phase 2 activation criteria are all false in Phase 1", () => {
-  it("returns all activation criteria as false before Phase 2 approval", async () => {
-    const deps = createDependencies();
-    const service = new ScopeProtectionService(deps);
-
-    const criteria = await service.checkPhase2ActivationCriteria();
-
-    expect(criteria.legalComplianceApproved).toBe(false);
-    expect(criteria.paymentProviderSelected).toBe(false);
-    expect(criteria.consentDesignApproved).toBe(false);
-    expect(criteria.migrationPlanDocumented).toBe(false);
-    expect(criteria.constitutionGatesPassed).toBe(false);
-  });
-
-  it("emits governance scope-check telemetry when activation criteria are read", async () => {
-    const deps = createDependencies();
-    const service = new ScopeProtectionService(deps);
-
-    await service.checkPhase2ActivationCriteria();
-
-    expect(deps.telemetry.track).toHaveBeenCalledOnce();
-    const [event] = vi.mocked(deps.telemetry.track).mock.calls[0]!;
-    expect(event.eventName).toBe("phase1.scope_check_passed");
-    expect(event.metadata["allCriteriaFalse"]).toBe(true);
-  });
-
-  it("marks premium flags as inactive in Phase 1", async () => {
-    const deps = createDependencies();
-    const service = new ScopeProtectionService(deps);
-
-    for (const flag of ["ad-free", "more-sources", "longer-digest"] as const) {
-      const result = await service.validatePremiumFlagInactive(flag, "user-789");
-      expect(result.allowed).toBe(false);
-      expect((result as { allowed: false; reason: string }).reason).toContain(flag);
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// US3: Keep User Trust and Consent Expectations Intact
-// ---------------------------------------------------------------------------
-describe("US3 unit: scope protection - free tier subscription state", () => {
-  it("returns free-plan subscription for any user in Phase 1", async () => {
-    const deps = createDependencies();
-    const service = new ScopeProtectionService(deps);
-
-    const subscription = await service.getFreeTierSubscription("user-001");
+  it("starts a 15-day trial for a new user", async () => {
+    const service = new ScopeProtectionService(createDependencies());
+    const subscription = await service.startTrial("user-001");
 
     expect(subscription.userId).toBe("user-001");
-    expect(subscription.planId).toBe("free-plan");
-    expect(subscription.status).toBe("active");
-    expect(subscription.canceledAt).toBeUndefined();
+    expect(subscription.status).toBe("trialing");
+    expect(subscription.trialEndsAt).toBe("2026-06-17T10:00:00.000Z");
   });
 
-  it("emits free-tier confirmation telemetry without payment data", async () => {
-    const deps = createDependencies();
-    const service = new ScopeProtectionService(deps);
+  it("reports remaining trial days while trialing", async () => {
+    const service = new ScopeProtectionService(createDependencies());
+    const subscription = await service.startTrial("user-002");
+    const status = await service.getSubscriptionStatus(subscription);
 
-    await service.getFreeTierSubscription("user-002");
-
-    expect(deps.telemetry.track).toHaveBeenCalledOnce();
-    const [event] = vi.mocked(deps.telemetry.track).mock.calls[0]!;
-    expect(event.eventName).toBe("phase1.free_tier_confirmed");
-    expect(event.feature).toBe("payments-subscriptions");
-    // No payment-related metadata
-    const metadataKeys = Object.keys(event.metadata);
-    for (const key of metadataKeys) {
-      expect(key).not.toMatch(/stripe|card|billing_amount|invoice|charge/i);
-    }
+    expect(status.status).toBe("trialing");
+    expect(status.trialDaysRemaining).toBe(15);
   });
 
-  it("confirms free tier does not include premium entitlements", async () => {
-    const deps = createDependencies();
-    const service = new ScopeProtectionService(deps);
+  it("marks trial as expired after the trial end date", async () => {
+    const service = new ScopeProtectionService({
+      ...createDependencies(),
+      now: () => new Date("2026-06-18T10:00:00.000Z"),
+    });
 
-    const subscription = await service.getFreeTierSubscription("user-003");
+    const status = await service.getSubscriptionStatus({
+      userId: "user-003",
+      planId: "daily-paper-plus-monthly",
+      status: "trialing",
+      startedAt: "2026-06-02T10:00:00.000Z",
+      trialEndsAt: "2026-06-17T10:00:00.000Z",
+    });
 
-    // planId must be free-plan, never a premium tier
-    expect(subscription.planId).toBe("free-plan");
-    // No premium flag metadata in the response
-    expect(JSON.stringify(subscription)).not.toContain("ad-free");
-    expect(JSON.stringify(subscription)).not.toContain("more-sources");
-    expect(JSON.stringify(subscription)).not.toContain("longer-digest");
+    expect(status.status).toBe("expired");
+    expect(status.trialDaysRemaining).toBe(0);
+  });
+
+  it("allows trialing and active users through entitlement checks", async () => {
+    const service = new ScopeProtectionService(createDependencies());
+    const trial = await service.startTrial("user-004");
+
+    await expect(service.checkEntitlement(trial, "more-sources")).resolves.toEqual({ allowed: true, tier: "trial" });
+    await expect(service.checkEntitlement({ ...trial, status: "active" }, "longer-digest")).resolves.toEqual({ allowed: true, tier: "plus" });
+  });
+
+  it("blocks expired users from paid newsletter entitlements", async () => {
+    const service = new ScopeProtectionService(createDependencies());
+    const result = await service.checkEntitlement({
+      userId: "user-005",
+      planId: "daily-paper-plus-monthly",
+      status: "expired",
+      startedAt: "2026-06-02T10:00:00.000Z",
+      trialEndsAt: "2026-06-17T10:00:00.000Z",
+    }, "more-sources");
+
+    expect(result.allowed).toBe(false);
+  });
+
+  it("returns provider-not-configured checkout without exposing payment data", async () => {
+    const service = new ScopeProtectionService(createDependencies());
+    const result = await service.createCheckoutIntent({
+      userId: "user-006",
+      planId: "daily-paper-plus-monthly",
+      billingInterval: "monthly",
+      successUrl: "https://dailynews-theta-ten.vercel.app/billing?success=true",
+      cancelUrl: "https://dailynews-theta-ten.vercel.app/billing?canceled=true",
+    });
+
+    expect(result.providerConfigured).toBe(false);
+    expect(result.checkoutUrl).toContain("provider-not-configured");
   });
 });
 
-// ---------------------------------------------------------------------------
-// Telemetry factory unit tests
-// ---------------------------------------------------------------------------
-describe("telemetry factory: createPaymentsSubscriptionsTelemetryEvent", () => {
-  it("creates a valid Phase 1 governance event", () => {
-    const event = createPaymentsSubscriptionsTelemetryEvent(
-      "phase1.scope_check_passed",
-      "success",
-      { userId: "u1", phase: "1" }
-    );
+describe("payments telemetry factory", () => {
+  it("creates lifecycle telemetry without non-primitive metadata", () => {
+    const event = createPaymentsSubscriptionsTelemetryEvent("subscription.trial_started", "success", {
+      userId: "u1",
+      trialDays: 15,
+      nested: { card: "never" },
+    });
 
     expect(event.feature).toBe("payments-subscriptions");
-    expect(event.eventName).toBe("phase1.scope_check_passed");
-    expect(event.status).toBe("success");
     expect(event.metadata["userId"]).toBe("u1");
-    expect(typeof event.occurredAt).toBe("string");
-  });
-
-  it("strips non-primitive metadata values", () => {
-    const event = createPaymentsSubscriptionsTelemetryEvent(
-      "phase1.free_tier_confirmed",
-      "success",
-      {
-        userId: "u2",
-        // These should be stripped (not string/number/boolean)
-        nestedObject: { foo: "bar" },
-        arrayValue: [1, 2, 3],
-      }
-    );
-
-    expect(event.metadata["userId"]).toBe("u2");
-    expect(event.metadata["nestedObject"]).toBeUndefined();
-    expect(event.metadata["arrayValue"]).toBeUndefined();
+    expect(event.metadata["trialDays"]).toBe(15);
+    expect(event.metadata["nested"]).toBeUndefined();
   });
 });

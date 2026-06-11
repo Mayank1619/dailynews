@@ -1,12 +1,22 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import {
+  FacebookAuthProvider,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut
+} from "firebase/auth";
 import { DESIGN_TOKENS } from "../design-system/tokens";
-import { getFirebaseClientAuth } from "../../lib/firebaseAuthClient";
+import { getFirebaseAuthErrorMessage, getFirebaseClientAuth } from "../../lib/firebaseAuthClient";
 
 export const AUTH_LOGIN_COPY = {
   heading: "Sign in to Daily Paper",
   emailLabel: "Email",
   passwordLabel: "Password",
+  socialHeading: "Or continue with",
+  googleLabel: "Google",
+  facebookLabel: "Facebook",
   submitLabel: "Sign in",
   forgotPasswordLink: "Forgot password?",
   successMessage: "You are now signed in."
@@ -25,14 +35,56 @@ export type LoginForm = {
   password: string;
 };
 
+export type SocialAuthProviderId = "google" | "facebook";
+
 export type AuthTelemetryClient = {
   track: (eventName: string, metadata: Record<string, string | number | boolean>) => void | Promise<void>;
 };
+
+export function validateLoginForm(form: LoginForm): string {
+  if (!form.email.trim()) {
+    return "Enter your email address.";
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
+    return "Enter a valid email address.";
+  }
+
+  if (!form.password) {
+    return "Enter your password.";
+  }
+
+  return "";
+}
 
 export async function submitLogin(form: LoginForm, telemetry?: AuthTelemetryClient): Promise<string> {
   const credentials = await signInWithEmailAndPassword(getFirebaseClientAuth(), form.email, form.password);
   const idToken = await credentials.user.getIdToken();
   await telemetry?.track("login_submitted", { emailVerified: credentials.user.emailVerified });
+  return idToken;
+}
+
+function createSocialProvider(providerId: SocialAuthProviderId): GoogleAuthProvider | FacebookAuthProvider {
+  if (providerId === "google") {
+    const provider = new GoogleAuthProvider();
+    provider.addScope("email");
+    provider.addScope("profile");
+    return provider;
+  }
+
+  const provider = new FacebookAuthProvider();
+  provider.addScope("email");
+  provider.addScope("public_profile");
+  return provider;
+}
+
+export async function submitSocialLogin(
+  providerId: SocialAuthProviderId,
+  telemetry?: AuthTelemetryClient
+): Promise<string> {
+  const credentials = await signInWithPopup(getFirebaseClientAuth(), createSocialProvider(providerId));
+  const idToken = await credentials.user.getIdToken();
+  await telemetry?.track("social_login_submitted", { provider: providerId, emailVerified: credentials.user.emailVerified });
   return idToken;
 }
 
@@ -42,36 +94,48 @@ export async function submitLogout(telemetry?: AuthTelemetryClient): Promise<voi
 }
 
 export async function submitForgotPassword(email: string, telemetry?: AuthTelemetryClient): Promise<void> {
-  const response = await fetch("/api/auth/forgot-password", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email })
-  });
+  let status = "success";
+
+  try {
+    await sendPasswordResetEmail(getFirebaseClientAuth(), email);
+  } catch (error) {
+    const message = getFirebaseAuthErrorMessage(error);
+    if (message.startsWith("Account access is not fully configured")) {
+      throw new Error(message);
+    }
+
+    status = "handled";
+  }
 
   // Non-enumeration: ignore response body; always show same confirmation
-  await telemetry?.track("forgot_password_submitted", { status: response.status });
+  await telemetry?.track("forgot_password_submitted", { status });
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
 const cardStyle: React.CSSProperties = {
-  background: DESIGN_TOKENS.colors.bgSecondary,
+  background: "linear-gradient(135deg, rgba(17,24,39,0.94), rgba(12,17,34,0.9))",
   color: DESIGN_TOKENS.colors.textPrimary,
-  borderRadius: 16,
+  border: "1px solid rgba(34,211,238,0.22)",
+  borderRadius: 18,
   padding: DESIGN_TOKENS.spacing[3],
-  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.08)",
-  maxWidth: 480,
+  boxShadow: "0 24px 70px rgba(0,0,0,0.42), 0 0 38px rgba(168,85,247,0.12)",
+  width: "100%",
+  maxWidth: 640,
   margin: "0 auto"
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  border: `1px solid ${DESIGN_TOKENS.colors.textSecondary}`,
+  border: "1px solid rgba(167,179,200,0.32)",
   borderRadius: 10,
   padding: "10px 12px",
   marginTop: 6,
   marginBottom: 14,
-  font: DESIGN_TOKENS.typography.body
+  font: DESIGN_TOKENS.typography.body,
+  background: "rgba(7,9,18,0.82)",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  outlineColor: DESIGN_TOKENS.colors.brandPrimary
 };
 
 const submitStyle: React.CSSProperties = {
@@ -79,11 +143,29 @@ const submitStyle: React.CSSProperties = {
   border: 0,
   borderRadius: 10,
   padding: "12px 16px",
-  background: DESIGN_TOKENS.colors.brandPrimary,
-  color: DESIGN_TOKENS.colors.bgSecondary,
-  fontWeight: 600,
+  background: `linear-gradient(120deg, ${DESIGN_TOKENS.colors.brandPrimary}, ${DESIGN_TOKENS.colors.brandSecondary})`,
+  color: "#07111F",
+  fontWeight: 700,
   cursor: "pointer",
-  transition: `transform ${DESIGN_TOKENS.interaction.transitionMs}ms`
+  transition: `transform ${DESIGN_TOKENS.interaction.transitionMs}ms`,
+  boxShadow: "0 0 24px rgba(34,211,238,0.3)"
+};
+
+const socialGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: 10,
+  marginTop: 14
+};
+
+const socialButtonStyle: React.CSSProperties = {
+  border: "1px solid rgba(34,211,238,0.28)",
+  borderRadius: 10,
+  padding: "11px 14px",
+  background: "rgba(7,9,18,0.82)",
+  color: DESIGN_TOKENS.colors.textPrimary,
+  fontWeight: 800,
+  cursor: "pointer"
 };
 
 const linkStyle: React.CSSProperties = {
@@ -134,11 +216,32 @@ export function LoginForm(props: { telemetry?: AuthTelemetryClient }): React.JSX
     setStatus("loading");
     setErrorMessage("");
     try {
+      const validationMessage = validateLoginForm({ email: formState.email, password: formState.password });
+      if (validationMessage) {
+        setStatus("error");
+        setErrorMessage(validationMessage);
+        return;
+      }
+
       await submitLogin({ email: formState.email, password: formState.password }, props.telemetry);
       setStatus("success");
+      window.location.assign("/settings");
     } catch (err) {
       setStatus("error");
-      setErrorMessage(err instanceof Error ? err.message : "Login failed. Please try again.");
+      setErrorMessage(getFirebaseAuthErrorMessage(err));
+    }
+  }
+
+  async function handleSocialLogin(providerId: SocialAuthProviderId): Promise<void> {
+    setStatus("loading");
+    setErrorMessage("");
+    try {
+      await submitSocialLogin(providerId, props.telemetry);
+      setStatus("success");
+      window.location.assign("/settings");
+    } catch (error) {
+      setStatus("error");
+      setErrorMessage(getFirebaseAuthErrorMessage(error));
     }
   }
 
@@ -183,8 +286,35 @@ export function LoginForm(props: { telemetry?: AuthTelemetryClient }): React.JSX
           {AUTH_LOGIN_COPY.forgotPasswordLink}
         </button>
         {status === "success" && <p style={successStyle}>{AUTH_LOGIN_COPY.successMessage}</p>}
-        {status === "error" && <p style={errorStyle}>{errorMessage}</p>}
+        {status === "error" && <p role="alert" style={errorStyle}>{errorMessage}</p>}
       </form>
+      <p style={{ textAlign: "center", color: DESIGN_TOKENS.colors.textSecondary }}>
+        New here?{" "}
+        <a href="/signup" style={{ color: DESIGN_TOKENS.colors.brandPrimary, fontWeight: 800 }}>
+          Create an account
+        </a>
+      </p>
+      <p style={{ color: DESIGN_TOKENS.colors.textSecondary, fontWeight: 800, marginBottom: 8 }}>
+        {AUTH_LOGIN_COPY.socialHeading}
+      </p>
+      <div style={socialGridStyle}>
+        <button
+          type="button"
+          style={socialButtonStyle}
+          disabled={status === "loading"}
+          onClick={() => void handleSocialLogin("google")}
+        >
+          {AUTH_LOGIN_COPY.googleLabel}
+        </button>
+        <button
+          type="button"
+          style={socialButtonStyle}
+          disabled={status === "loading"}
+          onClick={() => void handleSocialLogin("facebook")}
+        >
+          {AUTH_LOGIN_COPY.facebookLabel}
+        </button>
+      </div>
     </div>
   );
 }
@@ -201,15 +331,29 @@ export function ForgotPasswordForm(props: ForgotPasswordFormProps): React.JSX.El
   const [email, setEmail] = useState(props.initialEmail ?? "");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage("");
     try {
+      if (!email.trim()) {
+        setErrorMessage("Enter your email address.");
+        return;
+      }
+
+      if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+        setErrorMessage("Enter a valid email address.");
+        return;
+      }
+
       await submitForgotPassword(email, props.telemetry);
+      setSubmitted(true);
+    } catch (error) {
+      setErrorMessage(getFirebaseAuthErrorMessage(error));
     } finally {
       setLoading(false);
-      setSubmitted(true);
     }
   }
 
@@ -237,6 +381,7 @@ export function ForgotPasswordForm(props: ForgotPasswordFormProps): React.JSX.El
           <button type="submit" style={submitStyle} disabled={loading}>
             {loading ? "Sending…" : AUTH_FORGOT_PASSWORD_COPY.submitLabel}
           </button>
+          {errorMessage ? <p role="alert" style={errorStyle}>{errorMessage}</p> : null}
         </form>
       )}
       {props.onBack && (

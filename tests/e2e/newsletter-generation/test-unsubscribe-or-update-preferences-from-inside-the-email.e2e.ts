@@ -3,11 +3,11 @@
  * End-to-End tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { test, expect } from '@playwright/test';
 import { EmailManagementLinksService } from '../../../apps/api/src/features/newsletter-generation/unsubscribe-or-update-preferences-from-inside-the-email.service';
 
-describe('US4: E2E - Email Management Links in Newsletter', () => {
-  it('e2e scenario: newsletter includes unsubscribe link', () => {
+test.describe('US4: E2E - Email Management Links in Newsletter', () => {
+  test('e2e scenario: newsletter includes unsubscribe link', () => {
     const service = new EmailManagementLinksService();
     const userId = 'user-with-links';
 
@@ -18,7 +18,7 @@ describe('US4: E2E - Email Management Links in Newsletter', () => {
     expect(links.unsubscribeUrl).toContain(userId);
   });
 
-  it('e2e scenario: newsletter includes preferences link', () => {
+  test('e2e scenario: newsletter includes preferences link', () => {
     const service = new EmailManagementLinksService();
     const userId = 'user-preferences';
 
@@ -29,7 +29,7 @@ describe('US4: E2E - Email Management Links in Newsletter', () => {
     expect(links.preferencesUrl).toContain('preferences');
   });
 
-  it('e2e scenario: user clicks unsubscribe link', async () => {
+  test('e2e scenario: user clicks unsubscribe link', async () => {
     const service = new EmailManagementLinksService();
     const userId = 'unsubscribe-test-user';
 
@@ -48,7 +48,7 @@ describe('US4: E2E - Email Management Links in Newsletter', () => {
     // Should not throw
   });
 
-  it('e2e scenario: user updates preferences from email', async () => {
+  test('e2e scenario: user updates preferences from email', async () => {
     const service = new EmailManagementLinksService();
     const userId = 'preferences-update-user';
 
@@ -70,7 +70,7 @@ describe('US4: E2E - Email Management Links in Newsletter', () => {
     // Should not throw
   });
 
-  it('e2e scenario: links are footer footer of email', () => {
+  test('e2e scenario: links are footer footer of email', () => {
     const service = new EmailManagementLinksService();
     const userId = 'email-footer-test';
 

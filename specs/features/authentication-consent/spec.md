@@ -23,6 +23,7 @@ As a new user, I want to register with email and password, verify my email, and 
 1. **Given** I am a new visitor, **When** I submit signup with a valid email and password, **Then** the system creates my account, stores only a hashed password, and records my consent choices with a timestamp and terms version.
 2. **Given** I leave optional product updates and offers unchecked, **When** I complete signup, **Then** the stored consent record shows those optional preferences as false.
 3. **Given** I have not verified my email, **When** I attempt to use any newsletter-related capability, **Then** the system does not treat me as verified for newsletter delivery.
+4. **Given** I prefer a social account, **When** I choose Google or Facebook from signup, **Then** the system starts Firebase provider sign-in and records the same newsletter consent choices before sending me to onboarding.
 
 ---
 
@@ -40,6 +41,7 @@ As a registered user, I want to sign in securely, sign out cleanly, and recover 
 2. **Given** I am signed in, **When** I log out, **Then** my session is invalidated and I can no longer use it to remain authenticated.
 3. **Given** I request a password reset, **When** I enter an email address, **Then** the response does not reveal whether that email exists and a time-limited reset token is used if the account is valid.
 4. **Given** I use a valid reset token before it expires, **When** I set a new password, **Then** I regain access using the new password and the old reset token cannot be reused.
+5. **Given** I sign in with email, Google, or Facebook, **When** authentication succeeds, **Then** I am routed to the account settings area where I can manage preferences and newsletter subscription state.
 
 ---
 
@@ -78,6 +80,8 @@ As an admin, I want blocked users to be prevented from signing in or receiving n
 - **FR-AUTH-004**: The system MUST support password reset using a time-limited token.
 - **FR-AUTH-005**: The system MUST establish a secure authenticated session on successful login.
 - **FR-AUTH-006**: The system MUST end the authenticated session on logout so the session cannot continue to be used.
+- **FR-AUTH-011**: The web experience SHOULD expose Firebase-backed Google and Facebook sign-in options alongside email/password where those providers are enabled in Firebase Authentication.
+- **FR-AUTH-012**: Successful signup MUST route the user into onboarding, and successful login MUST route the user into an authenticated account settings or dashboard surface.
 - **FR-CONS-001**: The system MUST capture consent choices at signup for newsletter, product updates, and offers/promotions, with product updates and offers/promotions treated as optional and newsletter consent recorded explicitly.
 - **FR-CONS-002**: The system MUST persist consent flags, a timestamp, and the accepted terms version for each signup.
 - **FR-AUTH-007**: The system MUST prevent blocked users from logging in and MUST exclude blocked users from newsletter delivery.
@@ -162,7 +166,7 @@ As an admin, I want blocked users to be prevented from signing in or receiving n
 ## Assumptions
 
 - The existing User Dashboard dependency will provide the admin workflow for blocking or unblocking users and, where needed, future consent management views.
-- Social login, multi-factor authentication, and account recovery beyond the listed password reset flow are out of scope for Phase 1.
+- Multi-factor authentication and account recovery beyond the listed password reset flow are out of scope for Phase 1. Social login is supported through Firebase Auth providers when the provider configuration is enabled in Firebase.
 - Newsletter delivery itself is outside this spec except for the verification and blocked-user gating rules.
 - Terms and consent text versions are supplied by product or governance owners and will be recorded alongside each consent event.
 - The authentication experience must remain consistent with the Daily Paper constitution and the existing design-system rules for layout, contrast, motion, and accessibility.
@@ -171,6 +175,26 @@ As an admin, I want blocked users to be prevented from signing in or receiving n
 
 - Scope confirmed for this pass: Phase 1 setup, Phase 2 foundational work, and User Story 1 (P1) only.
 - Dependency baseline confirmed: Firebase Auth client bootstrap for web signup, Firebase Admin ID-token verification for API identity binding, and privacy-safe consent telemetry/audit hooks.
+
+## Implementation Update (2026-06-02)
+
+- Confirmed the Vite web app uses Firebase Auth client SDK for email/password signup, login, sign-out, and password reset.
+- Confirmed `/api/auth/signup` is implemented as a Vercel serverless function that verifies the Firebase ID token through Firebase Identity Toolkit token lookup before recording consent.
+- Confirmed the Vercel signup function can use the Firebase web API key for token lookup, avoiding a service-account key for this consent-binding path.
+- Confirmed missing Firebase web configuration produces a user-facing setup message instead of exposing raw internal environment-variable errors.
+- Deferred the remaining HTTP auth endpoints (`/api/auth/login`, `/api/auth/logout`, `/api/auth/verify-email`, `/api/auth/reset-password`, `/api/auth/me`) to the broader authenticated dashboard/API phase because login/logout/reset currently use the Firebase client SDK directly.
+
+## Implementation Update (2026-06-02, Post-Auth Routing)
+
+- Confirmed signup now redirects authenticated users to `/onboarding` so preference setup starts immediately after account creation.
+- Confirmed login now redirects authenticated users to `/settings`, which links to preference updates and newsletter subscription controls.
+- Confirmed Google and Facebook provider buttons are present on signup and login, backed by Firebase popup sign-in; provider success depends on the corresponding Firebase provider configuration.
+
+## Implementation Update (2026-06-02, Auth UX Polish)
+
+- Confirmed login and signup now render as full-screen dark neon account surfaces rather than compact centered boxes.
+- Confirmed Google and Facebook buttons appear below the primary email/password flow, with the login page showing the create-account prompt before social options.
+- Confirmed account and public surfaces include a "Powered by Netfroot" footer link.
 
 ## Telemetry & Privacy Compliance
 

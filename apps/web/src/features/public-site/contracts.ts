@@ -24,7 +24,11 @@ export const PRIMARY_CTA: PublicRouteAction = {
 export const PUBLIC_NAV_ACTIONS: PublicRouteAction[] = [
   PRIMARY_CTA,
   { id: "login", label: "Login", route: "/login" },
-  { id: "blog", label: "Blog", route: "/blog" }
+  { id: "about", label: "About", route: "/about" },
+  { id: "how-it-works", label: "How It Works", route: "/how-it-works" },
+  { id: "pricing", label: "Pricing", route: "/pricing" },
+  { id: "blog", label: "Blog", route: "/blog" },
+  { id: "samples", label: "Samples", route: "/samples" }
 ];
 
 export const HOW_IT_WORKS_STEPS = [
@@ -37,12 +41,15 @@ export const SAMPLE_DIGEST_PREVIEW: LandingSampleDigest = {
   title: "Morning Brief: Markets, Climate, and Policy",
   snippet: "A sample of how Daily Paper summarizes key headlines with source links and timestamps.",
   sourceName: "Illustrative sample",
-  canonicalUrl: "/blog",
+  canonicalUrl: "/samples",
   publishedAt: "2026-05-26T08:00:00.000Z",
   label: "Illustrative sample digest"
 };
 
 export const FOOTER_TRUST_LINKS: PublicRouteAction[] = [
+  { id: "about", label: "About", route: "/about" },
+  { id: "how-it-works", label: "How It Works", route: "/how-it-works" },
+  { id: "pricing", label: "Pricing", route: "/pricing" },
   { id: "privacy", label: "Privacy", route: "/privacy" },
   { id: "terms", label: "Terms", route: "/terms" },
   { id: "contact", label: "Contact", route: "/contact" }

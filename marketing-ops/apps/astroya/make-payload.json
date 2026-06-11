@@ -1,0 +1,14 @@
+{
+  "appId": "astroya",
+  "productName": "Astroya SoulPath",
+  "positioning": "A calm astrology and palmistry guidance experience for reflective self-discovery.",
+  "strategy": "minimal-cost",
+  "platforms": ["youtube-shorts", "instagram-reels", "facebook-reels"],
+  "dailyVideoCount": 1,
+  "topic": "why personalized astrology and palmistry guidance helps people reflect with more clarity",
+  "audience": "spiritually curious adults who want a calm personal guidance flow",
+  "newsletterThemes": ["Vedic astrology", "Western astrology", "palmistry", "AI-powered consultation"],
+  "baseUrl": "https://www.astroya.ca",
+  "sampleRoute": "/how-it-works",
+  "ctaRoute": "/signup"
+}

@@ -28,24 +28,24 @@ export type LayoutTokens = {
 
 export const DESIGN_TOKENS = {
   colors: {
-    bgPrimary: "#F5F7FB",
-    bgSecondary: "#FFFFFF",
-    textPrimary: "#111827",
-    textSecondary: "#4B5563",
-    brandPrimary: "#0EA5E9",
-    brandSecondary: "#14B8A6",
-    accentHighlight: "#F43F5E",
-    success: "#15803D",
-    warning: "#F59E0B",
-    error: "#B91C1C"
+    bgPrimary: "#070912",
+    bgSecondary: "#111827",
+    textPrimary: "#F8FAFC",
+    textSecondary: "#A7B3C8",
+    brandPrimary: "#22D3EE",
+    brandSecondary: "#A855F7",
+    accentHighlight: "#F472B6",
+    success: "#34D399",
+    warning: "#FBBF24",
+    error: "#FB7185"
   } satisfies ColorTokens,
   spacing: [8, 16, 24, 32, 48] as const,
   typography: {
-    headingFamily: "Fraunces, Georgia, serif",
+    headingFamily: "Plus Jakarta Sans, Segoe UI, sans-serif",
     bodyFamily: "Plus Jakarta Sans, Segoe UI, sans-serif",
-    h1: "700 40px/1.12 Fraunces, Georgia, serif",
-    h2: "600 28px/1.24 Fraunces, Georgia, serif",
-    h3: "500 20px/1.32 Fraunces, Georgia, serif",
+    h1: "800 40px/1.12 Plus Jakarta Sans, Segoe UI, sans-serif",
+    h2: "800 28px/1.24 Plus Jakarta Sans, Segoe UI, sans-serif",
+    h3: "700 20px/1.32 Plus Jakarta Sans, Segoe UI, sans-serif",
     body: "400 16px/1.65 Plus Jakarta Sans, Segoe UI, sans-serif"
   } satisfies TypographyTokens,
   layout: {

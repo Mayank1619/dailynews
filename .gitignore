@@ -5,6 +5,7 @@ coverage/
 playwright-report/
 test-results/
 .env*
+!.env.example
 
 __pycache__/
 *.pyc
@@ -20,3 +21,7 @@ Thumbs.db
 .idea/
 *.log
 node_modules
+.vercel
+marketing-ops/generated-videos/
+marketing-ops/publish-queue/
+marketing-ops/campaign-assets/

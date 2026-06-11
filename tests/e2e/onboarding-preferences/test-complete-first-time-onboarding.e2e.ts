@@ -4,8 +4,13 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { enableE2EAuth } from "../helpers/e2e-auth";
 
 test.describe("Complete First-Time Onboarding (E2E)", () => {
+  test.beforeEach(async ({ page }) => {
+    await enableE2EAuth(page);
+  });
+
   test("should guide user through complete onboarding flow", async ({ page }) => {
     // Navigate to onboarding
     await page.goto("/onboarding");
@@ -17,8 +22,8 @@ test.describe("Complete First-Time Onboarding (E2E)", () => {
     await expect(page.getByRole("heading", { name: /What topics interest you/i })).toBeVisible();
 
     // Select multiple topics
-    await page.getByRole("button", { name: "Technology" }).click();
-    await page.getByRole("button", { name: "Business" }).click();
+    await page.getByRole("button", { name: "New in Technology" }).click();
+    await page.getByRole("button", { name: "Markets" }).click();
     await page.getByRole("button", { name: "Science" }).click();
 
     // Verify topics are selected (visual feedback)
@@ -47,10 +52,10 @@ test.describe("Complete First-Time Onboarding (E2E)", () => {
     await page.getByRole("button", { name: "Next" }).click();
 
     // Step 3: Delivery Time
-    await expect(page.getByRole("heading", { name: /When should we deliver/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /How often should we deliver/i })).toBeVisible();
 
     // Set delivery time
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.fill("08:00");
 
     // Verify timezone dropdown
@@ -65,7 +70,7 @@ test.describe("Complete First-Time Onboarding (E2E)", () => {
 
     // Verify summary shows correct info
     const summaryText = await page.textContent("div");
-    expect(summaryText).toContain("Technology");
+    expect(summaryText).toContain("New in Technology");
     expect(summaryText).toContain("Canada");
     expect(summaryText).toContain("08:00");
 
@@ -73,10 +78,7 @@ test.describe("Complete First-Time Onboarding (E2E)", () => {
     const submitButton = page.getByRole("button", { name: /Complete Onboarding/i });
     await submitButton.click();
 
-    // Wait for navigation or success message
-    await page.waitForNavigation({ waitUntil: "networkidle" }).catch(() => {
-      // May not navigate, just check if completed
-    });
+    await expect(page).toHaveURL(/\/dashboard\/preferences$/);
 
     // Optionally verify we're redirected or see a success state
     // This depends on your implementation
@@ -126,8 +128,8 @@ test.describe("Complete First-Time Onboarding (E2E)", () => {
   test("should highlight selected topics with distinct styling", async ({ page }) => {
     await page.goto("/onboarding");
 
-    const techButton = page.getByRole("button", { name: "Technology" });
-    const businessButton = page.getByRole("button", { name: "Business" });
+    const techButton = page.getByRole("button", { name: "New in Technology" });
+    const businessButton = page.getByRole("button", { name: "Markets" });
 
     // Get initial style
     const techStyleBefore = await techButton.evaluate((el) => {
@@ -161,7 +163,7 @@ test.describe("Complete First-Time Onboarding (E2E)", () => {
     await expect(page.getByRole("heading", { name: /Personalize Your Daily News/i })).toBeVisible();
 
     // Topic buttons should stack vertically
-    const container = page.locator("div").filter({ has: page.getByRole("button", { name: "Technology" }) });
+    const container = page.locator("div").filter({ has: page.getByRole("button", { name: "New in Technology" }) }).last();
     const boundingBox = await container.boundingBox();
 
     // Width should be constrained to mobile viewport

@@ -156,7 +156,40 @@ date and status, and that rows with status `sent` and an available web version l
 
 ---
 
-### User Story 5 — Account Settings: Logout and Delete Account (Priority: P3)
+### User Story 5 — Manage My Profile and Plan (Priority: P2)
+
+As a signed-in user, I want a top-right profile menu and profile page where I can update my name,
+picture, password, and plan details so account management feels easy to find after login.
+
+**Why this priority**: Profile access is a primary navigation expectation for authenticated apps.
+It also gives users a clear place to inspect billing state without hunting through settings.
+
+**Independent Test**: Can be fully tested by signing in, opening the top-right profile menu,
+navigating to the profile page, saving profile fields, changing a password, and confirming the plan
+summary remains visible.
+
+**Acceptance Scenarios**:
+
+1. **Given** I am signed in, **When** I view the top-right navigation area, **Then** I see my
+   profile identity, picture or initials, and current plan state.
+2. **Given** I open the profile menu, **When** the menu expands, **Then** I can reach My Profile,
+   My Plan, Preferences, Newsletter Delivery, and Sign Out without losing my session.
+3. **Given** I am on the profile page, **When** I update my display name, headline, location, or
+   picture URL and save, **Then** the profile preview and top-right menu reflect the updated
+   identity.
+4. **Given** I upload a local picture, **When** the preview loads and I save the profile, **Then**
+   the picture is retained for the signed-in user's Daily Paper profile.
+5. **Given** I enter a weak or mismatched new password, **When** I submit the password form,
+   **Then** I see a safe, product-friendly validation message.
+6. **Given** I enter a valid matching new password, **When** the password change succeeds, **Then**
+   the form clears and I see a success confirmation.
+7. **Given** the identity provider requires recent login for password changes, **When** I submit
+   the password form, **Then** I am told to sign out and sign back in without exposing provider
+   internals.
+
+---
+
+### User Story 6 — Account Settings: Logout and Delete Account (Priority: P3)
 
 As a signed-in user, I want to log out of my session or permanently delete my account from the
 dashboard so I retain full control over my presence in the product.
@@ -262,6 +295,21 @@ immediate revocation of session access.
   `GET /api/dashboard` (returns preferences summary and delivery state for the signed-in user),
   `GET /api/dashboard/history` (returns paginated newsletter history for the signed-in user),
   `DELETE /api/account` (optional MVP — initiates account deletion for the signed-in user).
+- **FR-DASH-014**: The authenticated navigation MUST include a top-right profile menu showing the
+  signed-in user's display identity, avatar or initials, and current plan state.
+- **FR-DASH-015**: The profile menu MUST provide direct links to My Profile, My Plan, Preferences,
+  Newsletter Delivery, and Sign Out.
+- **FR-DASH-016**: The profile page MUST allow the signed-in user to update display name, headline,
+  location, and profile picture URL or local preview while scoping saved profile data to that user.
+- **FR-DASH-017**: The profile page MUST expose the current billing plan/trial state and link to
+  the billing page.
+- **FR-DASH-018**: The profile page MUST provide password change validation for minimum password
+  length, confirmation mismatch, successful update, and recent-login-required errors using safe
+  user-facing messages.
+- **FR-DASH-019**: Authenticated navigation MUST include a My Paper destination that routes to the
+  in-app personalized paper reader defined by the Newsletter Generation feature.
+- **FR-DASH-020**: Authenticated users MUST be able to open a Plus paper preview from dashboard
+  home and billing so they can inspect the paid newsletter format before subscribing.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -383,8 +431,9 @@ immediate revocation of session access.
 - **End-to-end coverage**: Validate the full login → dashboard loads → preferences summary displayed
   scenario; validate edit-preferences link navigates to the preferences editor and updated values
   appear on return; validate pause and resume delivery from the dashboard; validate the unsubscribe
-  email-footer flow terminates at the dashboard showing Paused state; validate logout redirects to
-  the public home page.
+  email-footer flow terminates at the dashboard showing Paused state; validate the top-right profile
+  menu exposes account destinations; validate profile edits, plan visibility, and password validation;
+  validate logout redirects to the public home page.
 - **Security testing**: Validate that unauthenticated requests to all dashboard endpoints return a
   redirect, not data; validate that a user cannot access another user's history by manipulating
   request parameters; validate that delete-account requires two-step confirmation and cannot be

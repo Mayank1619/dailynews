@@ -4,11 +4,11 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { enableE2EAuth } from "../helpers/e2e-auth";
 
 test.describe("Update Preferences Anytime (E2E)", () => {
   test.beforeEach(async ({ page }) => {
-    // Assume user is already logged in with existing preferences
-    // In real scenario, this would be set up by auth setup
+    await enableE2EAuth(page);
     await page.goto("/dashboard/preferences");
   });
 
@@ -20,14 +20,14 @@ test.describe("Update Preferences Anytime (E2E)", () => {
     await expect(page.getByRole("heading", { name: /Update Your Preferences/i })).toBeVisible();
 
     // Should have form controls
-    await expect(page.getByLabel("Topics", { exact: false })).toBeVisible();
+    await expect(page.getByRole("group", { name: /Topics/i })).toBeVisible();
     await expect(page.getByLabel("Region", { exact: false })).toBeVisible();
-    await expect(page.getByLabel("Time")).toBeVisible();
+    await expect(page.getByLabel("Time", { exact: true })).toBeVisible();
   });
 
   test("should update single field", async ({ page }) => {
     // Change delivery time
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("18:00");
 
@@ -50,7 +50,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
 
   test("should update multiple fields", async ({ page }) => {
     // Select different topics
-    const techButton = page.getByRole("button", { name: "Technology" });
+    const techButton = page.getByRole("button", { name: "New in Technology" });
     const scienceButton = page.getByRole("button", { name: "Science" });
 
     // Deselect if selected, select if not
@@ -63,7 +63,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
     await provinceInput.fill("British Columbia");
 
     // Change delivery time
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("09:00");
 
@@ -76,7 +76,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
   });
 
   test("should reset changes", async ({ page }) => {
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     const originalValue = await timeInput.inputValue();
 
     // Change value
@@ -98,7 +98,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
     await expect(saveButton).toBeDisabled();
 
     // Make a change
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("12:00");
 
@@ -113,21 +113,19 @@ test.describe("Update Preferences Anytime (E2E)", () => {
   });
 
   test("should validate required fields", async ({ page }) => {
-    const topicButtons = page.locator("button").filter({ has: page.locator("text=/Technology|Business|Science/") });
+    await expect(page.getByRole("button", { name: "New in Technology" })).toHaveAttribute("aria-pressed", "true");
 
-    // Deselect all topics
-    const allTopics = await topicButtons.all();
-    for (const topic of allTopics) {
-      const style = await topic.evaluate((el) => window.getComputedStyle(el).backgroundColor);
-      // If it looks selected, deselect it
-      if (style.includes("rgb(59, 130, 246)")) {
-        // Blue-ish color indicating selection
+    for (const topicName of ["New in Technology", "Markets", "Science"]) {
+      const topic = page.getByRole("button", { name: topicName });
+      if ((await topic.getAttribute("aria-pressed")) === "true") {
         await topic.click();
+        await expect(topic).toHaveAttribute("aria-pressed", "false");
       }
     }
 
     // Try to save
     const saveButton = page.getByRole("button", { name: /Save Changes/i });
+    await expect(saveButton).not.toBeDisabled();
     await saveButton.click();
 
     // Should show error
@@ -136,12 +134,12 @@ test.describe("Update Preferences Anytime (E2E)", () => {
 
   test("should show change summary in preferences card", async ({ page }) => {
     // Update a preference
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("15:00");
 
     // Look for visual indication of change
-    const timeField = page.locator("div").filter({ has: page.getByLabel("Time") });
+    const timeField = page.locator("div").filter({ has: page.getByLabel("Time", { exact: true }) }).last();
     await expect(timeField).toBeVisible();
 
     // Save changes
@@ -164,7 +162,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
       return (document.activeElement as HTMLElement)?.tagName;
     });
 
-    expect(["BUTTON", "INPUT", "SELECT"]).toContain(focused);
+    expect(["A", "BUTTON", "INPUT", "SELECT"]).toContain(focused);
 
     // Tab through form
     for (let i = 0; i < 5; i++) {
@@ -184,7 +182,7 @@ test.describe("Update Preferences Anytime (E2E)", () => {
 
   test("should persist changes across page reload", async ({ page }) => {
     // Update preference
-    const timeInput = page.getByLabel("Time");
+    const timeInput = page.getByLabel("Time", { exact: true });
     await timeInput.clear();
     await timeInput.fill("20:00");
 

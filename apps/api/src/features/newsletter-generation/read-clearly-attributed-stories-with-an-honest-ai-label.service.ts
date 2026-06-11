@@ -64,6 +64,10 @@ export class AttributionService {
    * Build attribution text for story
    */
   private buildAttributionText(story: any): string {
+    if (this.policy.requireSourceName && !story.source) {
+      return '';
+    }
+
     const parts = [];
 
     if (story.source) {
@@ -76,6 +80,7 @@ export class AttributionService {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
+        timeZone: 'UTC',
       });
       parts.push(dateStr);
     }

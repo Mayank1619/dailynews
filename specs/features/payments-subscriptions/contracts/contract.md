@@ -1,37 +1,57 @@
-# Contract - Payments Subscriptions (Placeholder)
+# Contract - Payments Subscriptions
 
-## Phase 1 Status
+## GET /api/subscriptions/current-user
 
-## Reserved Phase 2 Interfaces
-
-## Phase 1 Scope Guard Responses
-
-All reserved endpoints return a scope-blocked response in Phase 1 via `ScopeProtectionService.guardReservedEndpoint()`:
-
-```
-{ allowed: false, reason: "This endpoint is reserved for Phase 2 monetization activation and is not available in Phase 1." }
-```
-
-Telemetry event emitted per blocked request: `phase1.reserved_endpoint_blocked`
-
-## Free-Tier Subscription Contract (Phase 1)
-
-`GET /api/subscriptions/current-user` placeholder (not yet registered) returns:
+Returns the authenticated user's subscription state.
 
 ```json
 {
-	"userId": "<firebase-uid>",
-	"planId": "free-plan",
-	"status": "active",
-	"startedAt": "2026-01-01T00:00:00.000Z"
+  "userId": "<firebase-uid>",
+  "planId": "daily-paper-plus-monthly",
+  "status": "trialing",
+  "startedAt": "2026-06-02T00:00:00.000Z",
+  "trialEndsAt": "2026-06-17T00:00:00.000Z",
+  "trialDaysRemaining": 15
 }
 ```
 
-## Phase 2 Activation Pre-conditions
+## POST /api/subscriptions/checkout
 
-Before Phase 2 contracts become executable the following must be satisfied:
-- `legalComplianceApproved: true`
-- `paymentProviderSelected: true`
-- `consentDesignApproved: true`
-- `migrationPlanDocumented: true`
-- `constitutionGatesPassed: true`
+Creates an external-provider checkout handoff.
+
+Request:
+
+```json
+{
+  "planId": "daily-paper-plus-monthly",
+  "billingInterval": "monthly",
+  "successUrl": "https://dailynews-theta-ten.vercel.app/billing?success=true",
+  "cancelUrl": "https://dailynews-theta-ten.vercel.app/billing?canceled=true"
+}
+```
+
+Response when provider is configured:
+
+```json
+{
+  "checkoutUrl": "https://checkout.stripe.com/...",
+  "providerConfigured": true
+}
+```
+
+Response before provider setup:
+
+```json
+{
+  "checkoutUrl": "/billing?checkout=provider-not-configured",
+  "providerConfigured": false
+}
+```
+
+## POST /api/subscriptions/webhook
+
+Future provider webhook endpoint. Must validate provider signature before mutating subscription records.
+
+## Entitlement Rule
+
+`trialing` and `active` subscriptions are allowed. `expired`, `past_due`, and `canceled` subscriptions are blocked.

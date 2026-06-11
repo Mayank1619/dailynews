@@ -3,11 +3,11 @@
  * End-to-End tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { test, expect } from '@playwright/test';
 import { ResponsiveEmailService } from '../../../apps/api/src/features/newsletter-generation/receive-a-readable-email-on-any-device.service';
 
-describe('US5: E2E - Responsive Email Rendering', () => {
-  it('e2e scenario: newsletter renders on mobile 375px', () => {
+test.describe('US5: E2E - Responsive Email Rendering', () => {
+  test('e2e scenario: newsletter renders on mobile 375px', () => {
     const service = new ResponsiveEmailService();
 
     const mobileTest = service.testViewportRendering(375, '');
@@ -16,7 +16,7 @@ describe('US5: E2E - Responsive Email Rendering', () => {
     expect(mobileTest.readability).toBeTruthy();
   });
 
-  it('e2e scenario: newsletter renders on tablet 768px', () => {
+  test('e2e scenario: newsletter renders on tablet 768px', () => {
     const service = new ResponsiveEmailService();
 
     const tabletTest = service.testViewportRendering(768, '');
@@ -25,7 +25,7 @@ describe('US5: E2E - Responsive Email Rendering', () => {
     expect(['excellent', 'good', 'fair', 'poor']).toContain(tabletTest.readability);
   });
 
-  it('e2e scenario: newsletter renders on desktop 1024px', () => {
+  test('e2e scenario: newsletter renders on desktop 1024px', () => {
     const service = new ResponsiveEmailService();
 
     const desktopTest = service.testViewportRendering(1024, '');
@@ -33,7 +33,7 @@ describe('US5: E2E - Responsive Email Rendering', () => {
     expect(desktopTest.viewportWidth).toBe(1024);
   });
 
-  it('e2e scenario: validate rendering across viewport matrix', () => {
+  test('e2e scenario: validate rendering across viewport matrix', () => {
     const service = new ResponsiveEmailService();
 
     const matrix = service.generateViewportTestMatrix();
@@ -44,7 +44,7 @@ describe('US5: E2E - Responsive Email Rendering', () => {
     expect(matrix).toContainEqual(expect.objectContaining({ viewportWidth: 768 }));
   });
 
-  it('e2e scenario: email has responsive CSS', () => {
+  test('e2e scenario: email has responsive CSS', () => {
     const service = new ResponsiveEmailService();
 
     const css = service.generateResponsiveCss();
@@ -55,7 +55,7 @@ describe('US5: E2E - Responsive Email Rendering', () => {
     expect(css).toContain('width: 100%');
   });
 
-  it('e2e scenario: newsletter passes accessibility audit', () => {
+  test('e2e scenario: newsletter passes accessibility audit', () => {
     const service = new ResponsiveEmailService();
 
     const html = `

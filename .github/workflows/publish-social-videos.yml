@@ -1,0 +1,59 @@
+name: Publish Social Videos
+
+on:
+  schedule:
+    - cron: "15 11 * * *"
+  workflow_dispatch:
+    inputs:
+      app_id:
+        description: "App to publish: all, daily-paper, or astroya"
+        required: false
+        default: "all"
+
+jobs:
+  publish-social-videos:
+    runs-on: ubuntu-latest
+    env:
+      SOCIAL_AUTO_POST: ${{ secrets.SOCIAL_AUTO_POST }}
+      MAKE_SOCIAL_WEBHOOK_URL: ${{ secrets.MAKE_SOCIAL_WEBHOOK_URL }}
+      MAKE_SOCIAL_WEBHOOK_TOKEN: ${{ secrets.MAKE_SOCIAL_WEBHOOK_TOKEN }}
+      N8N_SOCIAL_WEBHOOK_URL: ${{ secrets.N8N_SOCIAL_WEBHOOK_URL }}
+      N8N_SOCIAL_WEBHOOK_TOKEN: ${{ secrets.N8N_SOCIAL_WEBHOOK_TOKEN }}
+      N8N_SOCIAL_WEBHOOK_HEADER: ${{ secrets.N8N_SOCIAL_WEBHOOK_HEADER }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Render marketing videos
+        run: |
+          if [ "${{ github.event.inputs.app_id }}" = "daily-paper" ] || [ "${{ github.event.inputs.app_id }}" = "astroya" ]; then
+            npm run marketing:render-videos -- "${{ github.event.inputs.app_id }}"
+          else
+            npm run marketing:render-videos
+          fi
+
+      - name: Publish or queue social videos
+        run: |
+          if [ "${{ github.event.inputs.app_id }}" = "daily-paper" ] || [ "${{ github.event.inputs.app_id }}" = "astroya" ]; then
+            npm run marketing:publish-social-videos -- "${{ github.event.inputs.app_id }}"
+          else
+            npm run marketing:publish-social-videos
+          fi
+
+      - name: Upload generated social assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: social-video-publish-assets
+          path: |
+            marketing-ops/generated-videos/
+            marketing-ops/publish-queue/
+          if-no-files-found: error

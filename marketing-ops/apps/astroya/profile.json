@@ -1,0 +1,51 @@
+{
+  "appId": "astroya",
+  "productName": "Astroya SoulPath",
+  "publicUrl": "https://www.astroya.ca",
+  "positioning": "A calm astrology and palmistry guidance experience for people who want reflective self-discovery without generic horoscope noise.",
+  "audience": "Spiritually curious adults who want a calm, personal astrology and palmistry experience.",
+  "topic": "why personalized astrology and palmistry guidance helps people reflect with more clarity",
+  "themes": [
+    "Vedic and Western astrology",
+    "palmistry-assisted reflection",
+    "birth details",
+    "AI-powered consultation",
+    "calm self-discovery"
+  ],
+  "routes": {
+    "sample": "/how-it-works",
+    "cta": "/signup",
+    "pricing": "/"
+  },
+  "platforms": [
+    "youtube-shorts",
+    "instagram-reels",
+    "facebook-reels"
+  ],
+  "preferredHandles": {
+    "youtube": "AstroyaSoulPath",
+    "instagram": "astroya.soulpath",
+    "facebookPage": "Astroya SoulPath"
+  },
+  "socialAccounts": {
+    "youtube": {
+      "status": "created",
+      "channelId": "UCvyD42R6KpG-wobER_JH3HQ",
+      "studioUrl": "https://studio.youtube.com/channel/UCvyD42R6KpG-wobER_JH3HQ",
+      "publicUrl": "https://www.youtube.com/channel/UCvyD42R6KpG-wobER_JH3HQ"
+    },
+    "facebook": {
+      "status": "created",
+      "pageId": "61590790372586",
+      "publicUrl": "https://www.facebook.com/profile.php?id=61590790372586"
+    }
+  },
+  "postingMode": "auto-publish-when-secrets-present",
+  "dailyVideoCount": 1,
+  "contentSafety": [
+    "Frame astrology and palmistry as reflection and self-discovery.",
+    "Avoid guaranteed predictions.",
+    "Avoid medical, financial, legal, or relationship certainty.",
+    "Do not ask users to post private birth details or palm images publicly."
+  ]
+}

@@ -23,6 +23,6 @@ describe("US1 unit: understand Daily Paper immediately", () => {
     expect(html.indexOf("Get Your Daily Paper")).toBeLessThan(html.indexOf("How it works"));
     expect(html).toContain('href="/signup"');
     expect(html).toContain('href="/login"');
-    expect(html).toContain('href="/blog"');
+    expect(html).not.toContain('href="/blog"');
   });
 });

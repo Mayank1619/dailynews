@@ -22,8 +22,8 @@ test("US2 e2e placeholder: login form renders email, password fields and submit 
   );
 
   await expect(page.getByRole("heading", { name: AUTH_LOGIN_COPY.heading })).toBeVisible();
-  await expect(page.getByText(AUTH_LOGIN_COPY.emailLabel)).toBeVisible();
-  await expect(page.getByText(AUTH_LOGIN_COPY.passwordLabel)).toBeVisible();
+  await expect(page.getByText(AUTH_LOGIN_COPY.emailLabel, { exact: true })).toBeVisible();
+  await expect(page.getByText(AUTH_LOGIN_COPY.passwordLabel, { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: AUTH_LOGIN_COPY.submitLabel })).toBeVisible();
 });
 
@@ -44,7 +44,7 @@ test("US2 e2e placeholder: forgot-password form renders email field and non-enum
   );
 
   await expect(page.getByRole("heading", { name: AUTH_FORGOT_PASSWORD_COPY.heading })).toBeVisible();
-  await expect(page.getByText(AUTH_FORGOT_PASSWORD_COPY.emailLabel)).toBeVisible();
+  await expect(page.getByText(AUTH_FORGOT_PASSWORD_COPY.emailLabel, { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: AUTH_FORGOT_PASSWORD_COPY.submitLabel })).toBeVisible();
 
   // Non-enumeration: confirmation message text is present in DOM (hidden until submit)

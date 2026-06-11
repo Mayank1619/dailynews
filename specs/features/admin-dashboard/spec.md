@@ -126,10 +126,19 @@ As an administrator, I want lightweight operational analytics and consent-filter
 
 - **FR-ADMIN-ANL-001**: The system MUST provide analytics-lite counters for registrations, newsletter sends, and opens when available.
 - **FR-ADMIN-ANL-002**: The system MUST clearly indicate when a metric is unavailable rather than displaying inferred values.
+- **FR-ADMIN-ANL-003**: The system MUST show newsletter generation and delivery readiness, including AI generation status, email provider configuration status, and protected-route status.
+- **FR-ADMIN-ANL-004**: The system MUST let admins inspect recent generated newsletter issues with subject, audience, status, source count, generation mode, topics, and send timestamp where available.
 - **FR-ADMIN-EXP-001**: The system MUST export emails filtered by consent where `offers = true` or `productUpdates = true`, based on the admin’s selected export mode.
 - **FR-ADMIN-EXP-002**: The export output MUST include email, consent flags, and signup date for each included user.
 - **FR-ADMIN-EXP-003**: The system MUST exclude users with missing, revoked, or false consent from corresponding marketing exports.
 - **FR-ADMIN-EXP-004**: The system MUST audit log export requests and completion outcomes, including filter type and record count.
+
+#### Growth Operations Module
+
+- **FR-ADMIN-GRW-001**: The system MUST provide admins with a Growth module that can request a protected marketing content kit from `/api/marketing/daily-content`.
+- **FR-ADMIN-GRW-002**: The Growth module MUST require an admin token before generation and MUST NOT display the token after submission.
+- **FR-ADMIN-GRW-003**: The Growth module MUST render the generated SEO blog draft, video scripts, channel recommendations, and review checklist for admin review.
+- **FR-ADMIN-GRW-004**: The Growth module MUST allow owned-site blog content to auto-publish through the configured GitHub Actions/Vercel deploy workflow, while keeping external social publishing disabled until platform accounts and OAuth/API permissions are connected.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -175,6 +184,7 @@ As an administrator, I want lightweight operational analytics and consent-filter
   3. Admin export offers list -> opted-out users excluded.
   4. Admin export product-updates list -> only matching consented users included.
   5. Admin source add/edit/enable-disable and blog publish/unpublish flows complete with visible confirmations.
+  6. Admin opens Growth -> enters admin token and topic -> generates a marketing content kit without exposing the token.
 - **Security and privacy verification**: Validate that all privileged actions produce audit records and that export datasets never include users without matching active consent.
 
 ## Success Criteria *(mandatory)*
@@ -194,3 +204,11 @@ As an administrator, I want lightweight operational analytics and consent-filter
 - Consent flags (`offers`, `productUpdates`) and signup date are already available in user data models from earlier features.
 - Export output is intended for operational use by authorized admins and follows existing privacy handling policies.
 - Phase 1 includes a single admin role; finer-grained sub-roles are deferred to later phases.
+
+## Implementation Update (2026-06-02, Newsletter Operations)
+
+- `/admin` now includes a Phase 1 operations console with Overview, Users, Newsletters, Content, and Growth sections.
+- The Newsletter section exposes recent issue status, generation mode, source count, topics, timestamps, and preview copy so generated newsletters can be inspected before the Firestore-backed archive is connected.
+- The readiness panel explicitly shows OpenAI generation as live and Brevo email delivery as blocked until `BREVO_API_KEY` and `BREVO_SENDER_EMAIL` are configured.
+- The Growth section now includes an admin-token-protected AI Marketing Agent panel that calls `/api/marketing/daily-content`, renders the generated blog draft, short-video scripts, publish window, channels, and checklist, and keeps output in review-only draft form.
+- Current dashboard data is fixture-backed for UX validation. The next backend step is replacing fixtures with Firebase/Auth user counts, newsletter records, email logs, and Brevo delivery events behind Firebase admin-claim API guards.

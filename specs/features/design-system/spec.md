@@ -21,7 +21,7 @@ As a product designer or product owner, I want one canonical design-system speci
 **Acceptance Scenarios**:
 
 1. **Given** a team is defining a new Daily Paper surface, **When** they consult the design-system spec, **Then** they can find the canonical visual principles, color tokens, typography scale, spacing scale, layout rules, and accessibility expectations in one place.
-2. **Given** a reviewer compares the design-system spec to the Daily Paper constitution, **When** they inspect the design direction and UI standards, **Then** they find the modern, bright, minimal, readable, and restrained gaming-accent rules preserved without contradiction.
+2. **Given** a reviewer compares the design-system spec to the Daily Paper constitution, **When** they inspect the design direction and UI standards, **Then** they find the modern, dark, readable, youth-oriented neon accent rules preserved without contradiction.
 
 ---
 
@@ -66,10 +66,10 @@ As a design reviewer or design-ops contributor, I want Figma-ready component map
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST define Daily Paper's governing visual principles as modern, bright, minimal, highly readable, content-first, and trustworthy.
-- **FR-002**: The system MUST preserve restrained gaming-inspired accents as optional emphasis only and MUST prohibit childish, noisy, or visually dominant accent usage.
-- **FR-003**: The system MUST define the canonical color token set with the following values: `--bg-primary` `#F8FAFC`, `--bg-secondary` `#FFFFFF`, `--text-primary` `#0F172A`, `--text-secondary` `#475569`, `--brand-primary` `#3B82F6`, `--brand-secondary` `#22C55E`, `--accent-highlight` `#A855F7`, `--success` `#16A34A`, `--warning` `#F59E0B`, and `--error` `#DC2626`.
-- **FR-004**: The system MUST define typography guidance with an editorial-modern pairing: Fraunces (or equivalent modern high-contrast serif) for headings and Plus Jakarta Sans (or equivalent modern sans-serif) for body/UI text, and a scale of H1 40px bold, H2 28px semi-bold, H3 20px medium, and body text at 16px.
+- **FR-001**: The system MUST define Daily Paper's governing visual principles as modern, dark, minimal, highly readable, content-first, youthful, and trustworthy.
+- **FR-002**: The system MUST preserve restrained neon/gaming-inspired accents as optional emphasis only and MUST prohibit childish, noisy, or visually dominant accent usage.
+- **FR-003**: The system MUST define the canonical color token set with the following values: `--bg-primary` `#070912`, `--bg-secondary` `#111827`, `--text-primary` `#F8FAFC`, `--text-secondary` `#A7B3C8`, `--brand-primary` `#22D3EE`, `--brand-secondary` `#A855F7`, `--accent-highlight` `#F472B6`, `--success` `#34D399`, `--warning` `#FBBF24`, and `--error` `#FB7185`.
+- **FR-004**: The system MUST define typography guidance with a modern expressive pairing: Space Grotesk (or equivalent geometric display sans) for headings and Plus Jakarta Sans (or equivalent modern sans-serif) for body/UI text, and a scale of H1 40px bold, H2 28px bold, H3 20px semi-bold, and body text at 16px.
 - **FR-005**: The system MUST define a spacing system with an 8px base unit and a canonical scale of 8, 16, 24, 32, and 48.
 - **FR-006**: The system MUST define layout rules with a maximum content width of 1200px, a 12-column desktop grid, and a mobile-first stacked layout approach.
 - **FR-007**: The system MUST define reusable component guidance for buttons, inputs, chips, cards, and tables, including intended usage, hierarchy, and expected states.
@@ -98,7 +98,7 @@ As a design reviewer or design-ops contributor, I want Figma-ready component map
 - The design system MUST keep article and digest content visually primary over decorative accents.
 - The design system MUST support trustworthy content presentation by reserving room for source attribution, timestamps, and honest AI labeling where article-derived content appears.
 - The design system MUST preserve a friendly, modern, concise, neutral, and trustworthy tone in component labels and microcopy guidance.
-- The design system MUST ensure accent highlight colors are used sparingly for special states such as trending, new, or featured signals rather than default interface chrome.
+- The design system MUST ensure neon accent colors are used sparingly for primary actions, selected states, and special signals such as trending, new, or featured content rather than default interface chrome.
 
 ### Observability & Telemetry Requirements *(mandatory)*
 
@@ -137,7 +137,7 @@ As a design reviewer or design-ops contributor, I want Figma-ready component map
 ## Assumptions
 
 - The design system applies to all Phase 1 Daily Paper product surfaces, including public, authenticated, and admin experiences.
-- Dark mode, paid-tier theming, and campaign-specific visual treatments are outside the initial scope unless later added through an explicit extension of this system.
+- Light mode, paid-tier theming, and campaign-specific visual treatments are outside the initial scope unless later added through an explicit extension of this system.
 - Similar fallback fonts may be used when exact named fonts are unavailable, provided the same hierarchy and readability goals are preserved.
 - Figma library creation and maintenance are downstream activities, while this spec provides the authoritative naming and behavioral rules they must follow.
 - Downstream feature specs, including public-site, are expected to reference this spec for shared design behavior rather than redefining foundational UI rules.
@@ -147,3 +147,9 @@ As a design reviewer or design-ops contributor, I want Figma-ready component map
 - Confirmed this implementation slice covers design-system foundations and User Story 1 only.
 - Confirmed dependencies for this slice are limited to token baselines, accessibility checks, and sample integration artifacts.
 - Confirmed downstream stories remain out of scope until User Story 1 verification is complete.
+
+## Implementation Update (2026-06-02)
+
+- Updated the active web token baseline to a dark neon visual direction for a younger audience.
+- Confirmed landing, signup, and login surfaces use the dark primary background, glass-like secondary panels, cyan/violet primary gradients, pink highlights, and Space Grotesk headings.
+- Confirmed the bright/editorial palette remains historical context only and is no longer the active Phase 1 web theme.

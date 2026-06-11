@@ -14,7 +14,7 @@ describe('US1: Receive a Personalized Daily Paper in My Inbox - Unit Tests', () 
     service = new PersonalizedDailyPaperService();
   });
 
-  it('should throw error when no articles available for topics', async () => {
+  it('should render deterministic local fallback articles when no adapter is wired', async () => {
     const request = {
       userId: 'user-123',
       date: new Date('2026-05-27'),
@@ -25,12 +25,16 @@ describe('US1: Receive a Personalized Daily Paper in My Inbox - Unit Tests', () 
       },
     };
 
-    await expect(service.generatePersonalizedNewsletter(request)).rejects.toThrow(
-      'No articles available for topics'
-    );
+    const newsletter = await service.generatePersonalizedNewsletter(request);
+
+    expect(newsletter.status).toBe('generated');
+    expect(newsletter.articleRefs).toContain('local-technology-2026-05-27');
+    expect(newsletter.articleRefs).toContain('local-business-2026-05-27');
+    expect(newsletter.html).toContain('Technology brief for your morning read');
+    expect(newsletter.text).toContain('BUSINESS');
   });
 
-  it('should return error with correct userId when articles unavailable', async () => {
+  it('should preserve userId while rendering local fallback content', async () => {
     const request = {
       userId: 'user-456',
       date: new Date('2026-05-27'),
@@ -41,9 +45,11 @@ describe('US1: Receive a Personalized Daily Paper in My Inbox - Unit Tests', () 
       },
     };
 
-    await expect(service.generatePersonalizedNewsletter(request)).rejects.toThrow(
-      'No articles available for topics'
-    );
+    const newsletter = await service.generatePersonalizedNewsletter(request);
+
+    expect(newsletter.userId).toBe('user-456');
+    expect(newsletter.id).toBe('nl-user-456-2026-05-27');
+    expect(newsletter.articleRefs).toEqual(['local-sports-2026-05-27']);
   });
 
   it('should generate subject line with date', async () => {

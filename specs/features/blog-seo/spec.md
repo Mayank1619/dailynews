@@ -104,6 +104,14 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - **FR-BLOG-011**: The system MUST align blog page layout, typography hierarchy, spacing, and readability with the Design System and public-site direction.
 - **FR-BLOG-012**: The system MUST present post content in a trust-preserving format that includes publication date and avoids misleading or sensational framing.
 - **FR-BLOG-013**: The system MUST provide deterministic SEO metadata fallback behavior when optional SEO fields are absent.
+- **FR-BLOG-014**: The system MUST support a recurring editorial calendar for SEO posts derived from newsletter topics, including AI, technology, politics, finance, sports, horoscopes, local news, and sample newsletter themes.
+- **FR-BLOG-015**: The public site SHOULD provide sample newsletters that demonstrate what subscribers receive before signup.
+- **FR-BLOG-016**: The growth workflow SHOULD include short-form video concepts and landing-page hooks that explain the product, show preference selection, and preview inbox output.
+- **FR-BLOG-017**: The system MUST expose an admin-only marketing content generation workflow that can produce one SEO blog draft plus 10-second, 15-second, and 30-second short-form video scripts from a topic, audience, newsletter themes, and optional source summaries.
+- **FR-BLOG-018**: The marketing generation workflow MUST return review controls, channel recommendations, signup/sample internal links, and automation notes before any generated content can become publicly published.
+- **FR-BLOG-019**: The marketing generation workflow MUST use supplied source summaries only for factual current-event claims and MUST fall back to evergreen product education when no source summaries are provided.
+- **FR-BLOG-020**: The system MUST expose an admin-only Make.com campaign workflow that returns a low-cost scenario blueprint, draft queues, operation estimate, required inputs, and cost guardrails for Daily Paper before expanding the same framework to Astoria.
+- **FR-BLOG-021**: The Make.com campaign workflow MUST default to draft/review output and script-only video briefs, with no direct autopublish or paid video generation unless explicitly enabled later.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -140,10 +148,14 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - **Unit**: Validate slug generation and uniqueness rules, including collision handling for similar titles.
 - **Unit**: Validate published-only visibility predicates and draft-inaccessibility checks.
 - **Unit**: Validate metadata fallback behavior when optional `seo` fields are missing.
+- **Unit**: Validate marketing content generation returns a compact prompt, SEO blog draft, and 10/15/30 second video scripts without requiring an AI provider.
 - **Integration**: Validate sitemap output includes published blog URLs and excludes draft or future-dated posts.
+- **Integration**: Validate the marketing content generation contract returns stable routes, review controls, and non-publishing automation notes.
 - **E2E**: Validate `/blog` loads for anonymous users and lists only published posts.
 - **E2E**: Validate `/blog/[slug]` loads for published posts and returns not-found for draft or unknown slugs.
 - **E2E**: Validate category/tag and date filters return only matching published posts.
+- **E2E**: Validate the admin Growth panel can request a marketing kit, render the blog/video output, and avoid displaying the admin token.
+- **E2E**: Validate the admin Growth panel can request a Make.com campaign kit, render operation estimates and draft queues, and avoid displaying the admin token.
 
 ## Success Criteria *(mandatory)*
 
@@ -155,6 +167,8 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - **SC-004**: 100% of sitemap blog entries correspond to currently published blog pages, with zero draft URLs present.
 - **SC-005**: At least 90% of test participants can locate a relevant post by tag or date filter within 60 seconds.
 - **SC-006**: 100% of blog pages reviewed for release meet Design System readability and hierarchy checks.
+- **SC-007**: 100% of generated marketing content responses include one blog draft, exactly three video scripts, CTA/sample routes, and a human-review checklist.
+- **SC-008**: 100% of Make.com campaign responses include a scenario blueprint, monthly operation estimate, draft social queue, script-only video briefs, required inputs, and no autopublish behavior.
 
 ## Assumptions
 
@@ -163,3 +177,49 @@ As a visitor arriving from search engines or social previews, I want blog pages 
 - Phase 1 content entry is manual; future digest-pipeline automation will feed the same `blog_posts` schema without changing public URL behavior.
 - Slug generation rules are deterministic and enforce unique public routes before publication.
 - Design and content presentation constraints inherit from the Design System and Public Site feature direction.
+
+## Growth Plan Update (2026-06-02)
+
+### SEO Cadence
+
+- Publish two posts per week from newsletter themes: "What changed in AI this week", "Market winners and losers", "Canadian politics digest", "Sports weekend brief", and "Horoscope plus culture roundup".
+- Each post should target one clear search intent, include a sample newsletter section, and link to signup plus preferences.
+- Reuse generated newsletter structure to reduce writing time: headline, why it matters, source-aware bullets, and a short CTA.
+
+### Sample Newsletter Library
+
+- Create public samples for AI/technology, markets/finance, sports, politics/world, horoscopes/culture, and local Canada news.
+- Each sample must show topic chips, generation date, source labels, and a visible "Create my version" route to signup.
+- Samples should be indexable public pages but not pretend to be live personalized output.
+
+### Short Video Plan
+
+- Weekly 20-40 second videos: problem hook, preference selection, AI-generated paper preview, inbox result, and Netfroot-powered credibility.
+- First five scripts: "News without the scroll", "Choose your topics", "Your AI morning paper", "Daily vs weekly", and "See a sample before signup".
+- Video pages and descriptions should point to the sample newsletter library and relevant blog posts.
+
+## Marketing Agent Update (2026-06-02)
+
+- Added protected Vercel route `POST /api/marketing/daily-content` for admin-only growth content generation.
+- The workflow accepts `topic`, `audience`, `newsletterThemes`, `sourceSummaries`, `sampleRoute`, and `ctaRoute`.
+- The response includes one SEO blog draft, 10-second/15-second/30-second short-video scripts, captions, hashtags, publish channels, review checklist, and automation notes.
+- Added `/admin` Growth panel UI for entering the admin token, choosing topic/audience, calling the protected endpoint, and reviewing generated output in the browser.
+- OpenAI generation uses compact JSON input and strict JSON output when `OPENAI_API_KEY` is configured; deterministic fallback keeps the flow usable when the AI provider is unavailable.
+- The workflow generates drafts only. Public auto-publishing remains blocked until a persistent blog store and admin publish/review workflow are connected.
+
+## Make.com Framework Update (2026-06-03)
+
+- Added protected Vercel route `POST /api/marketing/make-campaign` for a Make.com-ready organic marketing campaign kit.
+- The workflow accepts Daily Paper app profile fields, topic, audience, platforms, sample route, CTA route, and `dailyVideoCount`.
+- The default strategy is `minimal-cost`: Make calls one app endpoint, stores drafts, sends an approval digest, and routes platform draft rows.
+- The response includes a monthly Make operation estimate, free-tier fit label, scenario setup checklist, social post drafts, script-only video briefs, cost guardrails, and required user inputs.
+- `/admin` Growth panel now supports generating the Make.com campaign kit from the browser.
+- The workflow intentionally avoids paid video rendering and direct social autopublish in the starter phase.
+
+## Multi-App Marketing Update (2026-06-03)
+
+- The Make.com campaign workflow now supports app-specific profiles so Daily Paper and Astroya SoulPath can use the same endpoint without sharing copy, URLs, hashtags, or queues.
+- Admin Growth includes a marketing app selector for Daily Paper and Astroya SoulPath.
+- Astroya output uses `https://www.astroya.ca`, astrology/palmistry/self-discovery framing, and reflective-content safety rules.
+- Local marketing operations docs and profile JSON files live under `marketing-ops/`.
+- Generated local draft files are stored under `marketing-ops/draft-queue/`, which is ignored by git except for its README.

@@ -1,5 +1,6 @@
 import React from "react";
 import { ReachSignupAndLoginQuicklyService } from "../../../../api/src/features/public-site/reach-signup-and-login-quickly.service";
+import { DESIGN_TOKENS } from "../design-system/tokens";
 
 const service = new ReachSignupAndLoginQuicklyService();
 
@@ -9,7 +10,7 @@ type ReachSignupAndLoginQuicklyActionsProps = Readonly<{
 
 export function ReachSignupAndLoginQuicklyActions({ includePrimary = false }: ReachSignupAndLoginQuicklyActionsProps): React.JSX.Element {
   const routes = service.getActionRoutes();
-  const actions = includePrimary ? [routes.primary, routes.login, routes.blog] : [routes.login, routes.blog];
+  const actions = includePrimary ? [routes.primary, routes.login] : [routes.login];
 
   return (
     <nav aria-label="public quick actions" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -18,11 +19,11 @@ export function ReachSignupAndLoginQuicklyActions({ includePrimary = false }: Re
           key={action.route}
           href={action.route}
           style={{
-            color: "#111827",
+            color: DESIGN_TOKENS.colors.textPrimary,
             textDecoration: "none",
             fontWeight: 600,
             fontSize: 14,
-            letterSpacing: "0.01em"
+            letterSpacing: 0
           }}
         >
           {action.label}

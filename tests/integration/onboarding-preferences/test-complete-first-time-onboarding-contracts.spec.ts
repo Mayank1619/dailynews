@@ -4,9 +4,9 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { CompleteFirstTimeOnboardingService } from "../../../api/src/features/onboarding-preferences/complete-first-time-onboarding.service";
-import { MockPreferencesRepository } from "../../../api/src/features/onboarding-preferences/preferencesRepository";
-import { OnboardingPreferencesTelemetry } from "../../../api/src/features/onboarding-preferences/telemetry";
+import { CompleteFirstTimeOnboardingService } from "../../../apps/api/src/features/onboarding-preferences/complete-first-time-onboarding.service";
+import { MockPreferencesRepository } from "../../../apps/api/src/features/onboarding-preferences/preferencesRepository";
+import { OnboardingPreferencesTelemetry } from "../../../apps/api/src/features/onboarding-preferences/telemetry";
 
 describe("Complete First-Time Onboarding - Integration", () => {
   let service: CompleteFirstTimeOnboardingService;

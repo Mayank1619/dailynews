@@ -196,11 +196,40 @@ and its absence never breaks the overall newsletter structure.
 
 ---
 
+### User Story 7 — Read My Personalized Paper In App (Priority: P2)
+
+As a signed-in reader, I want to generate and read my personalized Daily Paper inside the app so I
+can use the product even when I do not want to wait for email delivery.
+
+**Why this priority**: The product promise is a personal newspaper. In-app reading makes that value
+visible immediately after preferences are selected and gives the user a place to refine the output.
+
+**Independent Test**: Can be tested by signing in with saved preferences, opening
+`/dashboard/paper`, generating today's paper, and confirming topic sections, summaries, source
+labels, why-it-matters notes, and refinement settings render.
+
+**Acceptance Scenarios**:
+
+1. **Given** I have saved topic preferences, **When** I open `/dashboard/paper` and generate the
+   paper, **Then** I see a personalized newspaper with sections matching my topics.
+2. **Given** I have no topics selected, **When** I open `/dashboard/paper`, **Then** I see a prompt
+   to choose topics before generating a paper.
+3. **Given** the generated paper feels too high-level, **When** I select improvement controls such
+   as more detailed, more local context, or less high-level summary, **Then** the regenerated paper
+   reflects those preferences in its section copy and refinement summary.
+4. **Given** I generate an in-app paper, **When** I leave and return, **Then** the latest generated
+   paper remains available for the signed-in user.
+
+---
+
 ### Edge Cases
 
 - What happens when a user has saved preferences but no `article_summaries` exist for any of their
   topics on date D? Generation MUST proceed with an empty-topics fallback that surfaces a "No
   stories available today" message in each topic section rather than skipping generation entirely.
+- What happens in local development or tests before Firestore-backed article summaries are wired?
+  The default implementation MAY construct deterministic local fallback summaries for the declared
+  topics so rendering, attribution, and delivery-contract tests can run without live content.
 - What happens when the HTML template renders but `text` generation fails? The newsletter MUST NOT be
   marked `generated` unless both renditions are present; it MUST be marked `failed` and logged.
 - What happens when `articleRefs[]` would contain a duplicate due to the same article appearing in
@@ -274,6 +303,15 @@ and its absence never breaks the overall newsletter structure.
 - **FR-NL-015**: Generation MUST NOT begin for a user if no `article_summaries` records are
   available for any of their declared topics and no fallback content can be constructed; in this
   case the record MUST be marked `failed` with a descriptive reason logged.
+- **FR-NL-016**: Topic matching MUST tolerate case and whitespace differences between saved
+  preference topics and article summary topic labels so valid stories are not dropped because of
+  formatting mismatch.
+- **FR-NL-017**: Authenticated users MUST be able to generate and read their latest personalized
+  paper inside the app at `/dashboard/paper` using their saved topics.
+- **FR-NL-018**: The in-app paper reader MUST provide improvement controls for depth, tone, and
+  requested fixes such as more local context, more business detail, and less high-level summary.
+- **FR-NL-019**: The latest generated in-app paper and refinement settings MUST be scoped to the
+  signed-in user and available when the user returns to the reader page.
 
 ### Security & Privacy Requirements *(mandatory)*
 
@@ -402,6 +440,12 @@ and its absence never breaks the overall newsletter structure.
   - Full pipeline: given seeded `article_summaries` for two topics and a user preference fixture,
     generate a newsletter and verify the stored HTML contains topic headings, story titles, source
     attributions, Summary labels where appropriate, and a footer with both required links.
+  - In-app reader: given a signed-in user with saved topics, generate `/dashboard/paper` and verify
+    topic sections, why-it-matters notes, and latest paper persistence render.
+  - Refinement controls: given an in-app paper, apply more detail, local context, and less
+    high-level feedback, then verify the regenerated paper reflects the requested changes.
+  - Empty state: given no saved topics, verify `/dashboard/paper` prompts the user to choose topics
+    before generation.
 
 - **Regression coverage**:
   - Verify that a preference change after a newsletter has been generated for the day does not
@@ -459,3 +503,17 @@ and its absence never breaks the overall newsletter structure.
 - Email client compatibility testing (Outlook, Gmail, Apple Mail, etc.) is an implementation-time
   concern; this spec requires mobile-first single-column rendering and Design System token alignment
   as the acceptance bar.
+
+## Implementation Update (2026-06-02)
+
+- Confirmed the local/default newsletter generation path now constructs deterministic fallback article summaries for requested topics when no Firestore adapter is present.
+- Confirmed topic grouping is case-insensitive and whitespace-normalized before comparing preference topics with article summary topics.
+
+## Implementation Update (2026-06-02, AI Generation Pipeline)
+
+- Added an efficient AI newsletter generator that sends compact JSON source packs to the OpenAI Responses API when `OPENAI_API_KEY` is configured.
+- Default model is configurable with `OPENAI_NEWSLETTER_MODEL` and defaults to `gpt-4.1-mini` for a balance of output quality and cost.
+- Generation caps source articles to the highest-scoring 18 items, limits stories to 3 per topic, and asks for 35-55 word source-grounded snippets to control token spend.
+- If AI credentials are absent or generation fails, the workflow falls back to deterministic source-linked sections so preview and rendering can still be tested.
+- Added protected Vercel route `POST /api/newsletter/preview` for admin-only newsletter preview generation.
+- Confirmed attribution dates are formatted in UTC to avoid local timezone date drift in rendered attribution text.

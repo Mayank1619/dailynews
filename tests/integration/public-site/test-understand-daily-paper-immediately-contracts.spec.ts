@@ -15,6 +15,14 @@ describe("US1 integration: understand Daily Paper immediately contracts", () => 
     expect(hero.brand).toBe("Daily Paper");
     expect(hero.primaryCta.label).toBe(PRIMARY_CTA.label);
     expect(hero.primaryCta.route).toBe(PRIMARY_CTA.route);
-    expect(PUBLIC_NAV_ACTIONS.map((action) => action.route)).toEqual(["/signup", "/login", "/blog"]);
+    expect(PUBLIC_NAV_ACTIONS.map((action) => action.route)).toEqual([
+      "/signup",
+      "/login",
+      "/about",
+      "/how-it-works",
+      "/pricing",
+      "/blog",
+      "/samples"
+    ]);
   });
 });

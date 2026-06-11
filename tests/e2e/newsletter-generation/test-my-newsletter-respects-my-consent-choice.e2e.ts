@@ -3,11 +3,11 @@
  * End-to-End tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { test, expect } from '@playwright/test';
 import { ConsentChoiceService } from '../../../apps/api/src/features/newsletter-generation/my-newsletter-respects-my-consent-choice.service';
 
-describe('US2: E2E - Newsletter Respects Consent Choice', () => {
-  it('e2e scenario: opted-out user is skipped', async () => {
+test.describe('US2: E2E - Newsletter Respects Consent Choice', () => {
+  test('e2e scenario: opted-out user is skipped', async () => {
     const service = new ConsentChoiceService();
     const userId = 'opted-out-user';
     const date = new Date();
@@ -23,7 +23,7 @@ describe('US2: E2E - Newsletter Respects Consent Choice', () => {
     expect(gate).toBe(false);
   });
 
-  it('e2e scenario: consent toggle affects generation', async () => {
+  test('e2e scenario: consent toggle affects generation', async () => {
     const service = new ConsentChoiceService();
     const userId = 'toggle-test-user';
     const date = new Date();
@@ -39,7 +39,7 @@ describe('US2: E2E - Newsletter Respects Consent Choice', () => {
     expect(typeof gate).toBe('boolean');
   });
 
-  it('e2e scenario: unverified users never receive newsletters', async () => {
+  test('e2e scenario: unverified users never receive newsletters', async () => {
     const service = new ConsentChoiceService();
     const userId = 'unverified-user';
     const date = new Date();
@@ -53,7 +53,7 @@ describe('US2: E2E - Newsletter Respects Consent Choice', () => {
     expect(consent).toHaveProperty('checkedAt');
   });
 
-  it('e2e scenario: missing preferences triggers skip', async () => {
+  test('e2e scenario: missing preferences triggers skip', async () => {
     const service = new ConsentChoiceService();
     const userId = 'no-preferences-user';
     const date = new Date();

@@ -361,9 +361,9 @@ in log payloads.
 - Newsletter Generation is a hard dependency: delivery cannot proceed without a `newsletters` record
   with `status: generated` for the target date. Delivery does not generate or re-generate newsletter
   content itself.
-- The initial email provider is a third-party free-tier service (provider TBD per the constitution's
-  open item); the delivery pipeline MUST be provider-agnostic at the interface level to allow
-  future provider changes without rewriting delivery logic.
+- The initial email provider is Brevo's transactional email API because its free tier currently
+  supports 300 email sends per day. The delivery pipeline remains provider-agnostic at the adapter
+  level to allow future provider changes without rewriting delivery logic.
 - Phase 1 delivers one newsletter per user per day. Multiple newsletters per user per day (breaking
   news, campaigns) are Phase 2+ scope and are excluded here.
 - Offers and marketing content is a Phase 2+ feature. Phase 1 newsletters contain no offers
@@ -377,6 +377,13 @@ in log payloads.
   (`FR-NL-004`); this feature consumes and validates those tokens but does not define them.
 - The default timezone fallback value (used when a user has no stored timezone) is a configurable
   constant; the specific default (e.g., UTC) is an implementation decision outside the spec.
+
+## Implementation Update (2026-06-02, Brevo Delivery Adapter)
+
+- Added a Brevo transactional email adapter using `POST https://api.brevo.com/v3/smtp/email`.
+- Added protected Vercel route `POST /api/newsletter/send-test` for admin-only test newsletter generation and sending.
+- Sending requires `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, and optional `BREVO_SENDER_NAME`; missing credentials return a setup error and never retry.
+- Newsletter preview and send routes require `NEWSLETTER_ADMIN_TOKEN` so the deployed app cannot be used as an open email relay.
 
 ---
 
